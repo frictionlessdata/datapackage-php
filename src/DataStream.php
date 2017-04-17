@@ -9,7 +9,11 @@ class DataStream implements \Iterator
 
     public function __construct($dataSource)
     {
-        $this->_fopenResource = fopen($dataSource, "r");
+        try {
+            $this->_fopenResource = fopen($dataSource, "r");
+        } catch (\Exception $e) {
+            throw new DataStreamOpenException("Failed to open source ".json_encode($dataSource));
+        }
     }
 
     public function __destruct()
@@ -44,3 +48,6 @@ class DataStream implements \Iterator
         return (!feof($this->_fopenResource));
     }
 }
+
+
+class DataStreamOpenException extends \Exception {};

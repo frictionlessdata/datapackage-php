@@ -1,0 +1,6 @@
+{
+  "name": "datapackage-name",
+  "resources": [
+    { "name": "resource-name", "data": [] }
+  ]
+}

@@ -7,21 +7,34 @@ use frictionlessdata\datapackage\Datapackage;
 
 class DatapackageTest extends TestCase
 {
+    public $simpleDescriptorArray;
+    public $simpleDescriptor;
+    public $simpleDescriptorExpectedData;
+    public $fixturesPath;
 
-    /**
-     * @param string $source
-     * @return Datapackage
-     */
-    protected function _getDatapackage($source)
+    public function setUp()
     {
-        return new Datapackage($source, dirname(__FILE__)."/fixtures");
+        $this->simpleDescriptorArray = [
+            "name" => "datapackage-name",
+            "resources" => [
+                ["name" => "resource-name", "data" => ["foo.txt"] ]
+            ]
+        ];
+        $this->simpleDescriptor = (object)[
+            "name" => "datapackage-name",
+            "resources" => [
+                (object)["name" => "resource-name", "data" => ["foo.txt"] ]
+            ]
+        ];
+        $this->simpleDescriptorExpectedData = ["resource-name" => [["foo"]]];
+        $this->fixturesPath = dirname(__FILE__)."/fixtures";
     }
 
     /**
      * @param object $expectedDescriptor
      * @param Datapackage $datapackage
      */
-    protected function _assertDatapackageDescriptor($expectedDescriptor, $datapackage)
+    public function assertDatapackageDescriptor($expectedDescriptor, $datapackage)
     {
         $this->assertEquals($expectedDescriptor, $datapackage->descriptor());
     }
@@ -30,7 +43,7 @@ class DatapackageTest extends TestCase
      * @param array $expectedData
      * @param Datapackage $datapackage
      */
-    protected function _assertDatapackageData($expectedData, $datapackage)
+    public function assertDatapackageData($expectedData, $datapackage)
     {
         $allResourcesData = [];
         foreach ($datapackage as $resource) {
@@ -52,30 +65,99 @@ class DatapackageTest extends TestCase
      * @param object $expectedDescriptor
      * @param array $expectedData
      */
-    public function assertDatapackage($source, $expectedDescriptor, $expectedData)
+    public function assertDatapackage($expectedDescriptor, $expectedData, $datapackage)
     {
-        $datapackage = $this->_getDatapackage($source);
-        $this->_assertDatapackageDescriptor($expectedDescriptor, $datapackage);
-        $this->_assertDatapackageData($expectedData, $datapackage);
+        $this->assertDatapackageDescriptor($expectedDescriptor, $datapackage);
+        $this->assertDatapackageData($expectedData, $datapackage);
     }
 
-    public function testSimpleValidDatapackage()
+    public function assertDatapackageException($expectedExceptionClass, $datapackageCallback)
     {
-        $simpleValidDatapackageDecriptor = (object)[
-            "name" => "datapackage-name",
-            "resources" => [
-                (object)["name" => "resource-name", "data" => ["foo.txt"] ]
-            ]
-        ];
-        $this->assertDatapackage(
-            "simple_valid_datapackage.json",
-            $simpleValidDatapackageDecriptor,
-            ["resource-name" => [["foo"]]]
+        try {
+            $datapackageCallback();
+        } catch (\Exception $e) {
+            $this->assertEquals($expectedExceptionClass, get_class($e), $e->getMessage());
+        }
+    }
+
+    public function testNativePHPArrayShouldFail()
+    {
+        $descriptorArray = $this->simpleDescriptorArray;
+        $this->assertDatapackageException(
+            "frictionlessdata\\datapackage\\DatapackageInvalidSourceException",
+            function() use ($descriptorArray) { new Datapackage($descriptorArray); }
         );
+    }
+
+    public function testNativePHPObjectWithoutBasePathShouldFail()
+    {
+        $descriptor = $this->simpleDescriptor;
+        $this->assertDatapackageException(
+            "frictionlessdata\\datapackage\\DataStreamOpenException",
+            function() use ($descriptor) { new Datapackage($descriptor); }
+        );
+    }
+
+    public function testNativePHPObjectWithBasePath()
+    {
         $this->assertDatapackage(
-            $simpleValidDatapackageDecriptor,
-            $simpleValidDatapackageDecriptor,
-            ["resource-name" => [["foo"]]]
+            $this->simpleDescriptor, $this->simpleDescriptorExpectedData,
+            new Datapackage($this->simpleDescriptor, $this->fixturesPath)
+        );
+    }
+
+    public function testJsonStringWithoutBasePathShouldFail()
+    {
+        $source = json_encode($this->simpleDescriptor);
+        $this->assertDatapackageException(
+            "frictionlessdata\\datapackage\\DataStreamOpenException",
+            function() use ($source) { new Datapackage($source); }
+        );
+    }
+
+    public function testJsonStringWithBasePath()
+    {
+        $source = json_encode($this->simpleDescriptor);
+        $this->assertDatapackage(
+            $this->simpleDescriptor, $this->simpleDescriptorExpectedData,
+            new Datapackage($source, $this->fixturesPath)
+        );
+    }
+
+    public function testNonExistantFileShouldFail()
+    {
+        $this->assertDatapackageException(
+            "frictionlessdata\\datapackage\\DatapackageInvalidSourceException",
+            function() { new Datapackage("-invalid-"); }
+        );
+    }
+
+    public function testJsonFileRelativeToBasePath()
+    {
+        $this->assertDatapackage(
+            $this->simpleDescriptor, $this->simpleDescriptorExpectedData,
+            new Datapackage("simple_valid_datapackage.json", $this->fixturesPath)
+        );
+    }
+
+    public function testJsonFileRelativeToCurrentDirectory()
+    {
+        $this->assertDatapackage(
+            $this->simpleDescriptor, $this->simpleDescriptorExpectedData,
+            new Datapackage("tests/fixtures/simple_valid_datapackage.json")
+        );
+    }
+
+    public function testHttpSource()
+    {
+        $this->assertDatapackage(
+            (object)[
+                "name" => "datapackage-name",
+                "resources" => [
+                    (object)["name" => "resource-name", "data" => [] ]
+                ]
+            ], ["resource-name" => []],
+            new MockDatapackage("mock-http://simple_valid_datapackage_no_data.json")
         );
     }
 
@@ -119,6 +201,29 @@ class DatapackageTest extends TestCase
             "בזבזבז\n",
             "זבזבזב",
         ], $out);
+    }
+
+}
+
+
+class MockDatapackage extends Datapackage {
+
+    protected function _isHttpSource($dataSource)
+    {
+        return (
+            strpos($dataSource, "mock-http://") === 0
+            || parent::_isHttpSource($dataSource)
+        );
+    }
+
+    protected function _normalizeHttpSource($dataSource)
+    {
+        $dataSource = parent::_normalizeHttpSource($dataSource);
+        if (strpos($dataSource, "mock-http://") === 0) {
+            $dataSource = str_replace("mock-http://", "", $dataSource);
+            $dataSource = dirname(__FILE__).DIRECTORY_SEPARATOR."fixtures".DIRECTORY_SEPARATOR.$dataSource;
+        }
+        return $dataSource;
     }
 
 }
