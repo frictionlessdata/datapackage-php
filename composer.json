@@ -1,0 +1,21 @@
+{
+    "name": "frictionlessdata/datapackage",
+    "description": "A utility library for working with Data Packages",
+    "license": "MIT",
+    "require": {
+        "php": ">=5.4",
+        "frictionlessdata/tableschema": "^0.1.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^4.8.35",
+        "satooshi/php-coveralls": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "frictionlessdata\\datapackage\\": "src/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit --debug tests/ --coverage-clover coverage-clover.xml"
+    }
+}
