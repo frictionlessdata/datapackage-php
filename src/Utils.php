@@ -1,10 +1,10 @@
-<?php namespace frictionlessdata\datapackage;
+<?php
+namespace frictionlessdata\datapackage;
 
-
+// TODO: refactor to an independenct package (used by both tableschema and datapackage)
 class Utils
 {
-
-    public static function is_json_string($json)
+    public static function isJsonString($json)
     {
         return (
             is_string($json)
@@ -12,7 +12,7 @@ class Utils
         );
     }
 
-    public static function is_http_source($source)
+    public static function isHttpSource($source)
     {
         return (
             is_string($source)
@@ -22,5 +22,4 @@ class Utils
             )
         );
     }
-
 }
