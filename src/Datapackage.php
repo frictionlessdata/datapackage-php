@@ -1,5 +1,5 @@
-<?php namespace frictionlessdata\datapackage;
-
+<?php
+namespace frictionlessdata\datapackage;
 
 /**
  * Datapackage representation, supports loading from the following sources:
@@ -10,80 +10,110 @@
  */
 class Datapackage implements \Iterator
 {
-    protected $_descriptor;
-    protected $_currentResourcePosition = 0;
-    protected $_basePath;
-
     public function __construct($source, $basePath=null)
     {
         if (is_object($source)) {
-            $this->_descriptor = $source;
-            $this->_basePath = $basePath;
+            $this->descriptor = $source;
+            $this->basePath = $basePath;
         } elseif (is_string($source)) {
-            if (Utils::is_json_string($source)) {
+            if (Utils::isJsonString($source)) {
                 try {
-                    $this->_descriptor = json_decode($source);
+                    $this->descriptor = json_decode($source);
                 } catch (\Exception $e) {
-                    throw new DatapackageInvalidSourceException("Failed to load source: ".json_encode($source).": ".$e->getMessage());
+                    throw new Exceptions\DatapackageInvalidSourceException(
+                        "Failed to load source: ".json_encode($source).": ".$e->getMessage()
+                    );
                 }
-                $this->_basePath = $basePath;
-            } elseif ($this->_isHttpSource($source)) {
+                $this->basePath = $basePath;
+            } elseif ($this->isHttpSource($source)) {
                 try {
-                    $this->_descriptor = json_decode(file_get_contents($this->_normalizeHttpSource($source)));
+                    $this->descriptor = json_decode(file_get_contents($this->normalizeHttpSource($source)));
                 } catch (\Exception $e) {
-                    throw new DatapackageInvalidSourceException("Failed to load source: ".json_encode($source).": ".$e->getMessage());
+                    throw new Exceptions\DatapackageInvalidSourceException(
+                        "Failed to load source: ".json_encode($source).": ".$e->getMessage()
+                    );
                 }
                 // http sources don't allow relative paths, hence basePath should remain null
-                $this->_basePath = null;
+                $this->basePath = null;
             } else {
                 if (empty($basePath)) {
-                    $this->_basePath = dirname($source);
+                    $this->basePath = dirname($source);
                 } else {
-                    $this->_basePath = $basePath;
-                    $absPath = $this->_basePath.DIRECTORY_SEPARATOR.$source;
+                    $this->basePath = $basePath;
+                    $absPath = $this->basePath.DIRECTORY_SEPARATOR.$source;
                     if (file_exists($absPath)) {
                         $source = $absPath;
                     }
                 }
                 try {
-                    $this->_descriptor = json_decode(file_get_contents($source));
+                    $this->descriptor = json_decode(file_get_contents($source));
                 } catch (\Exception $e) {
-                    throw new DatapackageInvalidSourceException("Failed to load source: ".json_encode($source).": ".$e->getMessage());
+                    throw new Exceptions\DatapackageInvalidSourceException(
+                        "Failed to load source: ".json_encode($source).": ".$e->getMessage()
+                    );
                 }
 
             }
         } else {
-            throw new DatapackageInvalidSourceException("Invalid source: ".json_encode($source));
+            throw new Exceptions\DatapackageInvalidSourceException(
+                "Invalid source: ".json_encode($source)
+            );
         }
     }
 
-    protected function _normalizeHttpSource($source)
+    /**
+     * get the descriptor as a native PHP object
+     *
+     * @return object
+     */
+    public function descriptor()
+    {
+        return $this->descriptor;
+    }
+
+    // standard iterator functions - to iterate over the resources
+    public function rewind() {$this->currentResourcePosition = 0;}
+    public function current() { return $this->initResource($this->descriptor()->resources[$this->currentResourcePosition]); }
+    public function key() { return $this->currentResourcePosition; }
+    public function next() { $this->currentResourcePosition++; }
+    public function valid() { return isset($this->descriptor()->resources[$this->currentResourcePosition]); }
+
+    protected $descriptor;
+    protected $currentResourcePosition = 0;
+    protected $basePath;
+
+    /**
+     * allows extending classes to add custom sources
+     * used by unit tests to add a mock http source
+     *
+     * @param string $source
+     * @return string
+     */
+    protected function normalizeHttpSource($source)
     {
         return $source;
     }
 
-    protected function _isHttpSource($source)
+    /**
+     * allows extending classes to add custom sources
+     * used by unit tests to add a mock http source
+     *
+     * @param string $source
+     * @return bool
+     */
+    protected function isHttpSource($source)
     {
-        return Utils::is_http_source($source);
+        return Utils::isHttpSource($source);
     }
 
-    protected function _initResource($resourceDescriptor)
+    /**
+     * called by the resources iterator for each iteration
+     *
+     * @param object $resourceDescriptor
+     * @return \frictionlessdata\datapackage\Resource
+     */
+    protected function initResource($resourceDescriptor)
     {
-        return new Resource($resourceDescriptor, $this->_basePath);
+        return new Resource($resourceDescriptor, $this->basePath);
     }
-
-    public function descriptor()
-    {
-        return $this->_descriptor;
-    }
-
-    // standard iterator functions - to iterate over the resources
-    public function rewind() { $this->_currentResourcePosition = 0; }
-    public function current() { return $this->_initResource($this->descriptor()->resources[$this->_currentResourcePosition]); }
-    public function key() { return $this->_currentResourcePosition; }
-    public function next() { $this->_currentResourcePosition++; }
-    public function valid() { return isset($this->descriptor()->resources[$this->_currentResourcePosition]); }
 }
-
-
-class DatapackageInvalidSourceException extends \Exception {};

@@ -1,34 +1,30 @@
-<?php namespace frictionlessdata\datapackage;
-
+<?php
+namespace frictionlessdata\datapackage;
 
 class DataStream implements \Iterator
 {
-    protected $_currentLineNumber = 0;
-    protected $_fopenResource;
-    protected $_dataSource;
-
     public function __construct($dataSource)
     {
         try {
-            $this->_fopenResource = fopen($dataSource, "r");
+            $this->fopenResource = fopen($dataSource, "r");
         } catch (\Exception $e) {
-            throw new DataStreamOpenException("Failed to open source ".json_encode($dataSource));
+            throw new Exceptions\DataStreamOpenException("Failed to open source ".json_encode($dataSource).": ".json_encode($e->getMessage()));
         }
     }
 
     public function __destruct()
     {
-        fclose($this->_fopenResource);
+        fclose($this->fopenResource);
     }
 
     public function rewind() {
-        if ($this->_currentLineNumber != 0) {
+        if ($this->currentLineNumber != 0) {
             throw new \Exception("DataStream does not support rewind, sorry");
         }
     }
 
     public function current() {
-        $line = fgets($this->_fopenResource);
+        $line = fgets($this->fopenResource);
         if ($line === false) {
             return "";
         } else {
@@ -37,17 +33,18 @@ class DataStream implements \Iterator
     }
 
     public function key() {
-        return $this->_currentLineNumber;
+        return $this->currentLineNumber;
     }
 
     public function next() {
-        $this->_currentLineNumber++;
+        $this->currentLineNumber++;
     }
 
     public function valid() {
-        return (!feof($this->_fopenResource));
+        return (!feof($this->fopenResource));
     }
+
+    protected $currentLineNumber = 0;
+    protected $fopenResource;
+    protected $dataSource;
 }
-
-
-class DataStreamOpenException extends \Exception {};

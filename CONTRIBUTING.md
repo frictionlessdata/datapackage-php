@@ -4,6 +4,10 @@ The project follows the [Open Knowledge International coding standards](https://
 
 All PHP Code should conform to [PHP-FIG](http://www.php-fig.org/psr/) accepted PSRs.
 
+Flow Framework has a nice guide regarding coding standards:
+* [Printable summary of most important coding guidelines on one page **(.pdf)**](http://flowframework.readthedocs.io/en/stable/_downloads/Flow_Coding_Guidelines_on_one_page.pdf)
+* [The full guide **(.html)**](http://flowframework.readthedocs.io/en/stable/TheDefinitiveGuide/PartV/CodingGuideLines/PHP.html)
+
 
 ## Getting Started
 

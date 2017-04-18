@@ -1,9 +1,8 @@
 <?php
-
+namespace frictionlessdata\datapackage\tests;
 
 use PHPUnit\Framework\TestCase;
 use frictionlessdata\datapackage\Datapackage;
-
 
 class DatapackageTest extends TestCase
 {
@@ -30,61 +29,11 @@ class DatapackageTest extends TestCase
         $this->fixturesPath = dirname(__FILE__)."/fixtures";
     }
 
-    /**
-     * @param object $expectedDescriptor
-     * @param Datapackage $datapackage
-     */
-    public function assertDatapackageDescriptor($expectedDescriptor, $datapackage)
-    {
-        $this->assertEquals($expectedDescriptor, $datapackage->descriptor());
-    }
-
-    /**
-     * @param array $expectedData
-     * @param Datapackage $datapackage
-     */
-    public function assertDatapackageData($expectedData, $datapackage)
-    {
-        $allResourcesData = [];
-        foreach ($datapackage as $resource) {
-            $resourceData = [];
-            foreach ($resource as $dataStream) {
-                $data = [];
-                foreach ($dataStream as $line) {
-                    $data[] = $line;
-                }
-                $resourceData[] = $data;
-            }
-            $allResourcesData[$resource->name()] = $resourceData;
-        }
-        $this->assertEquals($expectedData, $allResourcesData);
-    }
-
-    /**
-     * @param string $source
-     * @param object $expectedDescriptor
-     * @param array $expectedData
-     */
-    public function assertDatapackage($expectedDescriptor, $expectedData, $datapackage)
-    {
-        $this->assertDatapackageDescriptor($expectedDescriptor, $datapackage);
-        $this->assertDatapackageData($expectedData, $datapackage);
-    }
-
-    public function assertDatapackageException($expectedExceptionClass, $datapackageCallback)
-    {
-        try {
-            $datapackageCallback();
-        } catch (\Exception $e) {
-            $this->assertEquals($expectedExceptionClass, get_class($e), $e->getMessage());
-        }
-    }
-
     public function testNativePHPArrayShouldFail()
     {
         $descriptorArray = $this->simpleDescriptorArray;
         $this->assertDatapackageException(
-            "frictionlessdata\\datapackage\\DatapackageInvalidSourceException",
+            "frictionlessdata\\datapackage\\Exceptions\\DatapackageInvalidSourceException",
             function() use ($descriptorArray) { new Datapackage($descriptorArray); }
         );
     }
@@ -93,7 +42,7 @@ class DatapackageTest extends TestCase
     {
         $descriptor = $this->simpleDescriptor;
         $this->assertDatapackageException(
-            "frictionlessdata\\datapackage\\DataStreamOpenException",
+            "frictionlessdata\\datapackage\\Exceptions\\DataStreamOpenException",
             function() use ($descriptor) { new Datapackage($descriptor); }
         );
     }
@@ -110,7 +59,7 @@ class DatapackageTest extends TestCase
     {
         $source = json_encode($this->simpleDescriptor);
         $this->assertDatapackageException(
-            "frictionlessdata\\datapackage\\DataStreamOpenException",
+            "frictionlessdata\\datapackage\\Exceptions\\DataStreamOpenException",
             function() use ($source) { new Datapackage($source); }
         );
     }
@@ -127,7 +76,7 @@ class DatapackageTest extends TestCase
     public function testNonExistantFileShouldFail()
     {
         $this->assertDatapackageException(
-            "frictionlessdata\\datapackage\\DatapackageInvalidSourceException",
+            "frictionlessdata\\datapackage\\Exceptions\\DatapackageInvalidSourceException",
             function() { new Datapackage("-invalid-"); }
         );
     }
@@ -157,7 +106,7 @@ class DatapackageTest extends TestCase
                     (object)["name" => "resource-name", "data" => [] ]
                 ]
             ], ["resource-name" => []],
-            new MockDatapackage("mock-http://simple_valid_datapackage_no_data.json")
+            new Mocks\MockDatapackage("mock-http://simple_valid_datapackage_no_data.json")
         );
     }
 
@@ -203,27 +152,53 @@ class DatapackageTest extends TestCase
         ], $out);
     }
 
-}
-
-
-class MockDatapackage extends Datapackage {
-
-    protected function _isHttpSource($dataSource)
+    /**
+     * @param object $expectedDescriptor
+     * @param Datapackage $datapackage
+     */
+    protected function assertDatapackageDescriptor($expectedDescriptor, $datapackage)
     {
-        return (
-            strpos($dataSource, "mock-http://") === 0
-            || parent::_isHttpSource($dataSource)
-        );
+        $this->assertEquals($expectedDescriptor, $datapackage->descriptor());
     }
 
-    protected function _normalizeHttpSource($dataSource)
+    /**
+     * @param array $expectedData
+     * @param Datapackage $datapackage
+     */
+    protected function assertDatapackageData($expectedData, $datapackage)
     {
-        $dataSource = parent::_normalizeHttpSource($dataSource);
-        if (strpos($dataSource, "mock-http://") === 0) {
-            $dataSource = str_replace("mock-http://", "", $dataSource);
-            $dataSource = dirname(__FILE__).DIRECTORY_SEPARATOR."fixtures".DIRECTORY_SEPARATOR.$dataSource;
+        $allResourcesData = [];
+        foreach ($datapackage as $resource) {
+            $resourceData = [];
+            foreach ($resource as $dataStream) {
+                $data = [];
+                foreach ($dataStream as $line) {
+                    $data[] = $line;
+                }
+                $resourceData[] = $data;
+            }
+            $allResourcesData[$resource->name()] = $resourceData;
         }
-        return $dataSource;
+        $this->assertEquals($expectedData, $allResourcesData);
     }
 
+    /**
+     * @param string $source
+     * @param object $expectedDescriptor
+     * @param array $expectedData
+     */
+    protected function assertDatapackage($expectedDescriptor, $expectedData, $datapackage)
+    {
+        $this->assertDatapackageDescriptor($expectedDescriptor, $datapackage);
+        $this->assertDatapackageData($expectedData, $datapackage);
+    }
+
+    protected function assertDatapackageException($expectedExceptionClass, $datapackageCallback)
+    {
+        try {
+            $datapackageCallback();
+        } catch (\Exception $e) {
+            $this->assertEquals($expectedExceptionClass, get_class($e), $e->getMessage());
+        }
+    }
 }
