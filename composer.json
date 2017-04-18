@@ -4,7 +4,8 @@
     "license": "MIT",
     "require": {
         "php": ">=5.4",
-        "justinrainbow/json-schema": "^5.2"
+        "justinrainbow/json-schema": "^5.2",
+        "frictionlessdata/tableschema": "^0.1.2"
     },
     "require-dev": {
         "phpunit/phpunit": "^4.8.35",
