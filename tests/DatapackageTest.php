@@ -1,6 +1,7 @@
 <?php
 namespace frictionlessdata\datapackage\tests;
 
+use frictionlessdata\datapackage\DatapackageValidationError;
 use PHPUnit\Framework\TestCase;
 use frictionlessdata\datapackage\Datapackage;
 
@@ -150,6 +151,21 @@ class DatapackageTest extends TestCase
             "בזבזבז\n",
             "זבזבזב",
         ], $out);
+    }
+
+    public function testDatapackageValidation()
+    {
+        $this->assertEquals([], Datapackage::validate("tests/fixtures/multi_data_datapackage.json"));
+    }
+
+    public function testDatapackageValidationFailed()
+    {
+        $this->assertEquals(
+            "[resources] The property resources is required",
+            DatapackageValidationError::getErrorMessages(
+                Datapackage::validate("tests/fixtures/simple_invalid_datapackage.json")
+            )
+        );
     }
 
     /**

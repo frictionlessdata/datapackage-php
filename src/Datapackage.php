@@ -61,6 +61,17 @@ class Datapackage implements \Iterator
         }
     }
 
+    public static function validate($source, $basePath=null)
+    {
+        try {
+            $datapackage = new self($source, $basePath);
+            return DatapackageValidator::validate($datapackage->descriptor());
+        } catch (\Exception $e) {
+            return [new DatapackageValidationError(DatapackageValidationError::LOAD_FAILED, $e->getMessage())];
+        }
+
+    }
+
     /**
      * get the descriptor as a native PHP object
      *

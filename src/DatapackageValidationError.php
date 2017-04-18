@@ -3,6 +3,6 @@
 // TODO: move the SchemaValidation logic to it's own independent package
 use frictionlessdata\tableschema;
 
-class SchemaValidationError extends tableschema\SchemaValidationError
+class DatapackageValidationError extends tableschema\SchemaValidationError
 {
 }
