@@ -2,7 +2,7 @@
 
 The project follows the [Open Knowledge International coding standards](https://github.com/okfn/coding-standards).
 
-All PHP Code should conform to [PHP-FIG](http://www.php-fig.org/psr/) accepted PSRs.
+All PHP Code MUST conform to [PHP-FIG](http://www.php-fig.org/psr/) accepted PSRs.
 
 Flow Framework has a nice guide regarding coding standards:
 * [Printable summary of most important coding guidelines on one page **(.pdf)**](http://flowframework.readthedocs.io/en/stable/_downloads/Flow_Coding_Guidelines_on_one_page.pdf)
@@ -23,7 +23,7 @@ $ composer test
 
 Phpunit is used for unit tests, you can find the tests under tests directory
 
-Running Phpunit directly: `vendor/bin/phunit`
+Running Phpunit directly: `vendor/bin/phpunit --bootstrap tests/autoload.php tests/`
 
 
 ## Coveralls - for coverage
