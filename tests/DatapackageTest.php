@@ -1,9 +1,11 @@
 <?php
 namespace frictionlessdata\datapackage\tests;
 
-use frictionlessdata\datapackage\DatapackageValidationError;
+use frictionlessdata\datapackage\Validators\DatapackageValidationError;
 use PHPUnit\Framework\TestCase;
-use frictionlessdata\datapackage\Datapackage;
+use frictionlessdata\datapackage\Datapackages\DefaultDatapackage;
+use frictionlessdata\datapackage\Exceptions;
+use frictionlessdata\datapackage\Factory;
 
 class DatapackageTest extends TestCase
 {
@@ -35,7 +37,7 @@ class DatapackageTest extends TestCase
         $descriptorArray = $this->simpleDescriptorArray;
         $this->assertDatapackageException(
             "frictionlessdata\\datapackage\\Exceptions\\DatapackageInvalidSourceException",
-            function() use ($descriptorArray) { new Datapackage($descriptorArray); }
+            function() use ($descriptorArray) { Factory::datapackage($descriptorArray); }
         );
     }
 
@@ -44,7 +46,7 @@ class DatapackageTest extends TestCase
         $descriptor = $this->simpleDescriptor;
         $this->assertDatapackageException(
             "frictionlessdata\\datapackage\\Exceptions\\DataStreamOpenException",
-            function() use ($descriptor) { new Datapackage($descriptor); }
+            function() use ($descriptor) { Factory::datapackage($descriptor); }
         );
     }
 
@@ -52,7 +54,7 @@ class DatapackageTest extends TestCase
     {
         $this->assertDatapackage(
             $this->simpleDescriptor, $this->simpleDescriptorExpectedData,
-            new Datapackage($this->simpleDescriptor, $this->fixturesPath)
+            Factory::datapackage($this->simpleDescriptor, $this->fixturesPath)
         );
     }
 
@@ -61,7 +63,7 @@ class DatapackageTest extends TestCase
         $source = json_encode($this->simpleDescriptor);
         $this->assertDatapackageException(
             "frictionlessdata\\datapackage\\Exceptions\\DataStreamOpenException",
-            function() use ($source) { new Datapackage($source); }
+            function() use ($source) { Factory::datapackage($source); }
         );
     }
 
@@ -70,7 +72,7 @@ class DatapackageTest extends TestCase
         $source = json_encode($this->simpleDescriptor);
         $this->assertDatapackage(
             $this->simpleDescriptor, $this->simpleDescriptorExpectedData,
-            new Datapackage($source, $this->fixturesPath)
+            Factory::datapackage($source, $this->fixturesPath)
         );
     }
 
@@ -78,7 +80,7 @@ class DatapackageTest extends TestCase
     {
         $this->assertDatapackageException(
             "frictionlessdata\\datapackage\\Exceptions\\DatapackageInvalidSourceException",
-            function() { new Datapackage("-invalid-"); }
+            function() { Factory::datapackage("-invalid-"); }
         );
     }
 
@@ -86,7 +88,7 @@ class DatapackageTest extends TestCase
     {
         $this->assertDatapackage(
             $this->simpleDescriptor, $this->simpleDescriptorExpectedData,
-            new Datapackage("simple_valid_datapackage.json", $this->fixturesPath)
+            Factory::datapackage("simple_valid_datapackage.json", $this->fixturesPath)
         );
     }
 
@@ -94,7 +96,7 @@ class DatapackageTest extends TestCase
     {
         $this->assertDatapackage(
             $this->simpleDescriptor, $this->simpleDescriptorExpectedData,
-            new Datapackage("tests/fixtures/simple_valid_datapackage.json")
+            Factory::datapackage("tests/fixtures/simple_valid_datapackage.json")
         );
     }
 
@@ -104,17 +106,20 @@ class DatapackageTest extends TestCase
             (object)[
                 "name" => "datapackage-name",
                 "resources" => [
-                    (object)["name" => "resource-name", "data" => [] ]
+                    (object)[
+                        "name" => "resource-name",
+                        "data" => ["mock-http://foo.txt", "mock-http://foo.txt"]
+                    ]
                 ]
-            ], ["resource-name" => []],
-            new Mocks\MockDatapackage("mock-http://simple_valid_datapackage_no_data.json")
+            ], ["resource-name" => [["foo"], ["foo"]]],
+            Mocks\MockFactory::datapackage("mock-http://simple_valid_datapackage_mock_http_data.json")
         );
     }
 
     public function testMultiDataDatapackage()
     {
         $out = [];
-        $datapackage = new Datapackage("tests/fixtures/multi_data_datapackage.json");
+        $datapackage = Factory::datapackage("tests/fixtures/multi_data_datapackage.json");
         foreach ($datapackage as $resource) {
             $out[] = "-- ".$resource->name()." --";
             $i = 0;
@@ -155,22 +160,48 @@ class DatapackageTest extends TestCase
 
     public function testDatapackageValidation()
     {
-        $this->assertEquals([], Datapackage::validate("tests/fixtures/multi_data_datapackage.json"));
+        $this->assertEquals([], Factory::validate("tests/fixtures/multi_data_datapackage.json"));
     }
 
     public function testDatapackageValidationFailed()
     {
-        $this->assertEquals(
+        $this->assertDatapackageValidation(
             "[resources] The property resources is required",
-            DatapackageValidationError::getErrorMessages(
-                Datapackage::validate("tests/fixtures/simple_invalid_datapackage.json")
-            )
+            "tests/fixtures/simple_invalid_datapackage.json"
+        );
+    }
+
+    public function testDatapackageValidationFailedShouldPreventConstruct()
+    {
+        try {
+            Factory::datapackage((object)["name" => "foobar"]);
+            $caughtException = null;
+        } catch (Exceptions\DatapackageValidationFailedException $e) {
+            $caughtException = $e;
+        }
+        $this->assertEquals("DefaultDatapackage validation failed: [resources] The property resources is required", $caughtException->getMessage());
+    }
+
+    public function testTabularResourceDescriptorValidation()
+    {
+        $this->assertDatapackageValidation(
+            "DefaultResource 1 failed validation: [resources[0].schema.fields] The property fields is required",
+            "tests/fixtures/invalid_tabular_resource.json"
+        );
+    }
+
+    protected function assertDatapackageValidation($expectedMessages, $source, $basePath=null)
+    {
+        $validationErrors = Factory::validate($source, $basePath);
+        $this->assertEquals(
+            $expectedMessages,
+            DatapackageValidationError::getErrorMessages($validationErrors)
         );
     }
 
     /**
      * @param object $expectedDescriptor
-     * @param Datapackage $datapackage
+     * @param DefaultDatapackage $datapackage
      */
     protected function assertDatapackageDescriptor($expectedDescriptor, $datapackage)
     {
@@ -179,7 +210,7 @@ class DatapackageTest extends TestCase
 
     /**
      * @param array $expectedData
-     * @param Datapackage $datapackage
+     * @param DefaultDatapackage $datapackage
      */
     protected function assertDatapackageData($expectedData, $datapackage)
     {

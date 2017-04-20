@@ -1,0 +1,13 @@
+{
+  "name": "invalid-tabular-resource",
+  "resources": [
+    {
+      "profile": "tabular-data-resource",
+      "name": "invalid-tabular-resource",
+      "data": ["simple_tabular_data2.csv"],
+      "schema": {
+        "foo": "bar"
+      }
+    }
+  ]
+}

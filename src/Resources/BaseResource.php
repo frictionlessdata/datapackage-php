@@ -1,12 +1,21 @@
 <?php
-namespace frictionlessdata\datapackage;
+namespace frictionlessdata\datapackage\Resources;
 
-class Resource implements \Iterator
+use frictionlessdata\datapackage\Validators\ResourceValidator;
+use frictionlessdata\datapackage\Exceptions\ResourceValidationFailedException;
+use frictionlessdata\datapackage\Utils;
+use frictionlessdata\datapackage\DataStream;
+
+class BaseResource implements \Iterator
 {
     public function __construct($descriptor, $basePath)
     {
         $this->basePath = $basePath;
         $this->descriptor = $descriptor;
+        $validationErrors = ResourceValidator::validate($this->descriptor());
+        if (count($validationErrors) > 0) {
+            throw new ResourceValidationFailedException($validationErrors);
+        }
     }
 
     public function descriptor()
@@ -35,23 +44,11 @@ class Resource implements \Iterator
      * used by unit tests to add a mock http source
      *
      * @param string $dataSource
-     * @return bool
-     */
-    protected function isHttpSource($dataSource)
-    {
-        return Utils::isHttpSource($dataSource);
-    }
-
-    /**
-     * allows extending classes to add custom sources
-     * used by unit tests to add a mock http source
-     *
-     * @param string $dataSource
      * @return string
      */
     protected function normalizeDataSource($dataSource)
     {
-        if (!empty($this->basePath) && !$this->isHttpSource($dataSource)) {
+        if (!empty($this->basePath) && !Utils::isHttpSource($dataSource)) {
             // TODO: support JSON pointers
             $absPath = $this->basePath.DIRECTORY_SEPARATOR.$dataSource;
             if (file_exists($absPath)) {
