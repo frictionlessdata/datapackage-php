@@ -80,9 +80,10 @@ abstract class BaseValidator extends SchemaValidator
             ]
         );
         if (!$validator->isValid()) {
+            $schemaValidationErrorClass = $this->getSchemaValidationErrorClass();
             foreach ($validator->getErrors() as $error) {
                 $this->_addError(
-                    ($this->getSchemaValidationErrorClass())::SCHEMA_VIOLATION,
+                    $schemaValidationErrorClass::SCHEMA_VIOLATION,
                     $this->getValidationErrorMessage($error)
                 );
             }
