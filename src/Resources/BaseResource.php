@@ -6,8 +6,14 @@ use frictionlessdata\datapackage\Exceptions\ResourceValidationFailedException;
 use frictionlessdata\datapackage\Utils;
 use frictionlessdata\datapackage\DataStream;
 
-class BaseResource implements \Iterator
+abstract class BaseResource implements \Iterator
 {
+    /**
+     * BaseResource constructor.
+     * @param object $descriptor
+     * @param null|string $basePath
+     * @throws ResourceValidationFailedException
+     */
     public function __construct($descriptor, $basePath)
     {
         $this->basePath = $basePath;
@@ -18,11 +24,17 @@ class BaseResource implements \Iterator
         }
     }
 
+    /**
+     * @return object
+     */
     public function descriptor()
     {
         return $this->descriptor;
     }
 
+    /**
+     * @return string
+     */
     public function name()
     {
         return $this->descriptor()->name;
@@ -58,6 +70,10 @@ class BaseResource implements \Iterator
         return $dataSource;
     }
 
+    /**
+     * @param string $dataSource
+     * @return DataStream
+     */
     protected function getDataStream($dataSource)
     {
         return new DataStream($this->normalizeDataSource($dataSource));

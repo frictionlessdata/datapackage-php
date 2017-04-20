@@ -5,21 +5,13 @@ use frictionlessdata\datapackage\Factory;
 use frictionlessdata\datapackage\Validators\DatapackageValidator;
 use frictionlessdata\datapackage\Exceptions\DatapackageValidationFailedException;
 
-/**
- * Default datapackage representation
- *
- * supports loading from the following sources:
- *  - native PHP object containing the descriptor
- *  - JSON encoded object
- *  - URL (must be in either 'http' or 'https' schemes)
- *  - local filesystem (POSIX) path
- */
-class BaseDatapackage implements \Iterator
+abstract class BaseDatapackage implements \Iterator
 {
     /**
      * BaseDatapackage constructor.
      * @param object $descriptor
      * @param null|string $basePath
+     * @throws DatapackageValidationFailedException
      */
     public function __construct($descriptor, $basePath=null)
     {

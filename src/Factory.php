@@ -1,5 +1,9 @@
 <?php namespace frictionlessdata\datapackage;
 
+/**
+ * datapackage and resource have different classes depending on the corresponding profile
+ * this factory interface allows to validate and create object instances without having to check the profile first
+ */
 class Factory
 {
     /**
@@ -7,6 +11,19 @@ class Factory
      */
     const VALIDATE_PEEK_LINES = 10;
 
+    /**
+     * load, validate and create a datapackage object
+     * supports loading from the following sources:
+     *  - native PHP object containing the descriptor
+     *  - JSON encoded object
+     *  - URL (must be in either 'http' or 'https' schemes)
+     *  - local filesystem (POSIX) path
+     * @param mixed $source
+     * @param null|string $basePath
+     * @return Datapackages\BaseDatapackage
+     * @throws Exceptions\DatapackageInvalidSourceException
+     * @throws Exceptions\DatapackageValidationFailedException
+     */
     public static function datapackage($source, $basePath=null)
     {
         $source = static::loadSource($source, $basePath);
@@ -17,6 +34,13 @@ class Factory
         return $datapackage;
     }
 
+    /**
+     * create a resource object
+     * @param object $descriptor
+     * @param null|string $basePath
+     * @return Resources\BaseResource
+     * @throws Exceptions\ResourceValidationFailedException
+     */
     public static function resource($descriptor, $basePath=null)
     {
         $resourceClass = static::getResourceClass($descriptor);
@@ -27,9 +51,8 @@ class Factory
     /**
      * validates a given datapackage descriptor
      * will load all resources, and sample 10 lines of data from each data source
-     *
-     * @param mixed $source same as $source param in constructor
-     * @param null|string $basePath same as $basePath param in constructor
+     * @param mixed $source datapackage source - same as in datapackage function
+     * @param null|string $basePath same as in datapackage function
      * @return Validators\DatapackageValidationError[]
      */
     public static function validate($source, $basePath=null)

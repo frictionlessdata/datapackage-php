@@ -1,5 +1,7 @@
 <?php namespace frictionlessdata\datapackage\Validators;
 
+use frictionlessdata\datapackage\Repository;
+
 /**
  * validate a resource descriptor
  * checks the profile attribute to determine which schema to validate with
@@ -16,9 +18,11 @@ class ResourceValidator extends DatapackageValidator
 
     protected function getValidationProfile()
     {
-        $profile = parent::getValidationProfile();
+        $profile = Repository::getResourceValidationProfile($this->descriptor);
         if ($profile == "tabular-data-resource") {
             $profile = "tabular-data-package";
+        } elseif ($profile == "data-resource") {
+            $profile = "data-package";
         }
         return $profile;
     }

@@ -1,4 +1,5 @@
-<?php namespace frictionlessdata\datapackage\Validators;
+<?php
+namespace frictionlessdata\datapackage\Validators;
 
 use frictionlessdata\tableschema\SchemaValidator;
 use frictionlessdata\tableschema\SchemaValidationError;
@@ -8,7 +9,7 @@ abstract class BaseValidator extends SchemaValidator
     /**
      * validate a descriptor
      * @param object $descriptor
-     * @return array of validation error objects
+     * @return SchemaValidationError[]
      */
     public static function validate($descriptor)
     {
@@ -16,41 +17,58 @@ abstract class BaseValidator extends SchemaValidator
         return $validator->get_validation_errors();
     }
 
+    /**
+     * should be implemented properly by extending classes
+     * should return the profile used for validation
+     * if using the default getValidationSchemaUrl function - this value should correspond to a file in schemas/ directory
+     * @return string
+     */
     protected function getValidationProfile()
     {
-        if (isset($this->descriptor->profile) && $this->descriptor->profile != "default") {
-            return $this->descriptor->profile;
-        } else {
-            return "data-package";
-        }
+        return $this->descriptor->profile;
     }
 
     /**
      * get the url which the schema for validation can be fetched from
-     *
      * @return string
      */
     protected function getValidationSchemaUrl()
     {
-        // TODO: use a registry, support loading url to schema file
+        // TODO: support loading from url
         return 'file://' . realpath(dirname(__FILE__))."/schemas/".$this->getValidationProfile().".json";
     }
 
+    /**
+     * Allows to specify different error classes for different validators
+     * @return string
+     */
     protected function getSchemaValidationErrorClass()
     {
         return SchemaValidationError::class;
     }
 
+    /**
+     * allows extending classes to modify the descriptor before passing to the validator
+     * @return object
+     */
     protected function getDescriptorForValidation()
     {
         return $this->descriptor;
     }
 
+    /**
+     * conver the validation error message received from JsonSchema to human readable string
+     * @param array $error
+     * @return string
+     */
     protected function getValidationErrorMessage($error)
     {
         return sprintf("[%s] %s", $error['property'], $error['message']);
     }
 
+    /**
+     * does the validation, adds errors to the validator object using _addError method
+     */
     protected function _validateSchema()
     {
         $validator = new \JsonSchema\Validator();
@@ -71,6 +89,11 @@ abstract class BaseValidator extends SchemaValidator
         }
     }
 
+    /**
+     * Add an error to the validator object - errors are aggregated and returned by validate function
+     * @param integer $code
+     * @param null|mixed $extraDetails
+     */
     protected function _addError($code, $extraDetails=null)
     {
         $errorClass = $this->getSchemaValidationErrorClass();

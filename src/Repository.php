@@ -1,8 +1,7 @@
 <?php namespace frictionlessdata\datapackage;
 
 /**
- * repository datapackage and resource profiles
- * can be used to get the correct datapackage or resource class given a descriptor of unknown profile
+ * repository of known profiles and the corresponding classes and validation requirements
  */
 class Repository
 {

@@ -1,8 +1,19 @@
 <?php
 namespace frictionlessdata\datapackage;
 
+/**
+ * Provides a standard interface for streaming
+ *
+ * functionality could mostly be replaced by php generators (http://php.net/manual/en/language.generators.syntax.php)
+ * however, they are only supported on PHP 5.5 and above
+ */
 class DataStream implements \Iterator
 {
+    /**
+     * DataStream constructor.
+     * @param string $dataSource
+     * @throws Exceptions\DataStreamOpenException
+     */
     public function __construct($dataSource)
     {
         try {
