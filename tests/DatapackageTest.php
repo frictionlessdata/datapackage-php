@@ -185,8 +185,24 @@ class DatapackageTest extends TestCase
     public function testTabularResourceDescriptorValidation()
     {
         $this->assertDatapackageValidation(
-            "DefaultResource 1 failed validation: [resources[0].schema.fields] The property fields is required",
+            "resource 1 failed validation: [schema.fields] The property fields is required",
             "tests/fixtures/invalid_tabular_resource.json"
+        );
+    }
+
+    public function testDefaultResourceInvalidData()
+    {
+        $this->assertDatapackageValidation(
+            'data stream failure for resource 1, data stream 2: Failed to open source "--invalid--": "fopen(--invalid--): failed to open stream: No such file or directory"',
+            "tests/fixtures/default_resource_invalid_data.json"
+        );
+    }
+
+    public function testTabularResourceInvalidData()
+    {
+        $this->assertDatapackageValidation(
+            'data stream failure for resource 1, data stream 2, line number 2: invalid value for field id: should be integer, actual: "two"',
+            "tests/fixtures/tabular_resource_invalid_data.json"
         );
     }
 

@@ -1,4 +1,5 @@
 <?php namespace frictionlessdata\datapackage;
+use JsonSchema\Validator;
 
 /**
  * datapackage and resource have different classes depending on the corresponding profile
@@ -95,6 +96,32 @@ class Factory
                     [
                         "resource" => $curResource,
                         "validationErrors" => $e->validationErrors
+                    ]
+                )
+            ];
+        } catch (Exceptions\DataStreamOpenException $e) {
+            // failed to open data stream
+            return [
+                new Validators\DatapackageValidationError(
+                    Validators\DatapackageValidationError::DATA_STREAM_FAILURE,
+                    [
+                        "resource" => $curResource,
+                        "dataStream" => $curData,
+                        "line" => 0,
+                        "error" => $e->getMessage()
+                    ]
+                )
+            ];
+        } catch (Exceptions\DataStreamValidationException $e) {
+            // failed to validate the data stream
+            return [
+                new Validators\DatapackageValidationError(
+                    Validators\DatapackageValidationError::DATA_STREAM_FAILURE,
+                    [
+                        "resource" => $curResource,
+                        "dataStream" => $curData,
+                        "line" => $curLine,
+                        "error" => $e->getMessage()
                     ]
                 )
             ];

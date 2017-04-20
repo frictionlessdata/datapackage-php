@@ -1,10 +1,10 @@
 <?php
 namespace frictionlessdata\datapackage\Resources;
 
+use frictionlessdata\datapackage\DataStreams\BaseDataStream;
 use frictionlessdata\datapackage\Validators\ResourceValidator;
 use frictionlessdata\datapackage\Exceptions\ResourceValidationFailedException;
 use frictionlessdata\datapackage\Utils;
-use frictionlessdata\datapackage\DataStream;
 
 abstract class BaseResource implements \Iterator
 {
@@ -41,7 +41,7 @@ abstract class BaseResource implements \Iterator
     }
 
     // standard iterator functions - to iterate over the data sources
-    public function rewind() { $this->_currentDataPosition = 0; }
+    public function rewind() { $this->currentDataPosition = 0; }
     public function current() { return $this->getDataStream($this->descriptor()->data[$this->currentDataPosition]); }
     public function key() { return $this->currentDataPosition; }
     public function next() { $this->currentDataPosition++; }
@@ -72,10 +72,7 @@ abstract class BaseResource implements \Iterator
 
     /**
      * @param string $dataSource
-     * @return DataStream
+     * @return BaseDataStream
      */
-    protected function getDataStream($dataSource)
-    {
-        return new DataStream($this->normalizeDataSource($dataSource));
-    }
+    abstract protected function getDataStream($dataSource);
 }

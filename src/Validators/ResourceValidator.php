@@ -46,7 +46,7 @@ class ResourceValidator extends DatapackageValidator
     {
         $property = $error['property'];
         // silly hack to only show properties within the resource of the fake datapackage
-        str_replace("resources[0].", "", $property);
+        $property = str_replace("resources[0].", "", $property);
         return sprintf("[%s] %s", $property, $error['message']);
     }
 }
