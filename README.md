@@ -24,7 +24,7 @@ $ composer require frictionlessdata/datapackage
 use frictionlessdata\datapackage;
 
 // get a datapackage object
-$datapackage = datapackage\Repository::datapackage("tests/fixtures/multi_data_datapackage.json");
+$datapackage = datapackage\Factory::datapackage("tests/fixtures/multi_data_datapackage.json");
 
 // iterate over the data
 foreach ($datapackage as $resource) {
@@ -39,7 +39,7 @@ foreach ($datapackage as $resource) {
 }
 
 // validate a datapackage descriptor
-$validationErrors = datapackage\Repository::validate("tests/fixtures/simple_invalid_datapackage.json");
+$validationErrors = datapackage\Factory::validate("tests/fixtures/simple_invalid_datapackage.json");
 if (count($validationErrors) == 0) {
     print("descriptor is valid");
 } else {
