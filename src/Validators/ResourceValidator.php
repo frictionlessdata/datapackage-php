@@ -13,7 +13,7 @@ class ResourceValidator extends DatapackageValidator
 {
     protected function getSchemaValidationErrorClass()
     {
-        return ResourceValidationError::class;
+        return "frictionlessdata\\datapackage\\Validators\\ResourceValidationError";
     }
 
     protected function getValidationProfile()

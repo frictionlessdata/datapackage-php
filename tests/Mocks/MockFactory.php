@@ -26,7 +26,7 @@ class MockFactory extends Factory
     {
         $datapackageClass = parent::getDatapackageClass($descriptor);
         if ($datapackageClass == "frictionlessdata\\datapackage\\Datapackages\\DefaultDatapackage") {
-            $datapackageClass = MockDefaultDatapackage::class;
+            $datapackageClass = "frictionlessdata\\datapackage\\tests\\Mocks\\MockDefaultDatapackage";
         }
         return $datapackageClass;
     }
@@ -35,7 +35,7 @@ class MockFactory extends Factory
     {
         $resourceClass = parent::getResourceClass($descriptor);
         if ($resourceClass == "frictionlessdata\\datapackage\\Resources\\DefaultResource") {
-            $resourceClass = MockDefaultResource::class;
+            $resourceClass = "frictionlessdata\\datapackage\\tests\\Mocks\\MockDefaultResource";
         }
         return $resourceClass;
     }

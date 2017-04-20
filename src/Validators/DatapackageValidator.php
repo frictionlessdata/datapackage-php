@@ -10,7 +10,7 @@ class DatapackageValidator extends BaseValidator
 {
     protected function getSchemaValidationErrorClass()
     {
-        return DatapackageValidationError::class;
+        return "frictionlessdata\\datapackage\\Validators\\DatapackageValidationError";
     }
 
     protected function getValidationProfile()

@@ -8,9 +8,9 @@ class Repository
     public static function getResourceClass($descriptor)
     {
         if (static::getResourceValidationProfile($descriptor) == "tabular-data-resource") {
-            return Resources\TabularResource::class;
+            return "frictionlessdata\\datapackage\\Resources\\TabularResource";
         } else {
-            return Resources\DefaultResource::class;
+            return "frictionlessdata\\datapackage\\Resources\\DefaultResource";
         }
     }
 
@@ -25,7 +25,7 @@ class Repository
 
     public static function getDatapackageClass($descriptor)
     {
-        return Datapackages\DefaultDatapackage::class;
+        return "frictionlessdata\\datapackage\\Datapackages\\DefaultDatapackage";
     }
 
     public static function getDatapackageValidationProfile($descriptor)

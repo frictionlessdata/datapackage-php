@@ -44,7 +44,7 @@ abstract class BaseValidator extends SchemaValidator
      */
     protected function getSchemaValidationErrorClass()
     {
-        return SchemaValidationError::class;
+        return "frictionlessdata\\tableschema\\SchemaValidationError";
     }
 
     /**
