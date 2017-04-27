@@ -21,6 +21,8 @@ $ composer test
 
 ## Phpunit - for unit tests
 
+[![Travis](https://travis-ci.org/frictionlessdata/datapackage-php.svg?branch=master)](https://travis-ci.org/frictionlessdata/datapackage-php)
+
 Phpunit is used for unit tests, you can find the tests under tests directory
 
 Running Phpunit directly: `vendor/bin/phpunit --bootstrap tests/autoload.php tests/`
@@ -35,8 +37,22 @@ when running `composer test` phpunit generates coverage report in coverage-clove
 
 ## Scrutinizer-ci - for code analysis
 
-[Scrutinizer-ci](https://scrutinizer-ci.com/) integrates with GitHub and runs on commits.
+[![Scrutinizer-ci](https://scrutinizer-ci.com/g/OriHoch/datapackage-php/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/OriHoch/datapackage-php/)
+
+Scrutinizer-ci integrates with GitHub and runs on commits.
 
 It does static code analysis and ensure confirmation to the coding stnadards.
 
 At the moment, the integration with frictionlessdata repo is not working, you can setup a Scrutinizer-ci account for your fork and run against that.
+
+
+## Publishing a release and updating Packagist
+
+[![Packagist](https://img.shields.io/packagist/dm/frictionlessdata/datapackage.svg)](https://packagist.org/packages/frictionlessdata/datapackage)
+[![SemVer](https://img.shields.io/badge/versions-SemVer-brightgreen.svg)](http://semver.org/)
+
+* Publish a release (using SemVer) on GitHub
+* go to https://packagist.org/packages/frictionlessdata/datapackage
+* Login with GitHub which has permissions
+* click "Update"
+* all releases from GitHub appear as releases on Packagist

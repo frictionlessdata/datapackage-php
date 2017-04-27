@@ -156,7 +156,16 @@ class Factory
         return Utils::isHttpSource($source);
     }
 
-
+    /**
+     * loads the datapackage descriptor from different sources
+     * returns an object containing:
+     *   - the datapackage descriptor as native php object
+     *   - normalized basePath
+     * @param $source
+     * @param $basePath
+     * @return object
+     * @throws Exceptions\DatapackageInvalidSourceException
+     */
     protected static function loadSource($source, $basePath)
     {
         if (is_object($source)) {

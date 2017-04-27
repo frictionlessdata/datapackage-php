@@ -2,65 +2,57 @@
 namespace frictionlessdata\datapackage\DataStreams;
 
 use frictionlessdata\datapackage\Exceptions\DataStreamValidationException;
+use frictionlessdata\datapackage\Exceptions\DataStreamOpenException;
+use frictionlessdata\tableschema\DataSources\CsvDataSource;
+use frictionlessdata\tableschema\Schema;
+use frictionlessdata\tableschema\Table;
+use frictionlessdata\tableschema\Exceptions\TableRowValidationException;
 
-class TabularDataStream extends DefaultDataStream
+
+class TabularDataStream extends BaseDataStream
 {
-    public function __construct($dataSource, $schema)
+    public function __construct($dataSource, $schema=null)
     {
-        parent::__construct($dataSource);
-        // TODO: change to use table schema object
-        // $this->schemaIterator = $schema->rawDataIterator();
-        $this->schemaIterator = (object)[
-            "schema" => $schema,
-            "lineNum" => 0,
-            "sampleLines" => [],
-            "numPeekLines" => 10,
-            "headerLine" => null
-        ];
-    }
-
-    public function schemaIterator()
-    {
-        return $this->schemaIterator;
-    }
-
-    protected $schemaIterator;
-
-    protected function processLine($lineNum, $line)
-    {
-        // TODO: change to use table schema object
-        // return $this->schemaIterator->processLine($lineNum, $line);
-        if ($lineNum == 1) {
-            $this->schemaIterator()->headerLine = str_getcsv($line);
-            $this->next();
-            if ($this->valid()) {
-                return $this->current();
-            } else {
-                return null;
-            }
+        if (empty($schema)) {
+            throw new \Exception("schema is required for tabular data stream");
         } else {
-            $line = str_getcsv($line);
-            if (count($this->schemaIterator()->headerLine) != count($line)) {
-                throw new DataStreamValidationException(
-                    "mismatch in header and line number of columns"
-                    ." headerLine=".json_encode($this->schemaIterator()->headerLine)
-                    ." line=".json_encode($line)
-                );
+            try {
+                $dataSource = new CsvDataSource($dataSource);
+                $schema = new Schema($schema);
+                $this->table = new Table($dataSource, $schema);
+            } catch (\Exception $e) {
+                throw new DataStreamOpenException("Failed to open tabular data source ".json_encode($dataSource).": ".json_encode($e->getMessage()));
             }
-            $res = [];
-            $i = 0;
-            foreach ($this->schemaIterator()->headerLine as $field) {
-                $fieldSchema = $this->schemaIterator()->schema->fields[$i];
-                $val = $line[$i];
-                if ($fieldSchema->type == "integer" && !is_numeric($val)) {
-                    throw new DataStreamValidationException(
-                        "invalid value for field {$field}: should be integer, actual: ".json_encode($val)
-                    );
-                }
-                $res[$field] = $val;
-                $i++;
-            }
-            return $res;
         }
+    }
+
+    protected $table;
+
+    public function rewind() {
+        $this->table->rewind();
+    }
+
+    /**
+     * @return array
+     * @throws DataStreamValidationException
+     */
+    public function current() {
+        try {
+            return $this->table->current();
+        } catch (TableRowValidationException $e) {
+            throw new DataStreamValidationException($e->getMessage());
+        }
+    }
+
+    public function key() {
+        return $this->table->key();
+    }
+
+    public function next() {
+        $this->table->next();
+    }
+
+    public function valid() {
+        return $this->table->valid();
     }
 }

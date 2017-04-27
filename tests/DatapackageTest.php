@@ -193,7 +193,7 @@ class DatapackageTest extends TestCase
     public function testDefaultResourceInvalidData()
     {
         $this->assertDatapackageValidation(
-            'data stream failure for resource 1, data stream 2: Failed to open source "--invalid--": "fopen(--invalid--): failed to open stream: No such file or directory"',
+            'resource 1, data stream 2: Failed to open data source "--invalid--": "'.$this->getFopenErrorMessage("--invalid--").'"',
             "tests/fixtures/default_resource_invalid_data.json"
         );
     }
@@ -201,7 +201,7 @@ class DatapackageTest extends TestCase
     public function testTabularResourceInvalidData()
     {
         $this->assertDatapackageValidation(
-            'data stream failure for resource 1, data stream 2, line number 2: invalid value for field id: should be integer, actual: "two"',
+            'resource 1, data stream 2: row 2.email(bad.email): invalid value for email format',
             "tests/fixtures/tabular_resource_invalid_data.json"
         );
     }
@@ -263,5 +263,15 @@ class DatapackageTest extends TestCase
         } catch (\Exception $e) {
             $this->assertEquals($expectedExceptionClass, get_class($e), $e->getMessage());
         }
+    }
+
+    protected function getFopenErrorMessage($in)
+    {
+        try {
+            fopen($in, "r");
+        } catch (\Exception $e) {
+            return $e->getMessage();
+        }
+        throw new \Exception();
     }
 }

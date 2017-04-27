@@ -14,7 +14,7 @@ abstract class BaseValidator extends SchemaValidator
     public static function validate($descriptor)
     {
         $validator = new static($descriptor);
-        return $validator->get_validation_errors();
+        return $validator->getValidationErrors();
     }
 
     /**
@@ -69,7 +69,7 @@ abstract class BaseValidator extends SchemaValidator
     /**
      * does the validation, adds errors to the validator object using _addError method
      */
-    protected function _validateSchema()
+    protected function validateSchema()
     {
         $validator = new \JsonSchema\Validator();
         $descriptor = $this->getDescriptorForValidation();
@@ -80,10 +80,9 @@ abstract class BaseValidator extends SchemaValidator
             ]
         );
         if (!$validator->isValid()) {
-            $schemaValidationErrorClass = $this->getSchemaValidationErrorClass();
             foreach ($validator->getErrors() as $error) {
-                $this->_addError(
-                    $schemaValidationErrorClass::SCHEMA_VIOLATION,
+                $this->addError(
+                    SchemaValidationError::SCHEMA_VIOLATION,
                     $this->getValidationErrorMessage($error)
                 );
             }
@@ -95,7 +94,7 @@ abstract class BaseValidator extends SchemaValidator
      * @param integer $code
      * @param null|mixed $extraDetails
      */
-    protected function _addError($code, $extraDetails=null)
+    protected function addError($code, $extraDetails=null)
     {
         $errorClass = $this->getSchemaValidationErrorClass();
         $this->errors[] = new $errorClass($code, $extraDetails);

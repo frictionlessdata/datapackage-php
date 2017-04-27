@@ -4,11 +4,11 @@
     {
       "profile": "tabular-data-resource",
       "name": "tabular-resource-invalid-data",
-      "data": ["simple_tabular_data.csv", "invalid_tabular_data.csv"],
+      "data": ["valid_emails_tabular_data.csv", "invalid_tabular_data.csv"],
       "schema": {
         "fields": [
           {"name": "id", "type": "integer"},
-          {"name": "name", "type": "string"}
+          {"name": "email", "type": "string", "format": "email"}
         ]
       }
     }
