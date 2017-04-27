@@ -1,26 +1,47 @@
 <?php
-namespace frictionlessdata\datapackage;
+namespace frictionlessdata\datapackage\Resources;
 
-class Resource implements \Iterator
+use frictionlessdata\datapackage\DataStreams\BaseDataStream;
+use frictionlessdata\datapackage\Validators\ResourceValidator;
+use frictionlessdata\datapackage\Exceptions\ResourceValidationFailedException;
+use frictionlessdata\datapackage\Utils;
+
+abstract class BaseResource implements \Iterator
 {
+    /**
+     * BaseResource constructor.
+     * @param object $descriptor
+     * @param null|string $basePath
+     * @throws ResourceValidationFailedException
+     */
     public function __construct($descriptor, $basePath)
     {
         $this->basePath = $basePath;
         $this->descriptor = $descriptor;
+        $validationErrors = ResourceValidator::validate($this->descriptor());
+        if (count($validationErrors) > 0) {
+            throw new ResourceValidationFailedException($validationErrors);
+        }
     }
 
+    /**
+     * @return object
+     */
     public function descriptor()
     {
         return $this->descriptor;
     }
 
+    /**
+     * @return string
+     */
     public function name()
     {
         return $this->descriptor()->name;
     }
 
     // standard iterator functions - to iterate over the data sources
-    public function rewind() { $this->_currentDataPosition = 0; }
+    public function rewind() { $this->currentDataPosition = 0; }
     public function current() { return $this->getDataStream($this->descriptor()->data[$this->currentDataPosition]); }
     public function key() { return $this->currentDataPosition; }
     public function next() { $this->currentDataPosition++; }
@@ -35,23 +56,11 @@ class Resource implements \Iterator
      * used by unit tests to add a mock http source
      *
      * @param string $dataSource
-     * @return bool
-     */
-    protected function isHttpSource($dataSource)
-    {
-        return Utils::isHttpSource($dataSource);
-    }
-
-    /**
-     * allows extending classes to add custom sources
-     * used by unit tests to add a mock http source
-     *
-     * @param string $dataSource
      * @return string
      */
     protected function normalizeDataSource($dataSource)
     {
-        if (!empty($this->basePath) && !$this->isHttpSource($dataSource)) {
+        if (!empty($this->basePath) && !Utils::isHttpSource($dataSource)) {
             // TODO: support JSON pointers
             $absPath = $this->basePath.DIRECTORY_SEPARATOR.$dataSource;
             if (file_exists($absPath)) {
@@ -61,8 +70,9 @@ class Resource implements \Iterator
         return $dataSource;
     }
 
-    protected function getDataStream($dataSource)
-    {
-        return new DataStream($this->normalizeDataSource($dataSource));
-    }
+    /**
+     * @param string $dataSource
+     * @return BaseDataStream
+     */
+    abstract protected function getDataStream($dataSource);
 }

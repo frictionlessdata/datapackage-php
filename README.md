@@ -23,8 +23,10 @@ $ composer require frictionlessdata/datapackage
 ```php
 use frictionlessdata\datapackage;
 
+// get a datapackage object
+$datapackage = datapackage\Factory::datapackage("tests/fixtures/multi_data_datapackage.json");
+
 // iterate over the data
-$datapackage = new datapackage\Datapackage("tests/fixtures/multi_data_datapackage.json");
 foreach ($datapackage as $resource) {
     print("-- ".$resource->name()." --");
     $i = 0;
@@ -36,12 +38,12 @@ foreach ($datapackage as $resource) {
     }
 }
 
-// validate the descriptor
-$validationErrors = datapackage\Datapackage::validate("tests/fixtures/simple_invalid_datapackage.json");
+// validate a datapackage descriptor
+$validationErrors = datapackage\Factory::validate("tests/fixtures/simple_invalid_datapackage.json");
 if (count($validationErrors) == 0) {
     print("descriptor is valid");
 } else {
-    print(datapackage\DatapackageValidationError::getErrorMessages($validationErrors));
+    print(datapackage\Validators\DatapackageValidationError::getErrorMessages($validationErrors));
 }
 ```
 

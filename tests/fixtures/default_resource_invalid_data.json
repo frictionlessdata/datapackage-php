@@ -1,0 +1,9 @@
+{
+  "name": "default-resource-invalid-data",
+  "resources": [
+    {
+      "name": "default-resource-invalid-data",
+      "data": ["foo.txt", "--invalid--"]
+    }
+  ]
+}

@@ -2,6 +2,7 @@
 namespace frictionlessdata\datapackage\tests;
 
 use PHPUnit\Framework\TestCase;
+use frictionlessdata\datapackage\Resource;
 
 class ResourceTest extends TestCase
 {
@@ -9,7 +10,7 @@ class ResourceTest extends TestCase
     {
         $this->assertResourceData(
             [["foo"],["foo"]],
-            new Mocks\MockResource(
+            Mocks\MockFactory::resource(
                 (object)[
                     "name" => "resource-name",
                     "data" => [
