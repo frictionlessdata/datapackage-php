@@ -6,16 +6,25 @@ use frictionlessdata\tableschema\SchemaValidationError;
 
 abstract class BaseValidator extends SchemaValidator
 {
+    public function __construct($descriptor, $basePath=null)
+    {
+        $this->basePath = $basePath;
+        parent::__construct($descriptor);
+    }
+
     /**
      * validate a descriptor
      * @param object $descriptor
-     * @return SchemaValidationError[]
+     * @param string $basePath
+     * @return \frictionlessdata\tableschema\SchemaValidationError[]
      */
-    public static function validate($descriptor)
+    public static function validate($descriptor, $basePath=null)
     {
-        $validator = new static($descriptor);
+        $validator = new static($descriptor, $basePath);
         return $validator->getValidationErrors();
     }
+
+    protected $basePath;
 
     /**
      * should be implemented properly by extending classes
@@ -96,7 +105,16 @@ abstract class BaseValidator extends SchemaValidator
      */
     protected function addError($code, $extraDetails=null)
     {
+        // modified from parent function to support changing the error class
         $errorClass = $this->getSchemaValidationErrorClass();
         $this->errors[] = new $errorClass($code, $extraDetails);
+    }
+
+    protected function validateKeys()
+    {
+        // this can be used to do further validations on $this->descriptor
+        // it will run only in case validateSchema succeeded
+        // so no need to check if attribute exists or in correct type
+        // the parent SchemaValidator does some checks specific to table schema - so don't call the parent function
     }
 }

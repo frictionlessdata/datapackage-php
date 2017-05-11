@@ -22,7 +22,7 @@ class TabularResource extends DefaultResource
      */
     protected function getDataStream($dataSource)
     {
-        return new TabularDataStream($this->normalizeDataSource($dataSource), $this->schema());
+        return new TabularDataStream($this->normalizeDataSource($dataSource, $this->basePath), $this->schema());
     }
 
 }

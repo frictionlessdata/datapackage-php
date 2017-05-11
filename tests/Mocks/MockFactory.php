@@ -22,7 +22,7 @@ class MockFactory extends Factory
         return $dataSource;
     }
 
-    protected static function getDatapackageClass($descriptor)
+    public static function getDatapackageClass($descriptor)
     {
         $datapackageClass = parent::getDatapackageClass($descriptor);
         if ($datapackageClass == "frictionlessdata\\datapackage\\Datapackages\\DefaultDatapackage") {
@@ -31,7 +31,7 @@ class MockFactory extends Factory
         return $datapackageClass;
     }
 
-    protected static function getResourceClass($descriptor)
+    public static function getResourceClass($descriptor)
     {
         $resourceClass = parent::getResourceClass($descriptor);
         if ($resourceClass == "frictionlessdata\\datapackage\\Resources\\DefaultResource") {

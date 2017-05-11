@@ -17,7 +17,7 @@ abstract class BaseDatapackage implements \Iterator
     {
         $this->descriptor = $descriptor;
         $this->basePath = $basePath;
-        $validationErrors = DatapackageValidator::validate($this->descriptor());
+        $validationErrors = $this->datapackageValidate();
         if (count($validationErrors) > 0) {
             throw new DatapackageValidationFailedException($validationErrors);
         }
@@ -52,5 +52,10 @@ abstract class BaseDatapackage implements \Iterator
     protected function initResource($descriptor)
     {
         return Factory::resource($descriptor, $this->basePath);
+    }
+
+    protected function datapackageValidate()
+    {
+        return DatapackageValidator::validate($this->descriptor(), $this->basePath);
     }
 }

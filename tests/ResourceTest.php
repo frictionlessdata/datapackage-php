@@ -2,7 +2,6 @@
 namespace frictionlessdata\datapackage\tests;
 
 use PHPUnit\Framework\TestCase;
-use frictionlessdata\datapackage\Resource;
 
 class ResourceTest extends TestCase
 {

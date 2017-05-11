@@ -11,6 +11,6 @@ class DefaultResource extends BaseResource
      */
     protected function getDataStream($dataSource)
     {
-        return new DefaultDataStream($this->normalizeDataSource($dataSource));
+        return new DefaultDataStream($this->normalizeDataSource($dataSource, $this->basePath));
     }
 }

@@ -1,4 +1,5 @@
 <?php namespace frictionlessdata\datapackage;
+use frictionlessdata\datapackage\Resources\BaseResource;
 use JsonSchema\Validator;
 
 /**
@@ -128,16 +129,19 @@ class Factory
         }
     }
 
-    protected static function getDatapackageClass($descriptor)
+    public static function getDatapackageClass($descriptor)
     {
         return Repository::getDatapackageClass($descriptor);
     }
 
-    protected static function getResourceClass($descriptor)
+    /**
+     * @param $descriptor
+     * @return BaseResource::class
+     */
+    public static function getResourceClass($descriptor)
     {
         return Repository::getResourceClass($descriptor);
     }
-
     /**
      * allows extending classes to add custom sources
      * used by unit tests to add a mock http source
@@ -190,9 +194,16 @@ class Factory
                 // http sources don't allow relative paths, hence basePath should remain null
                 $basePath = null;
             } else {
+                // not a json string and not a url - assume it's a file path
                 if (empty($basePath)) {
+                    // no basePath
+                    // - assume source is the absolute path of the file
+                    // - set it's directory as the basePath
                     $basePath = dirname($source);
                 } else {
+                    // got a basePath
+                    // - try to prepend it to the source and see if such a file exists
+                    // - if not - assume it's an absolute path
                     $absPath = $basePath.DIRECTORY_SEPARATOR.$source;
                     if (file_exists($absPath)) {
                         $source = $absPath;

@@ -9,4 +9,9 @@ class MockDefaultDatapackage extends DefaultDatapackage
     {
         return new MockDefaultResource($resourceDescriptor, $this->basePath);
     }
+
+    protected function datapackageValidate()
+    {
+        return MockDatapackageValidator::validate($this->descriptor(), $this->basePath);
+    }
 }

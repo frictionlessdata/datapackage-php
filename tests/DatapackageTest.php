@@ -37,6 +37,7 @@ class DatapackageTest extends TestCase
         $descriptorArray = $this->simpleDescriptorArray;
         $this->assertDatapackageException(
             "frictionlessdata\\datapackage\\Exceptions\\DatapackageInvalidSourceException",
+            'Invalid source: {"name":"datapackage-name","resources":[{"name":"resource-name","data":["foo.txt"]}]}',
             function() use ($descriptorArray) { Factory::datapackage($descriptorArray); }
         );
     }
@@ -45,7 +46,8 @@ class DatapackageTest extends TestCase
     {
         $descriptor = $this->simpleDescriptor;
         $this->assertDatapackageException(
-            "frictionlessdata\\datapackage\\Exceptions\\DataStreamOpenException",
+            "frictionlessdata\\datapackage\\Exceptions\\DatapackageValidationFailedException",
+            'DefaultDatapackage validation failed: data source file does not exist or is not readable: foo.txt',
             function() use ($descriptor) { Factory::datapackage($descriptor); }
         );
     }
@@ -62,7 +64,8 @@ class DatapackageTest extends TestCase
     {
         $source = json_encode($this->simpleDescriptor);
         $this->assertDatapackageException(
-            "frictionlessdata\\datapackage\\Exceptions\\DataStreamOpenException",
+            "frictionlessdata\\datapackage\\Exceptions\\DatapackageValidationFailedException",
+            'DefaultDatapackage validation failed: data source file does not exist or is not readable: foo.txt',
             function() use ($source) { Factory::datapackage($source); }
         );
     }
@@ -80,6 +83,7 @@ class DatapackageTest extends TestCase
     {
         $this->assertDatapackageException(
             "frictionlessdata\\datapackage\\Exceptions\\DatapackageInvalidSourceException",
+            'Failed to load source: "-invalid-": file_get_contents(-invalid-): failed to open stream: No such file or directory',
             function() { Factory::datapackage("-invalid-"); }
         );
     }
@@ -185,7 +189,7 @@ class DatapackageTest extends TestCase
     public function testTabularResourceDescriptorValidation()
     {
         $this->assertDatapackageValidation(
-            "resource 1 failed validation: [schema.fields] The property fields is required",
+            "[schema.fields] The property fields is required",
             "tests/fixtures/invalid_tabular_resource.json"
         );
     }
@@ -193,7 +197,7 @@ class DatapackageTest extends TestCase
     public function testDefaultResourceInvalidData()
     {
         $this->assertDatapackageValidation(
-            'resource 1, data stream 2: Failed to open data source "--invalid--": "'.$this->getFopenErrorMessage("--invalid--").'"',
+            'data source file does not exist or is not readable: --invalid--',
             "tests/fixtures/default_resource_invalid_data.json"
         );
     }
@@ -201,7 +205,7 @@ class DatapackageTest extends TestCase
     public function testTabularResourceInvalidData()
     {
         $this->assertDatapackageValidation(
-            'resource 1, data stream 2: row 2.email(bad.email): invalid value for email format',
+            'resource 1, data stream 2: email: value is not a valid email (bad.email)',
             "tests/fixtures/tabular_resource_invalid_data.json"
         );
     }
@@ -256,12 +260,19 @@ class DatapackageTest extends TestCase
         $this->assertDatapackageData($expectedData, $datapackage);
     }
 
-    protected function assertDatapackageException($expectedExceptionClass, $datapackageCallback)
+    protected function assertDatapackageException($expectedExceptionClass, $expectedMessage, $datapackageCallback)
     {
         try {
             $datapackageCallback();
+            $this->fail("expected an exception");
         } catch (\Exception $e) {
-            $this->assertEquals($expectedExceptionClass, get_class($e), $e->getMessage());
+            $actualExceptionClass = get_class($e);
+            $this->assertEquals(
+                $expectedExceptionClass,
+                $actualExceptionClass,
+                "unexpected exception: {$e->getMessage()}\n{$e->getTraceAsString()}"
+            );
+            $this->assertEquals($expectedMessage, $e->getMessage());
         }
     }
 
