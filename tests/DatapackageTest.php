@@ -86,7 +86,7 @@ class DatapackageTest extends TestCase
     {
         $this->assertDatapackageException(
             "frictionlessdata\\datapackage\\Exceptions\\DatapackageInvalidSourceException",
-            'Failed to load source: "-invalid-": file_get_contents(-invalid-): failed to open stream: No such file or directory',
+            'Failed to load source: "-invalid-": '.$this->getFileGetContentsErrorMessage("-invalid-"),
             function() { Factory::datapackage("-invalid-"); }
         );
     }
@@ -376,6 +376,16 @@ class DatapackageTest extends TestCase
     {
         try {
             fopen($in, "r");
+        } catch (\Exception $e) {
+            return $e->getMessage();
+        }
+        throw new \Exception();
+    }
+
+    protected function getFileGetContentsErrorMessage($in)
+    {
+        try {
+            file_get_contents($in);
         } catch (\Exception $e) {
             return $e->getMessage();
         }
