@@ -39,7 +39,7 @@ class RegistryTest extends TestCase
     public function testDatapackageWithTabularDataPackageProfile()
     {
         $this->assertDatapackageClassProfile(
-            "frictionlessdata\\datapackage\\Datapackages\\DefaultDatapackage",
+            "frictionlessdata\\datapackage\\Datapackages\\TabularDatapackage",
             "tabular-data-package",
             (object)["profile" => "tabular-data-package"]
         );
@@ -99,7 +99,7 @@ class RegistryTest extends TestCase
             $this->fail();
         } catch (DatapackageValidationFailedException $e) {
             $this->assertEquals(
-                "DefaultDatapackage validation failed: [custom] The property custom is required",
+                "Datapackage validation failed: [custom] The property custom is required",
                 $e->getMessage()
             );
         }
@@ -109,7 +109,7 @@ class RegistryTest extends TestCase
             $this->fail();
         } catch (DatapackageValidationFailedException $e) {
             $this->assertEquals(
-                "DefaultDatapackage validation failed: [custom[0]] Integer value found, but a string is required, [custom[1]] Integer value found, but a string is required, [custom[2]] Integer value found, but a string is required",
+                "Datapackage validation failed: [custom[0]] Integer value found, but a string is required, [custom[1]] Integer value found, but a string is required, [custom[2]] Integer value found, but a string is required",
                 $e->getMessage()
             );
         }
@@ -120,7 +120,7 @@ class RegistryTest extends TestCase
             $this->fail("should raise an exception because test-custom-profile requires foobar attribute (array of strings)");
         } catch (DatapackageValidationFailedException $e) {
             $this->assertEquals(
-                "DefaultDatapackage validation failed: [foobar] String value found, but an array is required",
+                "Datapackage validation failed: [foobar] String value found, but an array is required",
                 $e->getMessage()
             );
         }
@@ -141,15 +141,32 @@ class RegistryTest extends TestCase
         ], $datapackage->descriptor());
     }
 
+    public function testCustomSchemaMustConformToDatapackageSchema()
+    {
+        $descriptor = (object)[
+            "profile" => "http://json-schema.org/schema",
+            "resources" => [] // this is allows for json-schema.org/schema - but for datapackage it has minimum of 1
+        ];
+        try {
+            Factory::datapackage($descriptor);
+            $this->fail();
+        } catch (DatapackageValidationFailedException $e) {
+            $this->assertEquals(
+                'Datapackage validation failed: [resources] There must be a minimum of 1 items in the array',
+                $e->getMessage()
+            );
+        }
+    }
+
     protected function assertDatapackageClassProfile($expectedClass, $expectedProfile, $descriptor)
     {
-        $this->assertEquals($expectedClass, Registry::getDatapackageClass($descriptor));
+        $this->assertEquals($expectedClass, Factory::getDatapackageClass($descriptor));
         $this->assertEquals($expectedProfile, Registry::getDatapackageValidationProfile($descriptor));
     }
 
     protected function assertResourceClassProfile($expectedClass, $expectedProfile, $descriptor)
     {
-        $this->assertEquals($expectedClass, Registry::getResourceClass($descriptor));
+        $this->assertEquals($expectedClass, Factory::getResourceClass($descriptor));
         $this->assertEquals($expectedProfile, Registry::getResourceValidationProfile($descriptor));
     }
 

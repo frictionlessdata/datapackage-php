@@ -1,5 +1,7 @@
 <?php namespace frictionlessdata\datapackage;
+use frictionlessdata\datapackage\Datapackages\BaseDatapackage;
 use frictionlessdata\datapackage\Resources\BaseResource;
+use frictionlessdata\datapackage\Resources\DefaultResource;
 use JsonSchema\Validator;
 
 /**
@@ -21,7 +23,7 @@ class Factory
      *  - URL (must be in either 'http' or 'https' schemes)
      *  - local filesystem (POSIX) path
      * @param mixed $source
-     * @param null|string $basePath
+     * @param null|string $basePath optional, required only if you want to use relative paths
      * @return Datapackages\BaseDatapackage
      * @throws Exceptions\DatapackageInvalidSourceException
      * @throws Exceptions\DatapackageValidationFailedException
@@ -131,7 +133,16 @@ class Factory
 
     public static function getDatapackageClass($descriptor)
     {
-        return Registry::getDatapackageClass($descriptor);
+        $profile = Registry::getDatapackageValidationProfile($descriptor);
+        if ($profile == "tabular-data-package") {
+            $datapackageClass = "frictionlessdata\\datapackage\\Datapackages\TabularDatapackage";
+        } elseif ($profile == "data-package") {
+            $datapackageClass = "frictionlessdata\\datapackage\\Datapackages\DefaultDatapackage";
+        } else {
+            $datapackageClass = "frictionlessdata\\datapackage\\Datapackages\CustomDatapackage";
+        }
+        /** @var BaseDatapackage $datapackageClass */
+        return $datapackageClass;
     }
 
     /**
@@ -140,7 +151,16 @@ class Factory
      */
     public static function getResourceClass($descriptor)
     {
-        return Registry::getResourceClass($descriptor);
+        $profile = Registry::getResourceValidationProfile($descriptor);
+        if ($profile == "tabular-data-resource") {
+            $resourceClass = "frictionlessdata\\datapackage\\Resources\TabularResource";
+        } elseif ($profile == "data-resource") {
+            $resourceClass = "frictionlessdata\\datapackage\\Resources\DefaultResource";
+        } else {
+            $resourceClass = "frictionlessdata\\datapackage\\Resources\CustomResource";
+        }
+        /** @var BaseResource $resourceClass */
+        return $resourceClass;
     }
     /**
      * allows extending classes to add custom sources

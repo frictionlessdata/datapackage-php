@@ -49,7 +49,7 @@ class ResourceValidator extends BaseValidator
 
     protected function getJsonSchemaFileFromRegistry($profile)
     {
-        if ($filename = Registry::getResourceJsonSchemaFile($profile)) {
+        if ($filename = Registry::getJsonSchemaFile($profile)) {
             return $filename;
         } else {
             return parent::getJsonSchemaFileFromRegistry($profile);

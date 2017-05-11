@@ -2,25 +2,13 @@
 use frictionlessdata\datapackage\Resources\BaseResource;
 
 /**
- * repository of known profiles and the corresponding classes and validation requirements
+ * repository of known profiles and the corresponding schemas
  */
 class Registry
 {
     /**
-     * @param $descriptor
-     * @return BaseResource::class
+     * get the profile which should be used for validation from the given resource descriptor
      */
-    public static function getResourceClass($descriptor)
-    {
-        if (static::getResourceValidationProfile($descriptor) == "tabular-data-resource") {
-            $resourceClass = "frictionlessdata\\datapackage\\Resources\\TabularResource";
-        } else {
-            $resourceClass = "frictionlessdata\\datapackage\\Resources\\DefaultResource";
-        }
-        /** @var BaseResource $resourceClass */
-        return $resourceClass;
-    }
-
     public static function getResourceValidationProfile($descriptor)
     {
         if (isset($descriptor->profile) && $descriptor->profile != "default") {
@@ -30,11 +18,10 @@ class Registry
         }
     }
 
-    public static function getDatapackageClass($descriptor)
-    {
-        return "frictionlessdata\\datapackage\\Datapackages\\DefaultDatapackage";
-    }
-
+    /**
+     * get the profile which should be used for validation from the given datapackage descriptor
+     * corresponds to the id from the registry
+     */
     public static function getDatapackageValidationProfile($descriptor)
     {
         if (isset($descriptor->profile) && $descriptor->profile != "default") {
@@ -44,28 +31,24 @@ class Registry
         }
     }
 
-    public static function getDatapackageJsonSchemaFile($profile)
+    /**
+     * given a normalized profile - get the corresponding schema file for known schema in the registry
+     * returns false in case of unknown schema
+     * works the same for both datapackage schema and resource schemas
+     */
+    public static function getJsonSchemaFile($profile)
     {
-        if (in_array($profile, ["data-package", "tabular-data-package"])) {
-            // known profile id
-            return realpath(dirname(__FILE__))."/Validators/schemas/".$profile.".json";
-        } else {
-            // unknown profile / file or url
-            return false;
+        foreach (static::getAllSchemas() as $schema) {
+            if ($schema->id != "registry" && $schema->id == $profile) {
+                return realpath(dirname(__FILE__))."/Validators/schemas/".$schema->schema_path;
+            }
         }
+        return false;
     }
 
-    public static function getResourceJsonSchemaFile($profile)
-    {
-        if (in_array($profile, ["data-resource", "tabular-data-resource"])) {
-            // known profile id
-            return realpath(dirname(__FILE__))."/Validators/schemas/".$profile.".json";
-        } else {
-            // unknown profile / file or url
-            return false;
-        }
-    }
-
+    /**
+     * returns array of all known schemas in the registry
+     */
     public static function getAllSchemas()
     {
         // registry schema

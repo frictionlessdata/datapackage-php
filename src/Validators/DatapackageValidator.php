@@ -19,6 +19,19 @@ class DatapackageValidator extends BaseValidator
         return Registry::getDatapackageValidationProfile($this->descriptor);
     }
 
+    protected function validateSchema()
+    {
+        parent::validateSchema();
+        if ($this->getValidationProfile() != "data-package") {
+            // all schemas must be an extension of datapackage spec
+            $this->validateSchemaUrl(
+                $this->convertValidationSchemaFilenameToUrl(
+                    $this->getJsonSchemaFileFromRegistry("data-package")
+                )
+            );
+        }
+    }
+
     protected function validateKeys()
     {
         foreach ($this->descriptor->resources as $resourceDescriptor) {
@@ -35,7 +48,7 @@ class DatapackageValidator extends BaseValidator
 
     protected function getJsonSchemaFileFromRegistry($profile)
     {
-        if ($filename = Registry::getDatapackageJsonSchemaFile($profile)) {
+        if ($filename = Registry::getJsonSchemaFile($profile)) {
             return $filename;
         } else {
             return parent::getJsonSchemaFileFromRegistry($profile);

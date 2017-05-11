@@ -109,14 +109,14 @@ abstract class BaseValidator extends SchemaValidator
      */
     protected function validateSchema()
     {
+        $this->validateSchemaUrl($this->getValidationSchemaUrl());
+    }
+
+    protected function validateSchemaUrl($url)
+    {
         $validator = new \JsonSchema\Validator();
         $descriptor = $this->getDescriptorForValidation();
-        $validator->validate(
-            $descriptor,
-            (object)[
-                "\$ref" => $this->getValidationSchemaUrl()
-            ]
-        );
+        $validator->validate($descriptor, (object)["\$ref" => $url]);
         if (!$validator->isValid()) {
             foreach ($validator->getErrors() as $error) {
                 $this->addError(
