@@ -131,7 +131,7 @@ class Factory
 
     public static function getDatapackageClass($descriptor)
     {
-        return Repository::getDatapackageClass($descriptor);
+        return Registry::getDatapackageClass($descriptor);
     }
 
     /**
@@ -140,7 +140,7 @@ class Factory
      */
     public static function getResourceClass($descriptor)
     {
-        return Repository::getResourceClass($descriptor);
+        return Registry::getResourceClass($descriptor);
     }
     /**
      * allows extending classes to add custom sources

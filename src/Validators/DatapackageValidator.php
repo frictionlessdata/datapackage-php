@@ -1,6 +1,6 @@
 <?php namespace frictionlessdata\datapackage\Validators;
 
-use frictionlessdata\datapackage\Repository;
+use frictionlessdata\datapackage\Registry;
 use frictionlessdata\datapackage\Validators\ResourceValidator;
 
 /**
@@ -16,7 +16,7 @@ class DatapackageValidator extends BaseValidator
 
     protected function getValidationProfile()
     {
-        return Repository::getDatapackageValidationProfile($this->descriptor);
+        return Registry::getDatapackageValidationProfile($this->descriptor);
     }
 
     protected function validateKeys()
@@ -31,5 +31,14 @@ class DatapackageValidator extends BaseValidator
     protected function resourceValidate($resourceDescriptor)
     {
         return ResourceValidator::validate($resourceDescriptor, $this->basePath);
+    }
+
+    protected function getJsonSchemaFileFromRegistry($profile)
+    {
+        if ($filename = Registry::getDatapackageJsonSchemaFile($profile)) {
+            return $filename;
+        } else {
+            return parent::getJsonSchemaFileFromRegistry($profile);
+        }
     }
 }
