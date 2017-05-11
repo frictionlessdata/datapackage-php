@@ -12,13 +12,27 @@ class MockDefaultResource extends DefaultResource
      * @param string $dataSource
      * @return string
      */
-    protected function normalizeDataSource($dataSource)
+    public static function normalizeDataSource($dataSource, $basePath=null)
     {
         if (strpos($dataSource, "mock-http://") === 0) {
             $dataSource = str_replace("mock-http://", "", $dataSource);
             return dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR."fixtures".DIRECTORY_SEPARATOR.$dataSource;
         } else {
-            return parent::normalizeDataSource($dataSource);
+            return parent::normalizeDataSource($dataSource, $basePath);
         }
+    }
+
+    public static function validateDataSource($dataSource, $basePath=null)
+    {
+        if (strpos($dataSource, "mock-http://") === 0) {
+            return [];
+        } else {
+            return parent::validateDataSource($dataSource, $basePath);
+        }
+    }
+
+    protected function validateResource()
+    {
+        return MockResourceValidator::validate($this->descriptor(), $this->basePath);
     }
 }

@@ -2,6 +2,7 @@
 namespace frictionlessdata\datapackage\Resources;
 
 use frictionlessdata\datapackage\DataStreams\BaseDataStream;
+use frictionlessdata\datapackage\Validators\ResourceValidationError;
 use frictionlessdata\datapackage\Validators\ResourceValidator;
 use frictionlessdata\datapackage\Exceptions\ResourceValidationFailedException;
 use frictionlessdata\datapackage\Utils;
@@ -18,7 +19,7 @@ abstract class BaseResource implements \Iterator
     {
         $this->basePath = $basePath;
         $this->descriptor = $descriptor;
-        $validationErrors = ResourceValidator::validate($this->descriptor());
+        $validationErrors = $this->validateResource();
         if (count($validationErrors) > 0) {
             throw new ResourceValidationFailedException($validationErrors);
         }
@@ -47,27 +48,45 @@ abstract class BaseResource implements \Iterator
     public function next() { $this->currentDataPosition++; }
     public function valid() { return isset($this->descriptor()->data[$this->currentDataPosition]); }
 
-    protected $descriptor;
-    protected $basePath;
-    protected $currentDataPosition = 0;
+    public static function validateDataSource($dataSource, $basePath=null)
+    {
+        $errors = [];
+        $dataSource = static::normalizeDataSource($dataSource, $basePath);
+        if (!Utils::isHttpSource($dataSource) && !file_exists($dataSource)) {
+            $errors[] = new ResourceValidationError(
+                ResourceValidationError::SCHEMA_VIOLATION,
+                "data source file does not exist or is not readable: {$dataSource}"
+            );
+        }
+        return $errors;
+    }
 
     /**
      * allows extending classes to add custom sources
      * used by unit tests to add a mock http source
-     *
      * @param string $dataSource
+     * @param string $basePath
      * @return string
      */
-    protected function normalizeDataSource($dataSource)
+    public static function normalizeDataSource($dataSource, $basePath=null)
     {
-        if (!empty($this->basePath) && !Utils::isHttpSource($dataSource)) {
+        if (!empty($basePath) && !Utils::isHttpSource($dataSource)) {
             // TODO: support JSON pointers
-            $absPath = $this->basePath.DIRECTORY_SEPARATOR.$dataSource;
+            $absPath = $basePath.DIRECTORY_SEPARATOR.$dataSource;
             if (file_exists($absPath)) {
                 $dataSource = $absPath;
             }
         }
         return $dataSource;
+    }
+
+    protected $descriptor;
+    protected $basePath;
+    protected $currentDataPosition = 0;
+
+    protected function validateResource()
+    {
+        return ResourceValidator::validate($this->descriptor(), $this->basePath);
     }
 
     /**

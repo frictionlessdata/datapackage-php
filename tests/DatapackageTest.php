@@ -6,6 +6,9 @@ use PHPUnit\Framework\TestCase;
 use frictionlessdata\datapackage\Datapackages\DefaultDatapackage;
 use frictionlessdata\datapackage\Exceptions;
 use frictionlessdata\datapackage\Factory;
+use frictionlessdata\tableschema\InferSchema;
+use frictionlessdata\tableschema\Table;
+use frictionlessdata\tableschema\DataSources\CsvDataSource;
 
 class DatapackageTest extends TestCase
 {
@@ -37,6 +40,7 @@ class DatapackageTest extends TestCase
         $descriptorArray = $this->simpleDescriptorArray;
         $this->assertDatapackageException(
             "frictionlessdata\\datapackage\\Exceptions\\DatapackageInvalidSourceException",
+            'Invalid source: {"name":"datapackage-name","resources":[{"name":"resource-name","data":["foo.txt"]}]}',
             function() use ($descriptorArray) { Factory::datapackage($descriptorArray); }
         );
     }
@@ -45,7 +49,8 @@ class DatapackageTest extends TestCase
     {
         $descriptor = $this->simpleDescriptor;
         $this->assertDatapackageException(
-            "frictionlessdata\\datapackage\\Exceptions\\DataStreamOpenException",
+            "frictionlessdata\\datapackage\\Exceptions\\DatapackageValidationFailedException",
+            'DefaultDatapackage validation failed: data source file does not exist or is not readable: foo.txt',
             function() use ($descriptor) { Factory::datapackage($descriptor); }
         );
     }
@@ -62,7 +67,8 @@ class DatapackageTest extends TestCase
     {
         $source = json_encode($this->simpleDescriptor);
         $this->assertDatapackageException(
-            "frictionlessdata\\datapackage\\Exceptions\\DataStreamOpenException",
+            "frictionlessdata\\datapackage\\Exceptions\\DatapackageValidationFailedException",
+            'DefaultDatapackage validation failed: data source file does not exist or is not readable: foo.txt',
             function() use ($source) { Factory::datapackage($source); }
         );
     }
@@ -80,6 +86,7 @@ class DatapackageTest extends TestCase
     {
         $this->assertDatapackageException(
             "frictionlessdata\\datapackage\\Exceptions\\DatapackageInvalidSourceException",
+            'Failed to load source: "-invalid-": '.$this->getFileGetContentsErrorMessage("-invalid-"),
             function() { Factory::datapackage("-invalid-"); }
         );
     }
@@ -185,7 +192,7 @@ class DatapackageTest extends TestCase
     public function testTabularResourceDescriptorValidation()
     {
         $this->assertDatapackageValidation(
-            "resource 1 failed validation: [schema.fields] The property fields is required",
+            "[schema.fields] The property fields is required",
             "tests/fixtures/invalid_tabular_resource.json"
         );
     }
@@ -193,7 +200,7 @@ class DatapackageTest extends TestCase
     public function testDefaultResourceInvalidData()
     {
         $this->assertDatapackageValidation(
-            'resource 1, data stream 2: Failed to open data source "--invalid--": "'.$this->getFopenErrorMessage("--invalid--").'"',
+            'data source file does not exist or is not readable: --invalid--',
             "tests/fixtures/default_resource_invalid_data.json"
         );
     }
@@ -201,9 +208,102 @@ class DatapackageTest extends TestCase
     public function testTabularResourceInvalidData()
     {
         $this->assertDatapackageValidation(
-            'resource 1, data stream 2: row 2.email(bad.email): invalid value for email format',
+            'resource 1, data stream 2: email: value is not a valid email (bad.email)',
             "tests/fixtures/tabular_resource_invalid_data.json"
         );
+    }
+
+    public function testDatapackageResources()
+    {
+        // prepare the desriptor, schema and datapackage
+        $dataSource = new CsvDataSource("tests/fixtures/simple_tabular_data.csv");
+        $schema = new InferSchema();
+        Table::validate($dataSource, $schema, 1);
+        $descriptor = (object)[
+            "name" => "datapackage-name",
+            "resources" => [
+                (object)[
+                    "name" => "resource-name", "data" => ["foo.txt", "baz.txt"]
+                ],
+                (object)[
+                    "name" => "another-resource-name",
+                    "profile" => "tabular-data-resource",
+                    "data" => ["simple_tabular_data.csv"],
+                    "schema" => $schema->fullDescriptor()
+                ],
+            ]
+        ];
+        $basePath = "tests/fixtures";
+        $datapackage = new DefaultDatapackage($descriptor, $basePath);
+        // test accessing resources
+        $resources = $datapackage->resources();
+        $this->assertTrue(is_a(
+            $resources["resource-name"],
+            "frictionlessdata\\datapackage\\Resources\\DefaultResource"
+        ));
+        $this->assertTrue(is_a(
+            $resources["another-resource-name"],
+            "frictionlessdata\\datapackage\\Resources\\TabularResource"
+        ));
+        // accessing resource by name
+        $this->assertTrue(is_a(
+            $datapackage->resource("another-resource-name"),
+            "frictionlessdata\\datapackage\\Resources\\TabularResource"
+        ));
+        $this->assertTrue(is_a(
+            $datapackage->resource("resource-name"),
+            "frictionlessdata\\datapackage\\Resources\\DefaultResource"
+        ));
+        // delete resource
+        $this->assertCount(2, $datapackage->resources());
+        $datapackage->deleteResource("resource-name");
+        $this->assertCount(1, $datapackage->resources());
+        $i = 0;
+        foreach ($datapackage as $resource) { $i++; };
+        $this->assertEquals(1, $i);
+        $this->assertEquals((object)[
+            "name" => "datapackage-name",
+            "resources" => [
+                (object)[
+                    "name" => "another-resource-name",
+                    "profile" => "tabular-data-resource",
+                    "data" => ["simple_tabular_data.csv"],
+                    "schema" => $schema->fullDescriptor()
+                ],
+            ]
+        ], $datapackage->descriptor());
+
+        // add a resource
+        $this->assertCount(1, $datapackage->resources());
+        $datapackage->addResource(Factory::resource((object)[
+            "name" => "new-resource", "data" => ["tests/fixtures/foo.txt", "tests/fixtures/baz.txt"]
+        ]));
+        $this->assertCount(2, $datapackage->resources());
+        $this->assertEquals((object)[
+            "name" => "datapackage-name",
+            "resources" => [
+                (object)[
+                    "name" => "another-resource-name",
+                    "profile" => "tabular-data-resource",
+                    "data" => ["simple_tabular_data.csv"],
+                    "schema" => $schema->fullDescriptor()
+                ],
+                (object)[
+                    "name" => "new-resource", "data" => ["tests/fixtures/foo.txt", "tests/fixtures/baz.txt"]
+                ]
+            ]
+        ], $datapackage->descriptor());
+        $rows = [];
+        foreach ($datapackage as $resource) {
+            if ($resource->name() == "new-resource") {
+                foreach ($resource as $dataStream) {
+                    foreach ($dataStream as $row) {
+                        $rows[] = $row;
+                    }
+                }
+            }
+        }
+        $this->assertEquals(['foo', "בזבזבז\n", 'זבזבזב'], $rows);
     }
 
     protected function assertDatapackageValidation($expectedMessages, $source, $basePath=null)
@@ -256,12 +356,19 @@ class DatapackageTest extends TestCase
         $this->assertDatapackageData($expectedData, $datapackage);
     }
 
-    protected function assertDatapackageException($expectedExceptionClass, $datapackageCallback)
+    protected function assertDatapackageException($expectedExceptionClass, $expectedMessage, $datapackageCallback)
     {
         try {
             $datapackageCallback();
+            $this->fail("expected an exception");
         } catch (\Exception $e) {
-            $this->assertEquals($expectedExceptionClass, get_class($e), $e->getMessage());
+            $actualExceptionClass = get_class($e);
+            $this->assertEquals(
+                $expectedExceptionClass,
+                $actualExceptionClass,
+                "unexpected exception: {$e->getMessage()}\n{$e->getTraceAsString()}"
+            );
+            $this->assertEquals($expectedMessage, $e->getMessage());
         }
     }
 
@@ -269,6 +376,16 @@ class DatapackageTest extends TestCase
     {
         try {
             fopen($in, "r");
+        } catch (\Exception $e) {
+            return $e->getMessage();
+        }
+        throw new \Exception();
+    }
+
+    protected function getFileGetContentsErrorMessage($in)
+    {
+        try {
+            file_get_contents($in);
         } catch (\Exception $e) {
             return $e->getMessage();
         }

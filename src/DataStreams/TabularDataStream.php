@@ -6,7 +6,8 @@ use frictionlessdata\datapackage\Exceptions\DataStreamOpenException;
 use frictionlessdata\tableschema\DataSources\CsvDataSource;
 use frictionlessdata\tableschema\Schema;
 use frictionlessdata\tableschema\Table;
-use frictionlessdata\tableschema\Exceptions\TableRowValidationException;
+use frictionlessdata\tableschema\Exceptions\FieldValidationException;
+use frictionlessdata\tableschema\Exceptions\DataSourceException;
 
 
 class TabularDataStream extends BaseDataStream
@@ -39,7 +40,9 @@ class TabularDataStream extends BaseDataStream
     public function current() {
         try {
             return $this->table->current();
-        } catch (TableRowValidationException $e) {
+        } catch (DataSourceException $e) {
+            throw new DataStreamValidationException($e->getMessage());
+        } catch (FieldValidationException $e) {
             throw new DataStreamValidationException($e->getMessage());
         }
     }

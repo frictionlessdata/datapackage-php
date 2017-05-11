@@ -26,7 +26,7 @@ use frictionlessdata\datapackage;
 // get a datapackage object
 $datapackage = datapackage\Factory::datapackage("tests/fixtures/multi_data_datapackage.json");
 
-// iterate over the data
+// iterate over the data - it will raise exceptions in case of any problems
 foreach ($datapackage as $resource) {
     print("-- ".$resource->name()." --");
     $i = 0;
@@ -45,6 +45,23 @@ if (count($validationErrors) == 0) {
 } else {
     print(datapackage\Validators\DatapackageValidationError::getErrorMessages($validationErrors));
 }
+
+// get and manipulate resources
+$resources = $datapackage->resources();
+$resources["resource-name"]->name() == "resource-name"
+$resources["another-resource-name"] //  BaseResource based object (e.g. DefaultResource / TabularResource)
+
+// get a single resource by name
+$datapackage->resource("resource-name")
+
+// delete a resource by name - will raise exception in case of validation failure for the new descriptor
+$datapackage->deleteResource("resource-name");
+
+// add a resource - will raise exception in case of validation error for the new descriptor
+$resource = Factory::resource((object)[
+    "name" => "new-resource", "data" => ["tests/fixtures/foo.txt", "tests/fixtures/baz.txt"]
+])
+$datapackage->addResource($resource);
 ```
 
 

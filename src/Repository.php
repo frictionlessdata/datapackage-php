@@ -1,17 +1,24 @@
 <?php namespace frictionlessdata\datapackage;
+use frictionlessdata\datapackage\Resources\BaseResource;
 
 /**
  * repository of known profiles and the corresponding classes and validation requirements
  */
 class Repository
 {
+    /**
+     * @param $descriptor
+     * @return BaseResource::class
+     */
     public static function getResourceClass($descriptor)
     {
         if (static::getResourceValidationProfile($descriptor) == "tabular-data-resource") {
-            return "frictionlessdata\\datapackage\\Resources\\TabularResource";
+            $resourceClass = "frictionlessdata\\datapackage\\Resources\\TabularResource";
         } else {
-            return "frictionlessdata\\datapackage\\Resources\\DefaultResource";
+            $resourceClass = "frictionlessdata\\datapackage\\Resources\\DefaultResource";
         }
+        /** @var BaseResource $resourceClass */
+        return $resourceClass;
     }
 
     public static function getResourceValidationProfile($descriptor)

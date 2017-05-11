@@ -17,7 +17,13 @@ abstract class BaseDatapackage implements \Iterator
     {
         $this->descriptor = $descriptor;
         $this->basePath = $basePath;
-        $validationErrors = DatapackageValidator::validate($this->descriptor());
+        $this->revalidate();
+    }
+
+    public function revalidate()
+    {
+        $this->rewind();
+        $validationErrors = $this->datapackageValidate();
         if (count($validationErrors) > 0) {
             throw new DatapackageValidationFailedException($validationErrors);
         }
@@ -30,6 +36,43 @@ abstract class BaseDatapackage implements \Iterator
     public function descriptor()
     {
         return $this->descriptor;
+    }
+
+    public function resources()
+    {
+        $resources = [];
+        foreach ($this as $resource) {
+            $resources[$resource->name()] = $resource;
+        }
+        return $resources;
+    }
+
+    public function resource($name)
+    {
+        return $this->resources()[$name];
+    }
+
+    public function deleteResource($name)
+    {
+        $resourceDescriptors = [];
+        foreach ($this->descriptor->resources as $resourceDescriptor) {
+            if ($resourceDescriptor->name != $name) {
+                $resourceDescriptors[] = $resourceDescriptor;
+            }
+        }
+        $this->descriptor->resources = $resourceDescriptors;
+        $this->revalidate();
+    }
+
+    public function addResource($resource)
+    {
+        $resourceDescriptors = [];
+        foreach ($this->descriptor->resources as $resourceDescriptor) {
+            $resourceDescriptors[] = $resourceDescriptor;
+        }
+        $resourceDescriptors[] = $resource->descriptor();
+        $this->descriptor->resources = $resourceDescriptors;
+        $this->revalidate();
     }
 
     // standard iterator functions - to iterate over the resources
@@ -52,5 +95,10 @@ abstract class BaseDatapackage implements \Iterator
     protected function initResource($descriptor)
     {
         return Factory::resource($descriptor, $this->basePath);
+    }
+
+    protected function datapackageValidate()
+    {
+        return DatapackageValidator::validate($this->descriptor(), $this->basePath);
     }
 }
