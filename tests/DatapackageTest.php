@@ -6,6 +6,9 @@ use PHPUnit\Framework\TestCase;
 use frictionlessdata\datapackage\Datapackages\DefaultDatapackage;
 use frictionlessdata\datapackage\Exceptions;
 use frictionlessdata\datapackage\Factory;
+use frictionlessdata\tableschema\InferSchema;
+use frictionlessdata\tableschema\Table;
+use frictionlessdata\tableschema\DataSources\CsvDataSource;
 
 class DatapackageTest extends TestCase
 {
@@ -208,6 +211,99 @@ class DatapackageTest extends TestCase
             'resource 1, data stream 2: email: value is not a valid email (bad.email)',
             "tests/fixtures/tabular_resource_invalid_data.json"
         );
+    }
+
+    public function testDatapackageResources()
+    {
+        // prepare the desriptor, schema and datapackage
+        $dataSource = new CsvDataSource("tests/fixtures/simple_tabular_data.csv");
+        $schema = new InferSchema();
+        Table::validate($dataSource, $schema, 1);
+        $descriptor = (object)[
+            "name" => "datapackage-name",
+            "resources" => [
+                (object)[
+                    "name" => "resource-name", "data" => ["foo.txt", "baz.txt"]
+                ],
+                (object)[
+                    "name" => "another-resource-name",
+                    "profile" => "tabular-data-resource",
+                    "data" => ["simple_tabular_data.csv"],
+                    "schema" => $schema->fullDescriptor()
+                ],
+            ]
+        ];
+        $basePath = "tests/fixtures";
+        $datapackage = new DefaultDatapackage($descriptor, $basePath);
+        // test accessing resources
+        $resources = $datapackage->resources();
+        $this->assertTrue(is_a(
+            $resources["resource-name"],
+            "frictionlessdata\\datapackage\\Resources\\DefaultResource"
+        ));
+        $this->assertTrue(is_a(
+            $resources["another-resource-name"],
+            "frictionlessdata\\datapackage\\Resources\\TabularResource"
+        ));
+        // accessing resource by name
+        $this->assertTrue(is_a(
+            $datapackage->resource("another-resource-name"),
+            "frictionlessdata\\datapackage\\Resources\\TabularResource"
+        ));
+        $this->assertTrue(is_a(
+            $datapackage->resource("resource-name"),
+            "frictionlessdata\\datapackage\\Resources\\DefaultResource"
+        ));
+        // delete resource
+        $this->assertCount(2, $datapackage->resources());
+        $datapackage->deleteResource("resource-name");
+        $this->assertCount(1, $datapackage->resources());
+        $i = 0;
+        foreach ($datapackage as $resource) { $i++; };
+        $this->assertEquals(1, $i);
+        $this->assertEquals((object)[
+            "name" => "datapackage-name",
+            "resources" => [
+                (object)[
+                    "name" => "another-resource-name",
+                    "profile" => "tabular-data-resource",
+                    "data" => ["simple_tabular_data.csv"],
+                    "schema" => $schema->fullDescriptor()
+                ],
+            ]
+        ], $datapackage->descriptor());
+
+        // add a resource
+        $this->assertCount(1, $datapackage->resources());
+        $datapackage->addResource(Factory::resource((object)[
+            "name" => "new-resource", "data" => ["tests/fixtures/foo.txt", "tests/fixtures/baz.txt"]
+        ]));
+        $this->assertCount(2, $datapackage->resources());
+        $this->assertEquals((object)[
+            "name" => "datapackage-name",
+            "resources" => [
+                (object)[
+                    "name" => "another-resource-name",
+                    "profile" => "tabular-data-resource",
+                    "data" => ["simple_tabular_data.csv"],
+                    "schema" => $schema->fullDescriptor()
+                ],
+                (object)[
+                    "name" => "new-resource", "data" => ["tests/fixtures/foo.txt", "tests/fixtures/baz.txt"]
+                ]
+            ]
+        ], $datapackage->descriptor());
+        $rows = [];
+        foreach ($datapackage as $resource) {
+            if ($resource->name() == "new-resource") {
+                foreach ($resource as $dataStream) {
+                    foreach ($dataStream as $row) {
+                        $rows[] = $row;
+                    }
+                }
+            }
+        }
+        $this->assertEquals(['foo', "בזבזבז\n", 'זבזבזב'], $rows);
     }
 
     protected function assertDatapackageValidation($expectedMessages, $source, $basePath=null)
