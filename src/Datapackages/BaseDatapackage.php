@@ -2,6 +2,7 @@
 namespace frictionlessdata\datapackage\Datapackages;
 
 use frictionlessdata\datapackage\Factory;
+use frictionlessdata\datapackage\Registry;
 use frictionlessdata\datapackage\Validators\DatapackageValidator;
 use frictionlessdata\datapackage\Exceptions\DatapackageValidationFailedException;
 
@@ -27,6 +28,11 @@ abstract class BaseDatapackage implements \Iterator
         if (count($validationErrors) > 0) {
             throw new DatapackageValidationFailedException($validationErrors);
         }
+    }
+
+    public static function handlesDescriptor($descriptor)
+    {
+        return static::handlesProfile(Registry::getDatapackageValidationProfile($descriptor));
     }
 
     /**
@@ -100,5 +106,10 @@ abstract class BaseDatapackage implements \Iterator
     protected function datapackageValidate()
     {
         return DatapackageValidator::validate($this->descriptor(), $this->basePath);
+    }
+
+    protected static function handlesProfile($profile)
+    {
+        return false;
     }
 }

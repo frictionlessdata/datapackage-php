@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 use frictionlessdata\datapackage\Registry;
 use frictionlessdata\datapackage\Factory;
 
+
 class RegistryTest extends TestCase
 {
 
@@ -145,7 +146,7 @@ class RegistryTest extends TestCase
     {
         $descriptor = (object)[
             "profile" => "http://json-schema.org/schema",
-            "resources" => [] // this is allows for json-schema.org/schema - but for datapackage it has minimum of 1
+            "resources" => [] // this is allowed for json-schema.org/schema - but for datapackage it has minimum of 1
         ];
         try {
             Factory::datapackage($descriptor);
@@ -156,6 +157,40 @@ class RegistryTest extends TestCase
                 $e->getMessage()
             );
         }
+    }
+
+    public function testRegisteredSchema()
+    {
+        $descriptor = (object)[
+            "name" => "custom-datapackage",
+            "profile" => "test-custom-profile",
+            "resources" => [
+                (object)[
+                    "name" => "custom-resource",
+                    "profile" => "test-custom-resource-profile",
+                    "data" => ["foo.txt"],
+                    "custom" => ["1", "2", "3"]
+                ]
+            ]
+        ];
+        Registry::registerSchema(
+            "test-custom-profile",
+            "tests/fixtures/test-custom-profile.schema.json"
+        );
+        Registry::registerSchema(
+            "test-custom-resource-profile",
+            "tests/fixtures/test-custom-resource-profile.schema.json"
+        );
+        $datapackage = Factory::datapackage($descriptor, "tests/fixtures");
+        $this->assertInstanceOf(
+            "frictionlessdata\\datapackage\\Datapackages\\CustomDatapackage",
+            $datapackage
+        );
+        $this->assertInstanceOf(
+            "frictionlessdata\\datapackage\\Resources\\CustomResource",
+            $datapackage->resource("custom-resource")
+        );
+        Registry::clearRegisteredSchemas();
     }
 
     protected function assertDatapackageClassProfile($expectedClass, $expectedProfile, $descriptor)

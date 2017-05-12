@@ -1,8 +1,7 @@
 <?php namespace frictionlessdata\datapackage;
+
 use frictionlessdata\datapackage\Datapackages\BaseDatapackage;
 use frictionlessdata\datapackage\Resources\BaseResource;
-use frictionlessdata\datapackage\Resources\DefaultResource;
-use JsonSchema\Validator;
 
 /**
  * datapackage and resource have different classes depending on the corresponding profile
@@ -131,18 +130,53 @@ class Factory
         }
     }
 
+    public static function registerDatapackageClass($datapackageClass)
+    {
+        static::$registeredDatapackageClasses[] = $datapackageClass;
+    }
+
+    public static function clearRegisteredDatapackageClasses()
+    {
+        static::$registeredDatapackageClasses = [];
+    }
+
+    /**
+     * @param $descriptor
+     * @return BaseDatapackage::class
+     */
     public static function getDatapackageClass($descriptor)
     {
-        $profile = Registry::getDatapackageValidationProfile($descriptor);
-        if ($profile == "tabular-data-package") {
-            $datapackageClass = "frictionlessdata\\datapackage\\Datapackages\TabularDatapackage";
-        } elseif ($profile == "data-package") {
-            $datapackageClass = "frictionlessdata\\datapackage\\Datapackages\DefaultDatapackage";
-        } else {
-            $datapackageClass = "frictionlessdata\\datapackage\\Datapackages\CustomDatapackage";
+        $datapackageClasses = array_merge(
+            // custom classes
+            static::$registeredDatapackageClasses,
+            // core classes
+            [
+                "frictionlessdata\\datapackage\\Datapackages\TabularDatapackage",
+                "frictionlessdata\\datapackage\\Datapackages\DefaultDatapackage",
+            ]
+        );
+        $res = null;
+        foreach ($datapackageClasses as $datapackageClass) {
+            if (call_user_func([$datapackageClass, "handlesDescriptor"], $descriptor)) {
+                $res = $datapackageClass;
+                break;
+            }
         }
-        /** @var BaseDatapackage $datapackageClass */
-        return $datapackageClass;
+        if (!$res) {
+            // not matched by any known classes
+            $res = "frictionlessdata\\datapackage\\Datapackages\CustomDatapackage";
+        }
+        return $res;
+    }
+
+    public static function registerResourceClass($resourceClass)
+    {
+        static::$registeredResourceClasses[] = $resourceClass;
+    }
+
+    public static function clearRegisteredResourceClasses()
+    {
+        static::$registeredResourceClasses = [];
     }
 
     /**
@@ -151,17 +185,32 @@ class Factory
      */
     public static function getResourceClass($descriptor)
     {
-        $profile = Registry::getResourceValidationProfile($descriptor);
-        if ($profile == "tabular-data-resource") {
-            $resourceClass = "frictionlessdata\\datapackage\\Resources\TabularResource";
-        } elseif ($profile == "data-resource") {
-            $resourceClass = "frictionlessdata\\datapackage\\Resources\DefaultResource";
-        } else {
-            $resourceClass = "frictionlessdata\\datapackage\\Resources\CustomResource";
+        $resourceClasses = array_merge(
+            // custom classes
+            static::$registeredResourceClasses,
+            // core classes
+            [
+                "frictionlessdata\\datapackage\\Resources\\TabularResource",
+                "frictionlessdata\\datapackage\\Resources\\DefaultResource"
+            ]
+        );
+        $res = null;
+        foreach ($resourceClasses as $resourceClass) {
+            if (call_user_func([$resourceClass, "handlesDescriptor"], $descriptor)) {
+                $res = $resourceClass;
+                break;
+            }
         }
-        /** @var BaseResource $resourceClass */
-        return $resourceClass;
+        if (!$res) {
+            // not matched by any known classes
+            $res = "frictionlessdata\\datapackage\\Resources\\CustomResource";
+        }
+        return $res;
     }
+
+    protected static $registeredDatapackageClasses = [];
+    protected static $registeredResourceClasses = [];
+
     /**
      * allows extending classes to add custom sources
      * used by unit tests to add a mock http source

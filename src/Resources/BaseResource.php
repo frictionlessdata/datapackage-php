@@ -2,6 +2,7 @@
 namespace frictionlessdata\datapackage\Resources;
 
 use frictionlessdata\datapackage\DataStreams\BaseDataStream;
+use frictionlessdata\datapackage\Registry;
 use frictionlessdata\datapackage\Validators\ResourceValidationError;
 use frictionlessdata\datapackage\Validators\ResourceValidator;
 use frictionlessdata\datapackage\Exceptions\ResourceValidationFailedException;
@@ -23,6 +24,11 @@ abstract class BaseResource implements \Iterator
         if (count($validationErrors) > 0) {
             throw new ResourceValidationFailedException($validationErrors);
         }
+    }
+
+    public static function handlesDescriptor($descriptor)
+    {
+        return static::handlesProfile(Registry::getResourceValidationProfile($descriptor));
     }
 
     /**
@@ -94,4 +100,9 @@ abstract class BaseResource implements \Iterator
      * @return BaseDataStream
      */
     abstract protected function getDataStream($dataSource);
+
+    protected static function handlesProfile($profile)
+    {
+        return false;
+    }
 }

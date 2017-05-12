@@ -45,7 +45,7 @@ abstract class BaseValidator extends SchemaValidator
         if (file_exists($filename)) {
             return "file://".$filename;
         } else {
-            throw new \Exception("failed to find schema file: {$filename} for descriptor ".json_encode($this->descriptor));
+            throw new \Exception("failed to find schema file: '{$filename}' for descriptor ".json_encode($this->descriptor));
         }
     }
 

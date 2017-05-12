@@ -1,5 +1,4 @@
 <?php namespace frictionlessdata\datapackage;
-use frictionlessdata\datapackage\Resources\BaseResource;
 
 /**
  * repository of known profiles and the corresponding schemas
@@ -40,10 +39,24 @@ class Registry
     {
         foreach (static::getAllSchemas() as $schema) {
             if ($schema->id != "registry" && $schema->id == $profile) {
-                return realpath(dirname(__FILE__))."/Validators/schemas/".$schema->schema_path;
+                if (isset($schema->schema_path)) {
+                    return realpath(dirname(__FILE__))."/Validators/schemas/".$schema->schema_path;
+                } else {
+                    return $schema->schema_filename;
+                }
             }
         }
         return false;
+    }
+
+    public static function registerSchema($profile, $filename)
+    {
+        static::$registeredSchemas[$profile] = ["filename" => $filename];
+    }
+
+    public static function clearRegisteredSchemas()
+    {
+        static::$registeredSchemas = [];
     }
 
     /**
@@ -82,6 +95,15 @@ class Registry
                 }
             }
         }
+        // custom registered schemas
+        foreach (static::$registeredSchemas as $profile => $schema) {
+            $registry[] = (object)[
+                "id" => $profile,
+                "schema_filename" => $schema["filename"]
+            ];
+        }
         return $registry;
     }
+
+    protected static $registeredSchemas = [];
 }
