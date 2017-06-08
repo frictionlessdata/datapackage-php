@@ -13,4 +13,9 @@ class DefaultResource extends BaseResource
     {
         return new DefaultDataStream($this->normalizeDataSource($dataSource, $this->basePath));
     }
+
+    protected static function handlesProfile($profile)
+    {
+        return ($profile == "data-resource");
+    }
 }

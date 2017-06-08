@@ -1,6 +1,8 @@
 <?php
 namespace frictionlessdata\datapackage\Validators;
 
+use frictionlessdata\datapackage\Registry;
+use frictionlessdata\datapackage\Utils;
 use frictionlessdata\tableschema\SchemaValidator;
 use frictionlessdata\tableschema\SchemaValidationError;
 
@@ -37,14 +39,41 @@ abstract class BaseValidator extends SchemaValidator
         return $this->descriptor->profile;
     }
 
+    protected function convertValidationSchemaFilenameToUrl($filename)
+    {
+        $filename = realpath($filename);
+        if (file_exists($filename)) {
+            return "file://".$filename;
+        } else {
+            throw new \Exception("failed to find schema file: '{$filename}' for descriptor ".json_encode($this->descriptor));
+        }
+    }
+
+    protected function getJsonSchemaFileFromRegistry($profile)
+    {
+        return false;
+    }
+
     /**
      * get the url which the schema for validation can be fetched from
      * @return string
      */
     protected function getValidationSchemaUrl()
     {
-        // TODO: support loading from url
-        return 'file://' . realpath(dirname(__FILE__))."/schemas/".$this->getValidationProfile().".json";
+        $profile = $this->getValidationProfile();
+        if ($filename = $this->getJsonSchemaFileFromRegistry($profile)) {
+            // known profile id in the registry
+            return $this->convertValidationSchemaFilenameToUrl($filename);
+        } elseif (Utils::isHttpSource($profile)) {
+            // url
+            return $profile;
+        } elseif (file_exists($filename = $this->basePath.DIRECTORY_SEPARATOR.$profile)) {
+            // relative path - prefixed with basePath
+            return $this->convertValidationSchemaFilenameToUrl($filename);
+        } else {
+            // absolute path (or relative to current working directory)
+            return $this->convertValidationSchemaFilenameToUrl($profile);
+        }
     }
 
     /**
@@ -80,14 +109,14 @@ abstract class BaseValidator extends SchemaValidator
      */
     protected function validateSchema()
     {
+        $this->validateSchemaUrl($this->getValidationSchemaUrl());
+    }
+
+    protected function validateSchemaUrl($url)
+    {
         $validator = new \JsonSchema\Validator();
         $descriptor = $this->getDescriptorForValidation();
-        $validator->validate(
-            $descriptor,
-            (object)[
-                "\$ref" => $this->getValidationSchemaUrl()
-            ]
-        );
+        $validator->validate($descriptor, (object)["\$ref" => $url]);
         if (!$validator->isValid()) {
             foreach ($validator->getErrors() as $error) {
                 $this->addError(

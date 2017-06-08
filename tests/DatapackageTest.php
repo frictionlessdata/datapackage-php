@@ -45,17 +45,17 @@ class DatapackageTest extends TestCase
         );
     }
 
-    public function testNativePHPObjectWithoutBasePathShouldFail()
+    public function testPHPObjectWithRelativeFilesButNoBasePathShouldFail()
     {
         $descriptor = $this->simpleDescriptor;
         $this->assertDatapackageException(
             "frictionlessdata\\datapackage\\Exceptions\\DatapackageValidationFailedException",
-            'DefaultDatapackage validation failed: data source file does not exist or is not readable: foo.txt',
+            'Datapackage validation failed: data source file does not exist or is not readable: foo.txt',
             function() use ($descriptor) { Factory::datapackage($descriptor); }
         );
     }
 
-    public function testNativePHPObjectWithBasePath()
+    public function testNativePHPObject()
     {
         $this->assertDatapackage(
             $this->simpleDescriptor, $this->simpleDescriptorExpectedData,
@@ -63,12 +63,12 @@ class DatapackageTest extends TestCase
         );
     }
 
-    public function testJsonStringWithoutBasePathShouldFail()
+    public function testJsonStringWithRelativeFilesButNoBasePathShouldFail()
     {
         $source = json_encode($this->simpleDescriptor);
         $this->assertDatapackageException(
             "frictionlessdata\\datapackage\\Exceptions\\DatapackageValidationFailedException",
-            'DefaultDatapackage validation failed: data source file does not exist or is not readable: foo.txt',
+            'Datapackage validation failed: data source file does not exist or is not readable: foo.txt',
             function() use ($source) { Factory::datapackage($source); }
         );
     }
@@ -186,7 +186,7 @@ class DatapackageTest extends TestCase
         } catch (Exceptions\DatapackageValidationFailedException $e) {
             $caughtException = $e;
         }
-        $this->assertEquals("DefaultDatapackage validation failed: [resources] The property resources is required", $caughtException->getMessage());
+        $this->assertEquals("Datapackage validation failed: [resources] The property resources is required", $caughtException->getMessage());
     }
 
     public function testTabularResourceDescriptorValidation()

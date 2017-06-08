@@ -17,6 +17,7 @@
         }
     },
     "scripts": {
-        "test": "phpunit --debug --coverage-clover coverage-clover.xml --bootstrap tests/autoload.php tests/"
+        "test": "phpunit --debug --coverage-clover coverage-clover.xml --bootstrap tests/autoload.php tests/",
+        "update_registry": "php update_registry.php"
     }
 }

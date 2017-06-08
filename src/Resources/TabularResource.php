@@ -25,4 +25,8 @@ class TabularResource extends DefaultResource
         return new TabularDataStream($this->normalizeDataSource($dataSource, $this->basePath), $this->schema());
     }
 
+    protected static function handlesProfile($profile)
+    {
+        return ($profile == "tabular-data-resource");
+    }
 }

@@ -62,6 +62,12 @@ $resource = Factory::resource((object)[
     "name" => "new-resource", "data" => ["tests/fixtures/foo.txt", "tests/fixtures/baz.txt"]
 ])
 $datapackage->addResource($resource);
+
+// register custom datapackage classes which can override / extend core classes
+Factory::registerDatapackageClass("my\\custom\\DatapackageClass");
+
+// register custom profiles and related schema (must conform to the default datapackage schema as well)
+Registry::registerSchema("my-custom-profile-id", "path/to/my-custom-profile.schema.json");
 ```
 
 

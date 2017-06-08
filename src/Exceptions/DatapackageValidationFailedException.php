@@ -11,6 +11,6 @@ class DatapackageValidationFailedException extends \Exception
     public function __construct($validationErrors)
     {
         $this->validationErrors = $validationErrors;
-        parent::__construct("DefaultDatapackage validation failed: ".DatapackageValidationError::getErrorMessages($validationErrors));
+        parent::__construct("Datapackage validation failed: ".DatapackageValidationError::getErrorMessages($validationErrors));
     }
 }

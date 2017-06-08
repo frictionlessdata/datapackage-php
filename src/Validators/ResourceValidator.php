@@ -1,14 +1,11 @@
 <?php namespace frictionlessdata\datapackage\Validators;
 
-use frictionlessdata\datapackage\Repository;
+use frictionlessdata\datapackage\Registry;
 use frictionlessdata\datapackage\Factory;
 
 /**
  * validate a resource descriptor
  * checks the profile attribute to determine which schema to validate with
- *
- * currently works by wrapping the resource descriptor inside a minimal valid datapackage descriptor
- * then validating the datapackage
  */
 class ResourceValidator extends BaseValidator
 {
@@ -19,26 +16,16 @@ class ResourceValidator extends BaseValidator
 
     protected function getValidationProfile()
     {
-        $profile = Repository::getResourceValidationProfile($this->descriptor);
-        if ($profile == "tabular-data-resource") {
-            $profile = "tabular-data-package";
-        } elseif ($profile == "data-resource") {
-            $profile = "data-package";
-        }
-        return $profile;
+        return Registry::getResourceValidationProfile($this->descriptor);
     }
 
     protected function getDescriptorForValidation()
     {
-        $descriptor = (object)[
-            "name" => "dummy-datapackage-name",
-            "resources" => [
-                $this->descriptor
-            ]
-        ];
-        if ($this->getValidationProfile() == "tabular-data-package") {
-            // profile is required for tabular data package
-            $descriptor->profile = "tabular-data-package";
+        // add base path to uri fields
+        // TODO: find a more elegant way to do it with support for registring custom url fields
+        $descriptor = clone $this->descriptor;
+        foreach ($descriptor->data as &$url) {
+            $url = "file://".$url;
         }
         return $descriptor;
     }
@@ -47,7 +34,7 @@ class ResourceValidator extends BaseValidator
     {
         $property = $error['property'];
         // silly hack to only show properties within the resource of the fake datapackage
-        $property = str_replace("resources[0].", "", $property);
+        // $property = str_replace("resources[0].", "", $property);
         return sprintf("[%s] %s", $property, $error['message']);
     }
 
@@ -63,6 +50,15 @@ class ResourceValidator extends BaseValidator
             foreach ($resourceClass::validateDataSource($dataSource, $this->basePath) as $error) {
                 $this->errors[] = $error;
             }
+        }
+    }
+
+    protected function getJsonSchemaFileFromRegistry($profile)
+    {
+        if ($filename = Registry::getJsonSchemaFile($profile)) {
+            return $filename;
+        } else {
+            return parent::getJsonSchemaFileFromRegistry($profile);
         }
     }
 }
