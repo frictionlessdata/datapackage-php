@@ -19,6 +19,22 @@ class DatapackageValidator extends BaseValidator
         return Registry::getDatapackageValidationProfile($this->descriptor);
     }
 
+    protected function getDescriptorForValidation()
+    {
+        // add base path to uri fields
+        // TODO: find a more elegant way to do it with support for registring custom url fields
+        $descriptor = clone $this->descriptor;
+        if (isset($descriptor->resources)) {
+            foreach ($descriptor->resources as &$resource) {
+                $resource = clone $resource;
+                foreach ($resource->data as &$url) {
+                    $url = "file://".$url;
+                }
+            }
+        }
+        return $descriptor;
+    }
+
     protected function validateSchema()
     {
         parent::validateSchema();

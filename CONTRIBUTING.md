@@ -56,3 +56,9 @@ At the moment, the integration with frictionlessdata repo is not working, you ca
 * Login with GitHub which has permissions
 * click "Update"
 * all releases from GitHub appear as releases on Packagist
+
+## updating frictionlessdata schemas
+
+The json schemas for the frictionlessdata specs are stored locally as part of the package.
+
+They might change from time to time, to donwnload the latest specs run `composer update_registry`
