@@ -45,7 +45,7 @@ class DatapackageTest extends TestCase
         );
     }
 
-    public function testNativePHPObjectWithoutBasePathShouldFail()
+    public function testPHPObjectWithRelativeFilesButNoBasePathShouldFail()
     {
         $descriptor = $this->simpleDescriptor;
         $this->assertDatapackageException(
@@ -55,7 +55,7 @@ class DatapackageTest extends TestCase
         );
     }
 
-    public function testNativePHPObjectWithBasePath()
+    public function testNativePHPObject()
     {
         $this->assertDatapackage(
             $this->simpleDescriptor, $this->simpleDescriptorExpectedData,
@@ -63,7 +63,7 @@ class DatapackageTest extends TestCase
         );
     }
 
-    public function testJsonStringWithoutBasePathShouldFail()
+    public function testJsonStringWithRelativeFilesButNoBasePathShouldFail()
     {
         $source = json_encode($this->simpleDescriptor);
         $this->assertDatapackageException(
