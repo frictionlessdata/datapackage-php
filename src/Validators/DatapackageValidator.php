@@ -21,14 +21,20 @@ class DatapackageValidator extends BaseValidator
 
     protected function getDescriptorForValidation()
     {
-        // add base path to uri fields
+        // add base path to uri fields - it runs before validations, so need to validate the attributes we need
         // TODO: find a more elegant way to do it with support for registring custom url fields
         $descriptor = clone $this->descriptor;
-        if (isset($descriptor->resources)) {
+        if (isset($descriptor->resources) && is_array($descriptor->resources)) {
             foreach ($descriptor->resources as &$resource) {
-                $resource = clone $resource;
-                foreach ($resource->data as &$url) {
-                    $url = "file://".$url;
+                if (is_object($resource)) {
+                    $resource = clone $resource;
+                    if (isset($resource->data) && is_array($resource->data)) {
+                        foreach ($resource->data as &$url) {
+                            if (is_string($url)) {
+                                $url = "file://".$url;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -67,7 +73,7 @@ class DatapackageValidator extends BaseValidator
         if ($filename = Registry::getJsonSchemaFile($profile)) {
             return $filename;
         } else {
-            return parent::getJsonSchemaFileFromRegistry($profile);
+            return Registry::getJsonSchemaFile("data-package");
         }
     }
 }

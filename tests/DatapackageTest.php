@@ -306,6 +306,32 @@ class DatapackageTest extends TestCase
         $this->assertEquals(['foo', "בזבזבז\n", 'זבזבזב'], $rows);
     }
 
+    public function testFiscalDatapackage()
+    {
+        $dp = Factory::datapackage("tests/fixtures/fiscal-datapackage/datapackage.json");
+        $resources_data = [];
+        foreach ($dp as $resource) {
+            $resources_data[$resource->name()] = [];
+            foreach ($resource as $dataStream) {
+                foreach ($dataStream as $row) {
+                    $resources_data[$resource->name()][] = trim($row);
+                }
+            }
+        }
+        $this->assertEquals(array (
+                'budget' => [
+                    'pk,budget,budget_date,payee',
+                    '1,10000,01/01/2015,1',
+                    '2,20000,01/02/2015,1',
+                ],
+                'entities' => [
+                    'id,name,description',
+                    '1,Acme 1,They are the first acme company',
+                    '2,Acme 2,They are the sceond acme company'
+                ]
+        ), $resources_data);
+    }
+
     protected function assertDatapackageValidation($expectedMessages, $source, $basePath=null)
     {
         $validationErrors = Factory::validate($source, $basePath);

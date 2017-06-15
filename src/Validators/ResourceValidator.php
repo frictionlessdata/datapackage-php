@@ -58,7 +58,7 @@ class ResourceValidator extends BaseValidator
         if ($filename = Registry::getJsonSchemaFile($profile)) {
             return $filename;
         } else {
-            return parent::getJsonSchemaFileFromRegistry($profile);
+            return Registry::getJsonSchemaFile("data-resource");
         }
     }
 }
