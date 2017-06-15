@@ -6,7 +6,7 @@
     {
       "name": "budget",
       "title": "Budget",
-      "profile": "fiscal-data-resource",
+      "profile": "data-resource",
       "data": ["budget.csv"],
       "schema": {
         "fields": [
@@ -43,7 +43,7 @@
     {
       "name": "entities",
       "title": "Entities",
-      "profile": "fiscal-data-resource",
+      "profile": "data-resource",
       "data": ["entities.csv"],
       "schema": {
         "fields": [

@@ -73,7 +73,7 @@ class DatapackageValidator extends BaseValidator
         if ($filename = Registry::getJsonSchemaFile($profile)) {
             return $filename;
         } else {
-            return Registry::getJsonSchemaFile("data-package");
+            return parent::getJsonSchemaFileFromRegistry($profile);
         }
     }
 }
