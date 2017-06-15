@@ -90,6 +90,9 @@ $datapackage->resource("my-tabular-resource")->descriptor()->data[] = "/path/to/
 
 // re-validate the new descriptor
 $datapackage->revalidate();
+
+// save the datapackage descriptor to a file
+$datapackage->saveDescriptor("datapackage.json");
 ```
 
 

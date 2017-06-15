@@ -429,6 +429,23 @@ class DatapackageTest extends TestCase
             }
             $i++;
         }
+
+        // save the descriptor to json file
+        $filename = tempnam(sys_get_temp_dir(), "datapackage-php-tests-");
+        $datapackage->saveDescriptor($filename);
+        $this->assertEquals((object)[
+            "name" => "my-datapackage-name",
+            "resources" => [
+                (object)[
+                    "name" => "my-default-resource",
+                    "data" => $datapackage->resource("my-default-resource")->descriptor()->data
+                ],
+                (object)[
+                    "name" => "my-renamed-tabular-resource",
+                    "data" => $datapackage->resource("my-renamed-tabular-resource")->descriptor()->data
+                ]
+            ]
+        ], json_decode(file_get_contents($filename)));
     }
 
     protected function assertDatapackageValidation($expectedMessages, $source, $basePath=null)
