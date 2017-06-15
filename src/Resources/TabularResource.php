@@ -15,7 +15,7 @@ class TabularResource extends DefaultResource
      * @param string $dataSource
      * @return TabularDataStream
      */
-    protected function getDataStream($dataSource)
+    protected function getDataStream($dataSource, $dataSourceOptions=null)
     {
         return new TabularDataStream($this->normalizeDataSource($dataSource, $this->basePath), $this->schema());
     }
