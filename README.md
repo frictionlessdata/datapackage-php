@@ -63,10 +63,12 @@ $resource = Factory::resource((object)[
 ])
 $datapackage->addResource($resource);
 
-// register custom datapackage classes which can override / extend core classes
+// register custom datapackage or resource classes which can override / extend core classes
+// these custom classes run a test against the schema to decide whether to handle a given descriptor or not
 Factory::registerDatapackageClass("my\\custom\\DatapackageClass");
+Factory::registerResourceClass("my\\custom\\ResourceClass");
 
-// register custom profiles and related schema (must conform to the default datapackage schema as well)
+// register custom profiles and related schemas for validation
 Registry::registerSchema("my-custom-profile-id", "path/to/my-custom-profile.schema.json");
 ```
 

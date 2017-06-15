@@ -78,10 +78,6 @@ class Registry
         if (file_exists($registrySchemaFilename)) {
             foreach (json_decode(file_get_contents($registrySchemaFilename)) as $schema) {
                 $schemaIds[] = $schema->id;
-                if ($schema->id == "fiscal-data-package") {
-                    // fix a bug in the specs, see https://github.com/frictionlessdata/specs/pull/416
-                    $schema->schema = "https://specs.frictionlessdata.io/schemas/fiscal-data-package.json";
-                }
                 $registry[] = $schema;
             };
             // resource schemas - currently not in the registry
