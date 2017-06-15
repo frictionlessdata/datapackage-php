@@ -9,6 +9,8 @@ use frictionlessdata\datapackage\Factory;
 use frictionlessdata\tableschema\InferSchema;
 use frictionlessdata\tableschema\Table;
 use frictionlessdata\tableschema\DataSources\CsvDataSource;
+use frictionlessdata\datapackage\Resources\DefaultResource;
+use frictionlessdata\datapackage\Resources\TabularResource;
 
 class DatapackageTest extends TestCase
 {
@@ -330,6 +332,103 @@ class DatapackageTest extends TestCase
                     '2,Acme 2,They are the sceond acme company'
                 ]
         ), $resources_data);
+    }
+
+    public function testCreateEditDatapackageDescriptor()
+    {
+        // create static method allows to create a new datapackage or resource without validation
+        // with shortcut arguments for common use-cases
+        $datapackage = DefaultDatapackage::create("my-datapackage-name", [
+            DefaultResource::create("my-default-resource"),
+            TabularResource::create("my-tabular-resource")
+        ]);
+
+        // when creating a datapackage or resource with the create method it doesn't validate
+        $this->assertEquals((object)[
+            "name" => "my-datapackage-name",
+            "resources" => [
+                (object)[
+                    "name" => "my-default-resource",
+                    "data" => []
+                ],
+                (object)[
+                    "name" => "my-tabular-resource",
+                    "data" => []
+                ]
+            ]
+        ], $datapackage->descriptor());
+
+        // you can now modify the descriptor further
+        $datapackage->descriptor()->resources[1]->name = "my-renamed-tabular-resource";
+
+        // when you are done you can revalidate
+        try { $datapackage->revalidate(); $this->fail(); } catch (\Exception $e) {
+            $this->assertEquals(
+                "Datapackage validation failed: "
+                        ."[resources[0].data] There must be a minimum of 1 items in the array, "
+                        ."[resources[1].data] There must be a minimum of 1 items in the array",
+                $e->getMessage()
+            );
+        }
+
+        // you can expect errors if you use the datapackage before it validates
+        try { foreach ($datapackage as $resource) {} } catch (\Exception $e) {
+            $this->assertEquals(
+                "resource validation failed: [data] There must be a minimum of 1 items in the array",
+                $e->getMessage()
+            );
+        }
+
+        // you can add data items to the descriptor
+        // for both existing and non-existing files which will be written to
+
+        // an existing data item
+        $datapackage->resource("my-default-resource")->descriptor()->data[] = dirname(__FILE__)."/fixtures/foo.txt";
+
+        // non-existing data items
+        $datapackage->resource("my-default-resource")->descriptor()->data[] = tempnam(sys_get_temp_dir(), "datapackage-php-tests-").".csv";
+        $datapackage->resource("my-renamed-tabular-resource")->descriptor()->data[] = tempnam(sys_get_temp_dir(), "datapackage-php-tests-").".csv";
+
+        // iterate over the data - will yield for first resource but raise exception for 2nd
+        foreach ($datapackage as $resource) {
+            if ($resource->name() == "my-default-resource") {
+                foreach ($resource as $dataStream) {
+                    foreach ($dataStream as $row) {
+                        $this->assertEquals("foo", $row);
+                    }
+                    break;
+                }
+            } else {
+                // but the non-existant resources raise an exception
+                try { foreach ($resource as $dataStream) {} } catch (Exceptions\DataStreamOpenException $e) {
+                    $this->assertContains("Failed to open data source", $e->getMessage());
+                }
+            }
+        };
+
+        // write data to the new simple data source
+        // you have to do this yourself, we don't support writing data stream at the moment
+        $filename = $datapackage->resource("my-default-resource")->descriptor()->data[1];
+        file_put_contents($filename, "testing 改善\n");
+
+        // now you can access the data normally
+        $i = 0;
+        foreach ($datapackage->resource("my-default-resource") as $data) {
+            if ($i == 1) {
+                $j = 0;
+                foreach ($data as $row) {
+                    if ($j == 0) {
+                        $this->assertEquals("testing 改善\n", $row);
+                    } elseif ($j == 1) {
+                        $this->assertFalse($row);
+                    } else {
+                        $this->fail();
+                    }
+                    $j++;
+                }
+            }
+            $i++;
+        }
     }
 
     protected function assertDatapackageValidation($expectedMessages, $source, $basePath=null)

@@ -41,13 +41,14 @@ class Factory
      * create a resource object
      * @param object $descriptor
      * @param null|string $basePath
+     * @param boolean $skipValidations
      * @return Resources\BaseResource
      * @throws Exceptions\ResourceValidationFailedException
      */
-    public static function resource($descriptor, $basePath=null)
+    public static function resource($descriptor, $basePath=null, $skipValidations=false)
     {
         $resourceClass = static::getResourceClass($descriptor);
-        $resource = new $resourceClass($descriptor, $basePath);
+        $resource = new $resourceClass($descriptor, $basePath, $skipValidations);
         return $resource;
     }
 

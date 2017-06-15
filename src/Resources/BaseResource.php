@@ -16,13 +16,16 @@ abstract class BaseResource implements \Iterator
      * @param null|string $basePath
      * @throws ResourceValidationFailedException
      */
-    public function __construct($descriptor, $basePath)
+    public function __construct($descriptor, $basePath, $skipValidations=false)
     {
         $this->basePath = $basePath;
         $this->descriptor = $descriptor;
-        $validationErrors = $this->validateResource();
-        if (count($validationErrors) > 0) {
-            throw new ResourceValidationFailedException($validationErrors);
+        $this->skipValidations = $skipValidations;
+        if (!$this->skipValidations) {
+            $validationErrors = $this->validateResource();
+            if (count($validationErrors) > 0) {
+                throw new ResourceValidationFailedException($validationErrors);
+            }
         }
     }
 
@@ -67,6 +70,14 @@ abstract class BaseResource implements \Iterator
         return $errors;
     }
 
+    public static function create($name, $basePath=null)
+    {
+        return new static((object)[
+            "name" => $name,
+            "data" => []
+        ], $basePath, true);
+    }
+
     /**
      * allows extending classes to add custom sources
      * used by unit tests to add a mock http source
@@ -88,6 +99,7 @@ abstract class BaseResource implements \Iterator
 
     protected $descriptor;
     protected $basePath;
+    protected $skipValidations = false;
     protected $currentDataPosition = 0;
 
     protected function validateResource()

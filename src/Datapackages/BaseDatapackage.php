@@ -14,11 +14,24 @@ abstract class BaseDatapackage implements \Iterator
      * @param null|string $basePath
      * @throws DatapackageValidationFailedException
      */
-    public function __construct($descriptor, $basePath=null)
+    public function __construct($descriptor, $basePath=null, $skipValidations=false)
     {
         $this->descriptor = $descriptor;
         $this->basePath = $basePath;
-        $this->revalidate();
+        $this->skipValidations = $skipValidations;
+        if (!$this->skipValidations) $this->revalidate();
+    }
+
+    public static function create($name, $resources, $basePath=null)
+    {
+        $datapackage = new static((object)[
+            "name" => $name,
+            "resources" => []
+        ], $basePath, true);
+        foreach ($resources as $resource) {
+            $datapackage->addResource($resource, true);
+        }
+        return $datapackage;
     }
 
     public function revalidate()
@@ -47,15 +60,20 @@ abstract class BaseDatapackage implements \Iterator
     public function resources()
     {
         $resources = [];
-        foreach ($this as $resource) {
-            $resources[$resource->name()] = $resource;
+        foreach ($this->descriptor->resources as $resourceDescriptor) {
+            $resources[$resourceDescriptor->name] = $this->initResource($resourceDescriptor);
         }
         return $resources;
     }
 
     public function resource($name)
     {
-        return $this->resources()[$name];
+        foreach ($this->descriptor->resources as $resourceDescriptor) {
+            if ($resourceDescriptor->name == $name) {
+                return $this->initResource($resourceDescriptor);
+            }
+        }
+        throw new \Exception("couldn't find matching resource with name =  '{$name}'");
     }
 
     public function deleteResource($name)
@@ -67,7 +85,7 @@ abstract class BaseDatapackage implements \Iterator
             }
         }
         $this->descriptor->resources = $resourceDescriptors;
-        $this->revalidate();
+        if (!$this->skipValidations) $this->revalidate();
     }
 
     public function addResource($resource)
@@ -78,7 +96,7 @@ abstract class BaseDatapackage implements \Iterator
         }
         $resourceDescriptors[] = $resource->descriptor();
         $this->descriptor->resources = $resourceDescriptors;
-        $this->revalidate();
+        if (!$this->skipValidations) $this->revalidate();
     }
 
     // standard iterator functions - to iterate over the resources
@@ -91,6 +109,7 @@ abstract class BaseDatapackage implements \Iterator
     protected $descriptor;
     protected $currentResourcePosition = 0;
     protected $basePath;
+    protected $skipValidations = false;
 
     /**
      * called by the resources iterator for each iteration
@@ -100,7 +119,7 @@ abstract class BaseDatapackage implements \Iterator
      */
     protected function initResource($descriptor)
     {
-        return Factory::resource($descriptor, $this->basePath);
+        return Factory::resource($descriptor, $this->basePath, $this->skipValidations);
     }
 
     protected function datapackageValidate()

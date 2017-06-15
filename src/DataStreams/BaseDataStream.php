@@ -2,7 +2,7 @@
 namespace frictionlessdata\datapackage\DataStreams;
 
 /**
- * Provides a standard interface for streaming
+ * Provides a standard interface for streaming from a data stream (Read-only)
  *
  * functionality could mostly be replaced by php generators (http://php.net/manual/en/language.generators.syntax.php)
  * however, they are only supported on PHP 5.5 and above

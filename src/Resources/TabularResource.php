@@ -5,11 +5,6 @@ use frictionlessdata\datapackage\DataStreams\TabularDataStream;
 
 class TabularResource extends DefaultResource
 {
-    public function __construct($descriptor, $basePath)
-    {
-        parent::__construct($descriptor, $basePath);
-    }
-
     public function schema()
     {
         // TODO: change to table schema object
