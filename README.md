@@ -70,6 +70,26 @@ Factory::registerResourceClass("my\\custom\\ResourceClass");
 
 // register custom profiles and related schemas for validation
 Registry::registerSchema("my-custom-profile-id", "path/to/my-custom-profile.schema.json");
+
+// create a new datapackage from scratch
+$datapackage = TabularDatapackage::create("my-tabular-datapackage", [
+    TabularResource::create("my-tabular-resource")
+]);
+
+// set the tabular data schema
+$datapackage->resource("my-tabular-resource")->descriptor()->schema = (object)[
+    "fields" => [
+        (object)["name" => "id", "type" => "integer"],
+        (object)["name" => "data", "type" => "string"],
+    ]
+];
+
+// add data files
+$datapackage->resource("my-tabular-resource")->descriptor()->data[] = "/path/to/file-1.csv";
+$datapackage->resource("my-tabular-resource")->descriptor()->data[] = "/path/to/file-2.csv";
+
+// re-validate the new descriptor
+$datapackage->revalidate();
 ```
 
 

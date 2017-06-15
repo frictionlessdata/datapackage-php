@@ -5,11 +5,6 @@ use frictionlessdata\datapackage\DataStreams\TabularDataStream;
 
 class TabularResource extends DefaultResource
 {
-    public function __construct($descriptor, $basePath)
-    {
-        parent::__construct($descriptor, $basePath);
-    }
-
     public function schema()
     {
         // TODO: change to table schema object
@@ -20,7 +15,7 @@ class TabularResource extends DefaultResource
      * @param string $dataSource
      * @return TabularDataStream
      */
-    protected function getDataStream($dataSource)
+    protected function getDataStream($dataSource, $dataSourceOptions=null)
     {
         return new TabularDataStream($this->normalizeDataSource($dataSource, $this->basePath), $this->schema());
     }

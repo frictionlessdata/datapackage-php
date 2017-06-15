@@ -18,15 +18,17 @@ class TabularDataStream extends BaseDataStream
             throw new \Exception("schema is required for tabular data stream");
         } else {
             try {
-                $dataSource = new CsvDataSource($dataSource);
-                $schema = new Schema($schema);
-                $this->table = new Table($dataSource, $schema);
+                $this->dataSource = new CsvDataSource($dataSource);
+                $this->schema = new Schema($schema);
+                $this->table = new Table($this->dataSource, $this->schema);
             } catch (\Exception $e) {
-                throw new DataStreamOpenException("Failed to open tabular data source ".json_encode($dataSource).": ".json_encode($e->getMessage()));
+                throw new DataStreamOpenException("Failed to open tabular data source ".json_encode($this->dataSource).": ".json_encode($e->getMessage()));
             }
         }
     }
 
+    protected $dataSource;
+    protected $schema;
     protected $table;
 
     public function rewind() {
