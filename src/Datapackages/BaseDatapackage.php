@@ -99,6 +99,11 @@ abstract class BaseDatapackage implements \Iterator
         if (!$this->skipValidations) $this->revalidate();
     }
 
+    public function saveDescriptor($filename)
+    {
+        return file_put_contents($filename, json_encode($this->descriptor()));
+    }
+
     // standard iterator functions - to iterate over the resources
     public function rewind() {$this->currentResourcePosition = 0;}
     public function current() { return $this->initResource($this->descriptor()->resources[$this->currentResourcePosition]); }
