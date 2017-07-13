@@ -1,0 +1,8 @@
+2017-07-13T16:25:21+03:00
+
+* added table-schema.json to registry (no effect on datapackage library)
+* uri format was changed to simpler string format without uri restrictions (to support paths)
+* added organisation
+* changed role enum
+* data attribute changed to path which can be either a single string or array of strings
+* changes to table-schema (not affecting datapackage directly)

@@ -22,6 +22,7 @@ function update()
         } else {
             print("schema changed - updating local file\n");
             file_put_contents($filename, $new_schema);
+            file_put_contents($base_filename.'CHANGELOG', "\n\nChanges to {$schema->id} schema\n".date('c')."\n* check the git diff and summarize the spec changes here\n* \n\n", FILE_APPEND);
             if ($schema->id == "registry") {
                 print("registry was updated, re-running update to fetch latest files from registry\n\n");
                 return update();
@@ -30,7 +31,6 @@ function update()
         }
     }
     print("\n{$numUpdated} schemas updated\n");
-    file_put_contents($base_filename."LAST_UPDATE", date("c"));
     return 0;
 }
 
