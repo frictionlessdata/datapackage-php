@@ -1,4 +1,5 @@
 <?php
+
 namespace frictionlessdata\datapackage\tests\Mocks;
 
 use frictionlessdata\datapackage\Validators\DatapackageValidator;

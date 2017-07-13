@@ -1,17 +1,18 @@
-<?php namespace frictionlessdata\datapackage\Validators;
+<?php
+
+namespace frictionlessdata\datapackage\Validators;
 
 use frictionlessdata\datapackage\Registry;
-use frictionlessdata\datapackage\Validators\ResourceValidator;
 
 /**
  * validate a datapackage descriptor
- * checks the profile attribute to determine which schema to validate with
+ * checks the profile attribute to determine which schema to validate with.
  */
 class DatapackageValidator extends BaseValidator
 {
     protected function getSchemaValidationErrorClass()
     {
-        return "frictionlessdata\\datapackage\\Validators\\DatapackageValidationError";
+        return 'frictionlessdata\\datapackage\\Validators\\DatapackageValidationError';
     }
 
     protected function getValidationProfile()
@@ -31,24 +32,25 @@ class DatapackageValidator extends BaseValidator
                     if (isset($resource->data) && is_array($resource->data)) {
                         foreach ($resource->data as &$url) {
                             if (is_string($url)) {
-                                $url = "file://".$url;
+                                $url = 'file://'.$url;
                             }
                         }
                     }
                 }
             }
         }
+
         return $descriptor;
     }
 
     protected function validateSchema()
     {
         parent::validateSchema();
-        if ($this->getValidationProfile() != "data-package") {
+        if ($this->getValidationProfile() != 'data-package') {
             // all schemas must be an extension of datapackage spec
             $this->validateSchemaUrl(
                 $this->convertValidationSchemaFilenameToUrl(
-                    $this->getJsonSchemaFileFromRegistry("data-package")
+                    $this->getJsonSchemaFileFromRegistry('data-package')
                 )
             );
         }

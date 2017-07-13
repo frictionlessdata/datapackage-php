@@ -1,17 +1,19 @@
-<?php namespace frictionlessdata\datapackage\Validators;
+<?php
+
+namespace frictionlessdata\datapackage\Validators;
 
 use frictionlessdata\datapackage\Registry;
 use frictionlessdata\datapackage\Factory;
 
 /**
  * validate a resource descriptor
- * checks the profile attribute to determine which schema to validate with
+ * checks the profile attribute to determine which schema to validate with.
  */
 class ResourceValidator extends BaseValidator
 {
     protected function getSchemaValidationErrorClass()
     {
-        return "frictionlessdata\\datapackage\\Validators\\ResourceValidationError";
+        return 'frictionlessdata\\datapackage\\Validators\\ResourceValidationError';
     }
 
     protected function getValidationProfile()
@@ -27,9 +29,10 @@ class ResourceValidator extends BaseValidator
         $descriptor = clone $this->descriptor;
         if (isset($descriptor->data) && is_array($descriptor->data)) {
             foreach ($descriptor->data as &$url) {
-                $url = "file://".$url;
+                $url = 'file://'.$url;
             }
         }
+
         return $descriptor;
     }
 
@@ -38,7 +41,7 @@ class ResourceValidator extends BaseValidator
         $property = $error['property'];
         // silly hack to only show properties within the resource of the fake datapackage
         // $property = str_replace("resources[0].", "", $property);
-        return sprintf("[%s] %s", $property, $error['message']);
+        return sprintf('[%s] %s', $property, $error['message']);
     }
 
     protected function getResourceClass()

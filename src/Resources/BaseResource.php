@@ -1,4 +1,5 @@
 <?php
+
 namespace frictionlessdata\datapackage\Resources;
 
 use frictionlessdata\datapackage\DataStreams\BaseDataStream;
@@ -12,11 +13,13 @@ abstract class BaseResource implements \Iterator
 {
     /**
      * BaseResource constructor.
-     * @param object $descriptor
+     *
+     * @param object      $descriptor
      * @param null|string $basePath
+     *
      * @throws ResourceValidationFailedException
      */
-    public function __construct($descriptor, $basePath, $skipValidations=false)
+    public function __construct($descriptor, $basePath, $skipValidations = false)
     {
         $this->basePath = $basePath;
         $this->descriptor = $descriptor;
@@ -51,13 +54,32 @@ abstract class BaseResource implements \Iterator
     }
 
     // standard iterator functions - to iterate over the data sources
-    public function rewind() { $this->currentDataPosition = 0; }
-    public function current() { return $this->getDataStream($this->descriptor()->data[$this->currentDataPosition]); }
-    public function key() { return $this->currentDataPosition; }
-    public function next() { $this->currentDataPosition++; }
-    public function valid() { return isset($this->descriptor()->data[$this->currentDataPosition]); }
+    public function rewind()
+    {
+        $this->currentDataPosition = 0;
+    }
 
-    public static function validateDataSource($dataSource, $basePath=null)
+    public function current()
+    {
+        return $this->getDataStream($this->descriptor()->data[$this->currentDataPosition]);
+    }
+
+    public function key()
+    {
+        return $this->currentDataPosition;
+    }
+
+    public function next()
+    {
+        ++$this->currentDataPosition;
+    }
+
+    public function valid()
+    {
+        return isset($this->descriptor()->data[$this->currentDataPosition]);
+    }
+
+    public static function validateDataSource($dataSource, $basePath = null)
     {
         $errors = [];
         $dataSource = static::normalizeDataSource($dataSource, $basePath);
@@ -67,25 +89,28 @@ abstract class BaseResource implements \Iterator
                 "data source file does not exist or is not readable: {$dataSource}"
             );
         }
+
         return $errors;
     }
 
-    public static function create($name, $basePath=null)
+    public static function create($name, $basePath = null)
     {
-        return new static((object)[
-            "name" => $name,
-            "data" => []
+        return new static((object) [
+            'name' => $name,
+            'data' => [],
         ], $basePath, true);
     }
 
     /**
      * allows extending classes to add custom sources
-     * used by unit tests to add a mock http source
+     * used by unit tests to add a mock http source.
+     *
      * @param string $dataSource
      * @param string $basePath
+     *
      * @return string
      */
-    public static function normalizeDataSource($dataSource, $basePath=null)
+    public static function normalizeDataSource($dataSource, $basePath = null)
     {
         if (!empty($basePath) && !Utils::isHttpSource($dataSource)) {
             // TODO: support JSON pointers
@@ -94,6 +119,7 @@ abstract class BaseResource implements \Iterator
                 $dataSource = $absPath;
             }
         }
+
         return $dataSource;
     }
 
@@ -109,6 +135,7 @@ abstract class BaseResource implements \Iterator
 
     /**
      * @param string $dataSource
+     *
      * @return BaseDataStream
      */
     abstract protected function getDataStream($dataSource);

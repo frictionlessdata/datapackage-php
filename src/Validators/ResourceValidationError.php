@@ -1,7 +1,9 @@
-<?php namespace frictionlessdata\datapackage\Validators;
+<?php
+
+namespace frictionlessdata\datapackage\Validators;
 
 /**
- * Represents a validation error encountered when validating a resource descriptor
+ * Represents a validation error encountered when validating a resource descriptor.
  */
 class ResourceValidationError extends DatapackageValidationError
 {

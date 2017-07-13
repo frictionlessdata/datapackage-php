@@ -5,11 +5,12 @@
     "require": {
         "php": ">=5.4",
         "justinrainbow/json-schema": "^5.2",
-        "frictionlessdata/tableschema": "^0.1.5"
+        "frictionlessdata/tableschema": "^0.1.6"
     },
     "require-dev": {
         "phpunit/phpunit": "^4.8.35",
-        "satooshi/php-coveralls": "^1.0"
+        "satooshi/php-coveralls": "^1.0",
+        "psy/psysh": "@stable"
     },
     "autoload": {
         "psr-4": {
@@ -18,6 +19,8 @@
     },
     "scripts": {
         "test": "phpunit --debug --coverage-clover coverage-clover.xml --bootstrap tests/autoload.php tests/",
-        "update_registry": "php update_registry.php"
+        "update_registry": "php update_registry.php",
+        "style-check": "./.install_cs_fixer.sh && ./php-cs-fixer fix --dry-run --verbose --diff",
+        "style-fix": "./.install_cs_fixer.sh && ./php-cs-fixer fix --verbose"
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace frictionlessdata\datapackage\Datapackages;
 
 use frictionlessdata\datapackage\Factory;
@@ -10,27 +11,32 @@ abstract class BaseDatapackage implements \Iterator
 {
     /**
      * BaseDatapackage constructor.
-     * @param object $descriptor
+     *
+     * @param object      $descriptor
      * @param null|string $basePath
+     *
      * @throws DatapackageValidationFailedException
      */
-    public function __construct($descriptor, $basePath=null, $skipValidations=false)
+    public function __construct($descriptor, $basePath = null, $skipValidations = false)
     {
         $this->descriptor = $descriptor;
         $this->basePath = $basePath;
         $this->skipValidations = $skipValidations;
-        if (!$this->skipValidations) $this->revalidate();
+        if (!$this->skipValidations) {
+            $this->revalidate();
+        }
     }
 
-    public static function create($name, $resources, $basePath=null)
+    public static function create($name, $resources, $basePath = null)
     {
-        $datapackage = new static((object)[
-            "name" => $name,
-            "resources" => []
+        $datapackage = new static((object) [
+            'name' => $name,
+            'resources' => [],
         ], $basePath, true);
         foreach ($resources as $resource) {
             $datapackage->addResource($resource, true);
         }
+
         return $datapackage;
     }
 
@@ -49,7 +55,8 @@ abstract class BaseDatapackage implements \Iterator
     }
 
     /**
-     * returns the descriptor as-is, without adding default values or normalizing
+     * returns the descriptor as-is, without adding default values or normalizing.
+     *
      * @return object
      */
     public function descriptor()
@@ -63,6 +70,7 @@ abstract class BaseDatapackage implements \Iterator
         foreach ($this->descriptor->resources as $resourceDescriptor) {
             $resources[$resourceDescriptor->name] = $this->initResource($resourceDescriptor);
         }
+
         return $resources;
     }
 
@@ -85,7 +93,9 @@ abstract class BaseDatapackage implements \Iterator
             }
         }
         $this->descriptor->resources = $resourceDescriptors;
-        if (!$this->skipValidations) $this->revalidate();
+        if (!$this->skipValidations) {
+            $this->revalidate();
+        }
     }
 
     public function addResource($resource)
@@ -96,7 +106,9 @@ abstract class BaseDatapackage implements \Iterator
         }
         $resourceDescriptors[] = $resource->descriptor();
         $this->descriptor->resources = $resourceDescriptors;
-        if (!$this->skipValidations) $this->revalidate();
+        if (!$this->skipValidations) {
+            $this->revalidate();
+        }
     }
 
     public function saveDescriptor($filename)
@@ -105,11 +117,30 @@ abstract class BaseDatapackage implements \Iterator
     }
 
     // standard iterator functions - to iterate over the resources
-    public function rewind() {$this->currentResourcePosition = 0;}
-    public function current() { return $this->initResource($this->descriptor()->resources[$this->currentResourcePosition]); }
-    public function key() { return $this->currentResourcePosition; }
-    public function next() { $this->currentResourcePosition++; }
-    public function valid() { return isset($this->descriptor()->resources[$this->currentResourcePosition]); }
+    public function rewind()
+    {
+        $this->currentResourcePosition = 0;
+    }
+
+    public function current()
+    {
+        return $this->initResource($this->descriptor()->resources[$this->currentResourcePosition]);
+    }
+
+    public function key()
+    {
+        return $this->currentResourcePosition;
+    }
+
+    public function next()
+    {
+        ++$this->currentResourcePosition;
+    }
+
+    public function valid()
+    {
+        return isset($this->descriptor()->resources[$this->currentResourcePosition]);
+    }
 
     protected $descriptor;
     protected $currentResourcePosition = 0;
@@ -117,9 +148,10 @@ abstract class BaseDatapackage implements \Iterator
     protected $skipValidations = false;
 
     /**
-     * called by the resources iterator for each iteration
+     * called by the resources iterator for each iteration.
      *
      * @param object $descriptor
+     *
      * @return \frictionlessdata\datapackage\Resources\BaseResource
      */
     protected function initResource($descriptor)

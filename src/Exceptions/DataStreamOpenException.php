@@ -1,6 +1,7 @@
 <?php
+
 namespace frictionlessdata\datapackage\Exceptions;
 
-class DataStreamOpenException extends \Exception {
-
+class DataStreamOpenException extends \Exception
+{
 }

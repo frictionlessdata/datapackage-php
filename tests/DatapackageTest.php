@@ -1,4 +1,5 @@
 <?php
+
 namespace frictionlessdata\datapackage\tests;
 
 use frictionlessdata\datapackage\Validators\DatapackageValidationError;
@@ -22,28 +23,28 @@ class DatapackageTest extends TestCase
     public function setUp()
     {
         $this->simpleDescriptorArray = [
-            "name" => "datapackage-name",
-            "resources" => [
-                ["name" => "resource-name", "data" => ["foo.txt"] ]
-            ]
+            'name' => 'datapackage-name',
+            'resources' => [
+                ['name' => 'resource-name', 'data' => ['foo.txt']],
+            ],
         ];
-        $this->simpleDescriptor = (object)[
-            "name" => "datapackage-name",
-            "resources" => [
-                (object)["name" => "resource-name", "data" => ["foo.txt"] ]
-            ]
+        $this->simpleDescriptor = (object) [
+            'name' => 'datapackage-name',
+            'resources' => [
+                (object) ['name' => 'resource-name', 'data' => ['foo.txt']],
+            ],
         ];
-        $this->simpleDescriptorExpectedData = ["resource-name" => [["foo"]]];
-        $this->fixturesPath = dirname(__FILE__)."/fixtures";
+        $this->simpleDescriptorExpectedData = ['resource-name' => [['foo']]];
+        $this->fixturesPath = dirname(__FILE__).'/fixtures';
     }
 
     public function testNativePHPArrayShouldFail()
     {
         $descriptorArray = $this->simpleDescriptorArray;
         $this->assertDatapackageException(
-            "frictionlessdata\\datapackage\\Exceptions\\DatapackageInvalidSourceException",
+            'frictionlessdata\\datapackage\\Exceptions\\DatapackageInvalidSourceException',
             'Invalid source: {"name":"datapackage-name","resources":[{"name":"resource-name","data":["foo.txt"]}]}',
-            function() use ($descriptorArray) { Factory::datapackage($descriptorArray); }
+            function () use ($descriptorArray) { Factory::datapackage($descriptorArray); }
         );
     }
 
@@ -51,9 +52,9 @@ class DatapackageTest extends TestCase
     {
         $descriptor = $this->simpleDescriptor;
         $this->assertDatapackageException(
-            "frictionlessdata\\datapackage\\Exceptions\\DatapackageValidationFailedException",
+            'frictionlessdata\\datapackage\\Exceptions\\DatapackageValidationFailedException',
             'Datapackage validation failed: data source file does not exist or is not readable: foo.txt',
-            function() use ($descriptor) { Factory::datapackage($descriptor); }
+            function () use ($descriptor) { Factory::datapackage($descriptor); }
         );
     }
 
@@ -69,9 +70,9 @@ class DatapackageTest extends TestCase
     {
         $source = json_encode($this->simpleDescriptor);
         $this->assertDatapackageException(
-            "frictionlessdata\\datapackage\\Exceptions\\DatapackageValidationFailedException",
+            'frictionlessdata\\datapackage\\Exceptions\\DatapackageValidationFailedException',
             'Datapackage validation failed: data source file does not exist or is not readable: foo.txt',
-            function() use ($source) { Factory::datapackage($source); }
+            function () use ($source) { Factory::datapackage($source); }
         );
     }
 
@@ -87,9 +88,9 @@ class DatapackageTest extends TestCase
     public function testNonExistantFileShouldFail()
     {
         $this->assertDatapackageException(
-            "frictionlessdata\\datapackage\\Exceptions\\DatapackageInvalidSourceException",
-            'Failed to load source: "-invalid-": '.$this->getFileGetContentsErrorMessage("-invalid-"),
-            function() { Factory::datapackage("-invalid-"); }
+            'frictionlessdata\\datapackage\\Exceptions\\DatapackageInvalidSourceException',
+            'Failed to load source: "-invalid-": '.$this->getFileGetContentsErrorMessage('-invalid-'),
+            function () { Factory::datapackage('-invalid-'); }
         );
     }
 
@@ -97,7 +98,7 @@ class DatapackageTest extends TestCase
     {
         $this->assertDatapackage(
             $this->simpleDescriptor, $this->simpleDescriptorExpectedData,
-            Factory::datapackage("simple_valid_datapackage.json", $this->fixturesPath)
+            Factory::datapackage('simple_valid_datapackage.json', $this->fixturesPath)
         );
     }
 
@@ -105,97 +106,97 @@ class DatapackageTest extends TestCase
     {
         $this->assertDatapackage(
             $this->simpleDescriptor, $this->simpleDescriptorExpectedData,
-            Factory::datapackage("tests/fixtures/simple_valid_datapackage.json")
+            Factory::datapackage('tests/fixtures/simple_valid_datapackage.json')
         );
     }
 
     public function testHttpSource()
     {
         $this->assertDatapackage(
-            (object)[
-                "name" => "datapackage-name",
-                "resources" => [
-                    (object)[
-                        "name" => "resource-name",
-                        "data" => ["mock-http://foo.txt", "mock-http://foo.txt"]
-                    ]
-                ]
-            ], ["resource-name" => [["foo"], ["foo"]]],
-            Mocks\MockFactory::datapackage("mock-http://simple_valid_datapackage_mock_http_data.json")
+            (object) [
+                'name' => 'datapackage-name',
+                'resources' => [
+                    (object) [
+                        'name' => 'resource-name',
+                        'data' => ['mock-http://foo.txt', 'mock-http://foo.txt'],
+                    ],
+                ],
+            ], ['resource-name' => [['foo'], ['foo']]],
+            Mocks\MockFactory::datapackage('mock-http://simple_valid_datapackage_mock_http_data.json')
         );
     }
 
     public function testMultiDataDatapackage()
     {
         $out = [];
-        $datapackage = Factory::datapackage("tests/fixtures/multi_data_datapackage.json");
+        $datapackage = Factory::datapackage('tests/fixtures/multi_data_datapackage.json');
         foreach ($datapackage as $resource) {
-            $out[] = "-- ".$resource->name()." --";
+            $out[] = '-- '.$resource->name().' --';
             $i = 0;
             foreach ($resource as $dataStream) {
-                $out[] = "-dataStream ".++$i;
+                $out[] = '-dataStream '.++$i;
                 foreach ($dataStream as $line) {
                     $out[] = $line;
                 }
             }
         }
         $this->assertEquals([
-            "-- first-resource --",
-            "-dataStream 1",
-            "foo",
-            "-dataStream 2",
+            '-- first-resource --',
+            '-dataStream 1',
+            'foo',
+            '-dataStream 2',
             "BAR!\n",
             "bar\n",
             "בר\n",
-            "",
-            "-dataStream 3",
+            '',
+            '-dataStream 3',
             "בזבזבז\n",
-            "זבזבזב",
-            "-- second-resource --",
-            "-dataStream 1",
+            'זבזבזב',
+            '-- second-resource --',
+            '-dataStream 1',
             "BAR!\n",
             "bar\n",
             "בר\n",
-            "",
-            "-dataStream 2",
+            '',
+            '-dataStream 2',
             "בזבזבז\n",
-            "זבזבזב",
-            "-- third-resource --",
-            "-dataStream 1",
+            'זבזבזב',
+            '-- third-resource --',
+            '-dataStream 1',
             "בזבזבז\n",
-            "זבזבזב",
+            'זבזבזב',
         ], $out);
     }
 
     public function testDatapackageValidation()
     {
-        $this->assertEquals([], Factory::validate("tests/fixtures/multi_data_datapackage.json"));
+        $this->assertEquals([], Factory::validate('tests/fixtures/multi_data_datapackage.json'));
     }
 
     public function testDatapackageValidationFailed()
     {
         $this->assertDatapackageValidation(
-            "[resources] The property resources is required",
-            "tests/fixtures/simple_invalid_datapackage.json"
+            '[resources] The property resources is required',
+            'tests/fixtures/simple_invalid_datapackage.json'
         );
     }
 
     public function testDatapackageValidationFailedShouldPreventConstruct()
     {
         try {
-            Factory::datapackage((object)["name" => "foobar"]);
+            Factory::datapackage((object) ['name' => 'foobar']);
             $caughtException = null;
         } catch (Exceptions\DatapackageValidationFailedException $e) {
             $caughtException = $e;
         }
-        $this->assertEquals("Datapackage validation failed: [resources] The property resources is required", $caughtException->getMessage());
+        $this->assertEquals('Datapackage validation failed: [resources] The property resources is required', $caughtException->getMessage());
     }
 
     public function testTabularResourceDescriptorValidation()
     {
         $this->assertDatapackageValidation(
-            "[schema.fields] The property fields is required",
-            "tests/fixtures/invalid_tabular_resource.json"
+            '[schema.fields] The property fields is required',
+            'tests/fixtures/invalid_tabular_resource.json'
         );
     }
 
@@ -203,7 +204,7 @@ class DatapackageTest extends TestCase
     {
         $this->assertDatapackageValidation(
             'data source file does not exist or is not readable: --invalid--',
-            "tests/fixtures/default_resource_invalid_data.json"
+            'tests/fixtures/default_resource_invalid_data.json'
         );
     }
 
@@ -211,93 +212,95 @@ class DatapackageTest extends TestCase
     {
         $this->assertDatapackageValidation(
             'resource 1, data stream 2: email: value is not a valid email (bad.email)',
-            "tests/fixtures/tabular_resource_invalid_data.json"
+            'tests/fixtures/tabular_resource_invalid_data.json'
         );
     }
 
     public function testDatapackageResources()
     {
         // prepare the desriptor, schema and datapackage
-        $dataSource = new CsvDataSource("tests/fixtures/simple_tabular_data.csv");
+        $dataSource = new CsvDataSource('tests/fixtures/simple_tabular_data.csv');
         $schema = new InferSchema();
         Table::validate($dataSource, $schema, 1);
-        $descriptor = (object)[
-            "name" => "datapackage-name",
-            "resources" => [
-                (object)[
-                    "name" => "resource-name", "data" => ["foo.txt", "baz.txt"]
+        $descriptor = (object) [
+            'name' => 'datapackage-name',
+            'resources' => [
+                (object) [
+                    'name' => 'resource-name', 'data' => ['foo.txt', 'baz.txt'],
                 ],
-                (object)[
-                    "name" => "another-resource-name",
-                    "profile" => "tabular-data-resource",
-                    "data" => ["simple_tabular_data.csv"],
-                    "schema" => $schema->fullDescriptor()
+                (object) [
+                    'name' => 'another-resource-name',
+                    'profile' => 'tabular-data-resource',
+                    'data' => ['simple_tabular_data.csv'],
+                    'schema' => $schema->fullDescriptor(),
                 ],
-            ]
+            ],
         ];
-        $basePath = "tests/fixtures";
+        $basePath = 'tests/fixtures';
         $datapackage = new DefaultDatapackage($descriptor, $basePath);
         // test accessing resources
         $resources = $datapackage->resources();
         $this->assertTrue(is_a(
-            $resources["resource-name"],
-            "frictionlessdata\\datapackage\\Resources\\DefaultResource"
+            $resources['resource-name'],
+            'frictionlessdata\\datapackage\\Resources\\DefaultResource'
         ));
         $this->assertTrue(is_a(
-            $resources["another-resource-name"],
-            "frictionlessdata\\datapackage\\Resources\\TabularResource"
+            $resources['another-resource-name'],
+            'frictionlessdata\\datapackage\\Resources\\TabularResource'
         ));
         // accessing resource by name
         $this->assertTrue(is_a(
-            $datapackage->resource("another-resource-name"),
-            "frictionlessdata\\datapackage\\Resources\\TabularResource"
+            $datapackage->resource('another-resource-name'),
+            'frictionlessdata\\datapackage\\Resources\\TabularResource'
         ));
         $this->assertTrue(is_a(
-            $datapackage->resource("resource-name"),
-            "frictionlessdata\\datapackage\\Resources\\DefaultResource"
+            $datapackage->resource('resource-name'),
+            'frictionlessdata\\datapackage\\Resources\\DefaultResource'
         ));
         // delete resource
         $this->assertCount(2, $datapackage->resources());
-        $datapackage->deleteResource("resource-name");
+        $datapackage->deleteResource('resource-name');
         $this->assertCount(1, $datapackage->resources());
         $i = 0;
-        foreach ($datapackage as $resource) { $i++; };
+        foreach ($datapackage as $resource) {
+            ++$i;
+        }
         $this->assertEquals(1, $i);
-        $this->assertEquals((object)[
-            "name" => "datapackage-name",
-            "resources" => [
-                (object)[
-                    "name" => "another-resource-name",
-                    "profile" => "tabular-data-resource",
-                    "data" => ["simple_tabular_data.csv"],
-                    "schema" => $schema->fullDescriptor()
+        $this->assertEquals((object) [
+            'name' => 'datapackage-name',
+            'resources' => [
+                (object) [
+                    'name' => 'another-resource-name',
+                    'profile' => 'tabular-data-resource',
+                    'data' => ['simple_tabular_data.csv'],
+                    'schema' => $schema->fullDescriptor(),
                 ],
-            ]
+            ],
         ], $datapackage->descriptor());
 
         // add a resource
         $this->assertCount(1, $datapackage->resources());
-        $datapackage->addResource(Factory::resource((object)[
-            "name" => "new-resource", "data" => ["tests/fixtures/foo.txt", "tests/fixtures/baz.txt"]
+        $datapackage->addResource(Factory::resource((object) [
+            'name' => 'new-resource', 'data' => ['tests/fixtures/foo.txt', 'tests/fixtures/baz.txt'],
         ]));
         $this->assertCount(2, $datapackage->resources());
-        $this->assertEquals((object)[
-            "name" => "datapackage-name",
-            "resources" => [
-                (object)[
-                    "name" => "another-resource-name",
-                    "profile" => "tabular-data-resource",
-                    "data" => ["simple_tabular_data.csv"],
-                    "schema" => $schema->fullDescriptor()
+        $this->assertEquals((object) [
+            'name' => 'datapackage-name',
+            'resources' => [
+                (object) [
+                    'name' => 'another-resource-name',
+                    'profile' => 'tabular-data-resource',
+                    'data' => ['simple_tabular_data.csv'],
+                    'schema' => $schema->fullDescriptor(),
                 ],
-                (object)[
-                    "name" => "new-resource", "data" => ["tests/fixtures/foo.txt", "tests/fixtures/baz.txt"]
-                ]
-            ]
+                (object) [
+                    'name' => 'new-resource', 'data' => ['tests/fixtures/foo.txt', 'tests/fixtures/baz.txt'],
+                ],
+            ],
         ], $datapackage->descriptor());
         $rows = [];
         foreach ($datapackage as $resource) {
-            if ($resource->name() == "new-resource") {
+            if ($resource->name() == 'new-resource') {
                 foreach ($resource as $dataStream) {
                     foreach ($dataStream as $row) {
                         $rows[] = $row;
@@ -310,7 +313,7 @@ class DatapackageTest extends TestCase
 
     public function testFiscalDatapackage()
     {
-        $dp = Factory::datapackage("tests/fixtures/fiscal-datapackage/datapackage.json");
+        $dp = Factory::datapackage('tests/fixtures/fiscal-datapackage/datapackage.json');
         $resources_data = [];
         foreach ($dp as $resource) {
             $resources_data[$resource->name()] = [];
@@ -320,7 +323,7 @@ class DatapackageTest extends TestCase
                 }
             }
         }
-        $this->assertEquals(array (
+        $this->assertEquals(array(
                 'budget' => [
                     'pk,budget,budget_date,payee',
                     '1,10000,01/01/2015,1',
@@ -329,8 +332,8 @@ class DatapackageTest extends TestCase
                 'entities' => [
                     'id,name,description',
                     '1,Acme 1,They are the first acme company',
-                    '2,Acme 2,They are the sceond acme company'
-                ]
+                    '2,Acme 2,They are the sceond acme company',
+                ],
         ), $resources_data);
     }
 
@@ -338,43 +341,49 @@ class DatapackageTest extends TestCase
     {
         // create static method allows to create a new datapackage or resource without validation
         // with shortcut arguments for common use-cases
-        $datapackage = DefaultDatapackage::create("my-datapackage-name", [
-            DefaultResource::create("my-default-resource"),
-            TabularResource::create("my-tabular-resource")
+        $datapackage = DefaultDatapackage::create('my-datapackage-name', [
+            DefaultResource::create('my-default-resource'),
+            TabularResource::create('my-tabular-resource'),
         ]);
 
         // when creating a datapackage or resource with the create method it doesn't validate
-        $this->assertEquals((object)[
-            "name" => "my-datapackage-name",
-            "resources" => [
-                (object)[
-                    "name" => "my-default-resource",
-                    "data" => []
+        $this->assertEquals((object) [
+            'name' => 'my-datapackage-name',
+            'resources' => [
+                (object) [
+                    'name' => 'my-default-resource',
+                    'data' => [],
                 ],
-                (object)[
-                    "name" => "my-tabular-resource",
-                    "data" => []
-                ]
-            ]
+                (object) [
+                    'name' => 'my-tabular-resource',
+                    'data' => [],
+                ],
+            ],
         ], $datapackage->descriptor());
 
         // you can now modify the descriptor further
-        $datapackage->descriptor()->resources[1]->name = "my-renamed-tabular-resource";
+        $datapackage->descriptor()->resources[1]->name = 'my-renamed-tabular-resource';
 
         // when you are done you can revalidate
-        try { $datapackage->revalidate(); $this->fail(); } catch (\Exception $e) {
+        try {
+            $datapackage->revalidate();
+            $this->fail();
+        } catch (\Exception $e) {
             $this->assertEquals(
-                "Datapackage validation failed: "
-                        ."[resources[0].data] There must be a minimum of 1 items in the array, "
-                        ."[resources[1].data] There must be a minimum of 1 items in the array",
+                'Datapackage validation failed: '
+                        .'[resources[0].data] There must be a minimum of 1 items in the array, '
+                        .'[resources[1].data] There must be a minimum of 1 items in the array',
                 $e->getMessage()
             );
         }
 
         // you can expect errors if you use the datapackage before it validates
-        try { foreach ($datapackage as $resource) {} } catch (\Exception $e) {
+        try {
+            foreach ($datapackage as $resource) {
+            }
+        } catch (\Exception $e) {
             $this->assertEquals(
-                "resource validation failed: [data] There must be a minimum of 1 items in the array",
+                'resource validation failed: [data] There must be a minimum of 1 items in the array',
                 $e->getMessage()
             );
         }
@@ -383,37 +392,40 @@ class DatapackageTest extends TestCase
         // for both existing and non-existing files which will be written to
 
         // an existing data item
-        $datapackage->resource("my-default-resource")->descriptor()->data[] = dirname(__FILE__)."/fixtures/foo.txt";
+        $datapackage->resource('my-default-resource')->descriptor()->data[] = dirname(__FILE__).'/fixtures/foo.txt';
 
         // non-existing data items
-        $datapackage->resource("my-default-resource")->descriptor()->data[] = tempnam(sys_get_temp_dir(), "datapackage-php-tests-").".csv";
-        $datapackage->resource("my-renamed-tabular-resource")->descriptor()->data[] = tempnam(sys_get_temp_dir(), "datapackage-php-tests-").".csv";
+        $datapackage->resource('my-default-resource')->descriptor()->data[] = tempnam(sys_get_temp_dir(), 'datapackage-php-tests-').'.csv';
+        $datapackage->resource('my-renamed-tabular-resource')->descriptor()->data[] = tempnam(sys_get_temp_dir(), 'datapackage-php-tests-').'.csv';
 
         // iterate over the data - will yield for first resource but raise exception for 2nd
         foreach ($datapackage as $resource) {
-            if ($resource->name() == "my-default-resource") {
+            if ($resource->name() == 'my-default-resource') {
                 foreach ($resource as $dataStream) {
                     foreach ($dataStream as $row) {
-                        $this->assertEquals("foo", $row);
+                        $this->assertEquals('foo', $row);
                     }
                     break;
                 }
             } else {
                 // but the non-existant resources raise an exception
-                try { foreach ($resource as $dataStream) {} } catch (Exceptions\DataStreamOpenException $e) {
-                    $this->assertContains("Failed to open data source", $e->getMessage());
+                try {
+                    foreach ($resource as $dataStream) {
+                    }
+                } catch (Exceptions\DataStreamOpenException $e) {
+                    $this->assertContains('Failed to open data source', $e->getMessage());
                 }
             }
-        };
+        }
 
         // write data to the new simple data source
         // you have to do this yourself, we don't support writing data stream at the moment
-        $filename = $datapackage->resource("my-default-resource")->descriptor()->data[1];
+        $filename = $datapackage->resource('my-default-resource')->descriptor()->data[1];
         file_put_contents($filename, "testing 改善\n");
 
         // now you can access the data normally
         $i = 0;
-        foreach ($datapackage->resource("my-default-resource") as $data) {
+        foreach ($datapackage->resource('my-default-resource') as $data) {
             if ($i == 1) {
                 $j = 0;
                 foreach ($data as $row) {
@@ -424,31 +436,31 @@ class DatapackageTest extends TestCase
                     } else {
                         $this->fail();
                     }
-                    $j++;
+                    ++$j;
                 }
             }
-            $i++;
+            ++$i;
         }
 
         // save the descriptor to json file
-        $filename = tempnam(sys_get_temp_dir(), "datapackage-php-tests-");
+        $filename = tempnam(sys_get_temp_dir(), 'datapackage-php-tests-');
         $datapackage->saveDescriptor($filename);
-        $this->assertEquals((object)[
-            "name" => "my-datapackage-name",
-            "resources" => [
-                (object)[
-                    "name" => "my-default-resource",
-                    "data" => $datapackage->resource("my-default-resource")->descriptor()->data
+        $this->assertEquals((object) [
+            'name' => 'my-datapackage-name',
+            'resources' => [
+                (object) [
+                    'name' => 'my-default-resource',
+                    'data' => $datapackage->resource('my-default-resource')->descriptor()->data,
                 ],
-                (object)[
-                    "name" => "my-renamed-tabular-resource",
-                    "data" => $datapackage->resource("my-renamed-tabular-resource")->descriptor()->data
-                ]
-            ]
+                (object) [
+                    'name' => 'my-renamed-tabular-resource',
+                    'data' => $datapackage->resource('my-renamed-tabular-resource')->descriptor()->data,
+                ],
+            ],
         ], json_decode(file_get_contents($filename)));
     }
 
-    protected function assertDatapackageValidation($expectedMessages, $source, $basePath=null)
+    protected function assertDatapackageValidation($expectedMessages, $source, $basePath = null)
     {
         $validationErrors = Factory::validate($source, $basePath);
         $this->assertEquals(
@@ -458,7 +470,7 @@ class DatapackageTest extends TestCase
     }
 
     /**
-     * @param object $expectedDescriptor
+     * @param object             $expectedDescriptor
      * @param DefaultDatapackage $datapackage
      */
     protected function assertDatapackageDescriptor($expectedDescriptor, $datapackage)
@@ -467,7 +479,7 @@ class DatapackageTest extends TestCase
     }
 
     /**
-     * @param array $expectedData
+     * @param array              $expectedData
      * @param DefaultDatapackage $datapackage
      */
     protected function assertDatapackageData($expectedData, $datapackage)
@@ -490,7 +502,7 @@ class DatapackageTest extends TestCase
     /**
      * @param string $source
      * @param object $expectedDescriptor
-     * @param array $expectedData
+     * @param array  $expectedData
      */
     protected function assertDatapackage($expectedDescriptor, $expectedData, $datapackage)
     {
@@ -502,7 +514,7 @@ class DatapackageTest extends TestCase
     {
         try {
             $datapackageCallback();
-            $this->fail("expected an exception");
+            $this->fail('expected an exception');
         } catch (\Exception $e) {
             $actualExceptionClass = get_class($e);
             $this->assertEquals(
@@ -517,7 +529,7 @@ class DatapackageTest extends TestCase
     protected function getFopenErrorMessage($in)
     {
         try {
-            fopen($in, "r");
+            fopen($in, 'r');
         } catch (\Exception $e) {
             return $e->getMessage();
         }

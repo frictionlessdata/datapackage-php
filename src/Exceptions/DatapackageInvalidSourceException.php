@@ -1,6 +1,7 @@
 <?php
+
 namespace frictionlessdata\datapackage\Exceptions;
 
-class DatapackageInvalidSourceException extends \Exception {
-
+class DatapackageInvalidSourceException extends \Exception
+{
 }
