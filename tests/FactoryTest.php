@@ -18,7 +18,7 @@ class FactoryTest extends TestCase
         $descriptor = (object) [
             'name' => 'my-custom-datapackage',
             'resources' => [
-                (object) ['name' => 'my-custom-resource', 'data' => ['tests/fixtures/foo.txt']],
+                (object) ['name' => 'my-custom-resource', 'path' => ['tests/fixtures/foo.txt']],
             ],
         ];
         // get a datapackage object based on this descriptor
@@ -55,7 +55,7 @@ class FactoryTest extends TestCase
             'frictionlessdata\\datapackage\\tests\\Mocks\\MyCustomResource'
         );
         // a descriptor without the goGoPowerRangers property
-        $descriptor = (object) ['name' => 'my-custom-resource', 'data' => ['tests/fixtures/foo.txt']];
+        $descriptor = (object) ['name' => 'my-custom-resource', 'path' => ['tests/fixtures/foo.txt']];
         // create a resource object based on the descriptor
         $resource = Factory::resource($descriptor);
         // got a normal resource

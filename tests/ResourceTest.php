@@ -13,7 +13,7 @@ class ResourceTest extends TestCase
             Mocks\MockFactory::resource(
                 (object) [
                     'name' => 'resource-name',
-                    'data' => [
+                    'path' => [
                         'mock-http://foo.txt', // basePath will not be added to http source
                         'foo.txt', // basePath will be added here
                     ],

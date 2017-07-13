@@ -27,8 +27,8 @@ class ResourceValidator extends BaseValidator
         // need to ensure all attributes exist because we are before schema validation
         // TODO: find a more elegant way to do it with support for registring custom url fields
         $descriptor = clone $this->descriptor;
-        if (isset($descriptor->data) && is_array($descriptor->data)) {
-            foreach ($descriptor->data as &$url) {
+        if (isset($descriptor->path) && is_array($descriptor->path)) {
+            foreach ($descriptor->path as &$url) {
                 $url = 'file://'.$url;
             }
         }
@@ -52,7 +52,7 @@ class ResourceValidator extends BaseValidator
     protected function validateKeys()
     {
         $resourceClass = $this->getResourceClass();
-        foreach ($this->descriptor->data as $dataSource) {
+        foreach ($this->descriptor->path as $dataSource) {
             foreach ($resourceClass::validateDataSource($dataSource, $this->basePath) as $error) {
                 $this->errors[] = $error;
             }

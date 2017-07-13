@@ -5,7 +5,7 @@
   "type": "object",
   "required": [
     "name",
-    "data",
+    "path",
     "custom"
   ],
   "properties": {
@@ -39,7 +39,7 @@
         "{\n  \"name\": \"my-nice-name\"\n}\n"
       ]
     },
-    "data": {
+    "path": {
       "propertyOrder": 30,
       "title": "Data",
       "description": "A reference to the data for this resource. `data` `MUST` be an array of valid URIs.",

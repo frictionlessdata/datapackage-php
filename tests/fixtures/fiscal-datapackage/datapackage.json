@@ -7,7 +7,7 @@
       "name": "budget",
       "title": "Budget",
       "profile": "data-resource",
-      "data": ["budget.csv"],
+      "path": ["budget.csv"],
       "schema": {
         "fields": [
           {
@@ -44,7 +44,7 @@
       "name": "entities",
       "title": "Entities",
       "profile": "data-resource",
-      "data": ["entities.csv"],
+      "path": ["entities.csv"],
       "schema": {
         "fields": [
           {

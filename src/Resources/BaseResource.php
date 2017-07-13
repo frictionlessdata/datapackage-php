@@ -61,7 +61,7 @@ abstract class BaseResource implements \Iterator
 
     public function current()
     {
-        return $this->getDataStream($this->descriptor()->data[$this->currentDataPosition]);
+        return $this->getDataStream($this->descriptor()->path[$this->currentDataPosition]);
     }
 
     public function key()
@@ -76,7 +76,7 @@ abstract class BaseResource implements \Iterator
 
     public function valid()
     {
-        return isset($this->descriptor()->data[$this->currentDataPosition]);
+        return isset($this->descriptor()->path[$this->currentDataPosition]);
     }
 
     public static function validateDataSource($dataSource, $basePath = null)
@@ -97,6 +97,7 @@ abstract class BaseResource implements \Iterator
     {
         return new static((object) [
             'name' => $name,
+            'path' => [],
             'data' => [],
         ], $basePath, true);
     }

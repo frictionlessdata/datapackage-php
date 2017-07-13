@@ -90,7 +90,7 @@ class RegistryTest extends TestCase
                 (object) [
                     'name' => 'custom-resource',
                     'profile' => 'test-custom-resource-profile.schema.json',
-                    'data' => ['foo.txt'],
+                    'path' => ['foo.txt'],
                 ],
             ],
         ];
@@ -134,7 +134,7 @@ class RegistryTest extends TestCase
                 (object) [
                     'name' => 'custom-resource',
                     'profile' => 'test-custom-resource-profile.schema.json',
-                    'data' => ['foo.txt'],
+                    'path' => ['foo.txt'],
                     'custom' => ['1', '2', '3'],
                 ],
             ],
@@ -167,7 +167,7 @@ class RegistryTest extends TestCase
                 (object) [
                     'name' => 'custom-resource',
                     'profile' => 'test-custom-resource-profile',
-                    'data' => ['foo.txt'],
+                    'path' => ['foo.txt'],
                     'custom' => ['1', '2', '3'],
                 ],
             ],

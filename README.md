@@ -59,7 +59,7 @@ $datapackage->deleteResource("resource-name");
 
 // add a resource - will raise exception in case of validation error for the new descriptor
 $resource = Factory::resource((object)[
-    "name" => "new-resource", "data" => ["tests/fixtures/foo.txt", "tests/fixtures/baz.txt"]
+    "name" => "new-resource", "path" => ["tests/fixtures/foo.txt", "tests/fixtures/baz.txt"]
 ])
 $datapackage->addResource($resource);
 
@@ -85,8 +85,8 @@ $datapackage->resource("my-tabular-resource")->descriptor()->schema = (object)[
 ];
 
 // add data files
-$datapackage->resource("my-tabular-resource")->descriptor()->data[] = "/path/to/file-1.csv";
-$datapackage->resource("my-tabular-resource")->descriptor()->data[] = "/path/to/file-2.csv";
+$datapackage->resource("my-tabular-resource")->descriptor()->path[] = "/path/to/file-1.csv";
+$datapackage->resource("my-tabular-resource")->descriptor()->path[] = "/path/to/file-2.csv";
 
 // re-validate the new descriptor
 $datapackage->revalidate();
