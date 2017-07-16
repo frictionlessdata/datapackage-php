@@ -34,7 +34,7 @@ abstract class BaseDatapackage implements \Iterator
             'resources' => [],
         ], $basePath, true);
         foreach ($resources as $resource) {
-            $datapackage->addResource($resource, true);
+            $datapackage->addResource($resource);
         }
 
         return $datapackage;

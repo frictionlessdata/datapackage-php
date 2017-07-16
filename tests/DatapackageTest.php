@@ -6,7 +6,8 @@ use frictionlessdata\datapackage\Validators\DatapackageValidationError;
 use PHPUnit\Framework\TestCase;
 use frictionlessdata\datapackage\Datapackages\DefaultDatapackage;
 use frictionlessdata\datapackage\Exceptions;
-use frictionlessdata\datapackage\Factory;
+use frictionlessdata\datapackage\Package;
+use frictionlessdata\datapackage\Resource;
 use frictionlessdata\tableschema\InferSchema;
 use frictionlessdata\tableschema\Table;
 use frictionlessdata\tableschema\DataSources\CsvDataSource;
@@ -44,7 +45,7 @@ class DatapackageTest extends TestCase
         $this->assertDatapackageException(
             'frictionlessdata\\datapackage\\Exceptions\\DatapackageInvalidSourceException',
             'Invalid source: {"name":"datapackage-name","resources":[{"name":"resource-name","path":["foo.txt"]}]}',
-            function () use ($descriptorArray) { Factory::datapackage($descriptorArray); }
+            function () use ($descriptorArray) { Package::load($descriptorArray); }
         );
     }
 
@@ -54,7 +55,7 @@ class DatapackageTest extends TestCase
         $this->assertDatapackageException(
             'frictionlessdata\\datapackage\\Exceptions\\DatapackageValidationFailedException',
             'Datapackage validation failed: data source file does not exist or is not readable: foo.txt',
-            function () use ($descriptor) { Factory::datapackage($descriptor); }
+            function () use ($descriptor) { Package::load($descriptor); }
         );
     }
 
@@ -62,7 +63,7 @@ class DatapackageTest extends TestCase
     {
         $this->assertDatapackage(
             $this->simpleDescriptor, $this->simpleDescriptorExpectedData,
-            Factory::datapackage($this->simpleDescriptor, $this->fixturesPath)
+            Package::load($this->simpleDescriptor, $this->fixturesPath)
         );
     }
 
@@ -72,7 +73,7 @@ class DatapackageTest extends TestCase
         $this->assertDatapackageException(
             'frictionlessdata\\datapackage\\Exceptions\\DatapackageValidationFailedException',
             'Datapackage validation failed: data source file does not exist or is not readable: foo.txt',
-            function () use ($source) { Factory::datapackage($source); }
+            function () use ($source) { Package::load($source); }
         );
     }
 
@@ -81,7 +82,7 @@ class DatapackageTest extends TestCase
         $source = json_encode($this->simpleDescriptor);
         $this->assertDatapackage(
             $this->simpleDescriptor, $this->simpleDescriptorExpectedData,
-            Factory::datapackage($source, $this->fixturesPath)
+            Package::load($source, $this->fixturesPath)
         );
     }
 
@@ -90,7 +91,7 @@ class DatapackageTest extends TestCase
         $this->assertDatapackageException(
             'frictionlessdata\\datapackage\\Exceptions\\DatapackageInvalidSourceException',
             'Failed to load source: "-invalid-": '.$this->getFileGetContentsErrorMessage('-invalid-'),
-            function () { Factory::datapackage('-invalid-'); }
+            function () { Package::load('-invalid-'); }
         );
     }
 
@@ -98,7 +99,7 @@ class DatapackageTest extends TestCase
     {
         $this->assertDatapackage(
             $this->simpleDescriptor, $this->simpleDescriptorExpectedData,
-            Factory::datapackage('simple_valid_datapackage.json', $this->fixturesPath)
+            Package::load('simple_valid_datapackage.json', $this->fixturesPath)
         );
     }
 
@@ -106,7 +107,7 @@ class DatapackageTest extends TestCase
     {
         $this->assertDatapackage(
             $this->simpleDescriptor, $this->simpleDescriptorExpectedData,
-            Factory::datapackage('tests/fixtures/simple_valid_datapackage.json')
+            Package::load('tests/fixtures/simple_valid_datapackage.json')
         );
     }
 
@@ -129,7 +130,7 @@ class DatapackageTest extends TestCase
     public function testMultiDataDatapackage()
     {
         $out = [];
-        $datapackage = Factory::datapackage('tests/fixtures/multi_data_datapackage.json');
+        $datapackage = Package::load('tests/fixtures/multi_data_datapackage.json');
         foreach ($datapackage as $resource) {
             $out[] = '-- '.$resource->name().' --';
             $i = 0;
@@ -170,7 +171,7 @@ class DatapackageTest extends TestCase
 
     public function testDatapackageValidation()
     {
-        $this->assertEquals([], Factory::validate('tests/fixtures/multi_data_datapackage.json'));
+        $this->assertEquals([], Package::validate('tests/fixtures/multi_data_datapackage.json'));
     }
 
     public function testDatapackageValidationFailed()
@@ -184,7 +185,7 @@ class DatapackageTest extends TestCase
     public function testDatapackageValidationFailedShouldPreventConstruct()
     {
         try {
-            Factory::datapackage((object) ['name' => 'foobar']);
+            Package::load((object) ['name' => 'foobar']);
             $caughtException = null;
         } catch (Exceptions\DatapackageValidationFailedException $e) {
             $caughtException = $e;
@@ -280,7 +281,7 @@ class DatapackageTest extends TestCase
 
         // add a resource
         $this->assertCount(1, $datapackage->resources());
-        $datapackage->addResource(Factory::resource((object) [
+        $datapackage->addResource(Resource::load((object) [
             'name' => 'new-resource', 'path' => ['tests/fixtures/foo.txt', 'tests/fixtures/baz.txt'],
         ]));
         $this->assertCount(2, $datapackage->resources());
@@ -313,7 +314,7 @@ class DatapackageTest extends TestCase
 
     public function testFiscalDatapackage()
     {
-        $dp = Factory::datapackage('tests/fixtures/fiscal-datapackage/datapackage.json');
+        $dp = Package::load('tests/fixtures/fiscal-datapackage/datapackage.json');
         $resources_data = [];
         foreach ($dp as $resource) {
             $resources_data[$resource->name()] = [];
@@ -461,7 +462,7 @@ class DatapackageTest extends TestCase
 
     protected function assertDatapackageValidation($expectedMessages, $source, $basePath = null)
     {
-        $validationErrors = Factory::validate($source, $basePath);
+        $validationErrors = Package::validate($source, $basePath);
         $this->assertEquals(
             $expectedMessages,
             DatapackageValidationError::getErrorMessages($validationErrors)

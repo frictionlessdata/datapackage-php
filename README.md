@@ -9,8 +9,7 @@
 
 A utility library for working with [Data Package](https://specs.frictionlessdata.io/data-package/) in PHP.
 
-
-## Getting Started
+## Features summary and Usage guide
 
 ### Installation
 
@@ -18,51 +17,52 @@ A utility library for working with [Data Package](https://specs.frictionlessdata
 $ composer require frictionlessdata/datapackage
 ```
 
-### Usage
+### Package
+
+Load a data package conforming to the specs
 
 ```php
-use frictionlessdata\datapackage;
+use frictionlessdata\datapackage\Package;
+$package = Package::load("tests/fixtures/multi_data_datapackage.json");
+```
 
-// get a datapackage object
-$datapackage = datapackage\Factory::datapackage("tests/fixtures/multi_data_datapackage.json");
+Iterate over the resources and the data.
 
-// iterate over the data - it will raise exceptions in case of any problems
+```php
 foreach ($datapackage as $resource) {
-    print("-- ".$resource->name()." --");
-    $i = 0;
+    $resource->name(); // "first-resource"
     foreach ($resource as $dataStream) {
-        print("-dataStream ".++$i);
         foreach ($dataStream as $line) {
-            print($line);
+            $line;  // ["key"=>"value", .. ]
         }
     }
 }
+```
 
-// validate a datapackage descriptor
-$validationErrors = datapackage\Factory::validate("tests/fixtures/simple_invalid_datapackage.json");
-if (count($validationErrors) == 0) {
-    print("descriptor is valid");
-} else {
-    print(datapackage\Validators\DatapackageValidationError::getErrorMessages($validationErrors));
-}
+All data and schemas are validated and throws exceptions in case of any problems.
 
-// get and manipulate resources
-$resources = $datapackage->resources();
-$resources["resource-name"]->name() == "resource-name"
-$resources["another-resource-name"] //  BaseResource based object (e.g. DefaultResource / TabularResource)
+You can also validate the data explicitly and get a list of errors
 
-// get a single resource by name
-$datapackage->resource("resource-name")
+```php
+Package::validate("tests/fixtures/simple_invalid_datapackage.json");  // array of validation errors
+```
 
-// delete a resource by name - will raise exception in case of validation failure for the new descriptor
-$datapackage->deleteResource("resource-name");
+The datapackage object has some useful methods to access and manipulate the resources
 
-// add a resource - will raise exception in case of validation error for the new descriptor
-$resource = Factory::resource((object)[
-    "name" => "new-resource", "path" => ["tests/fixtures/foo.txt", "tests/fixtures/baz.txt"]
-])
-$datapackage->addResource($resource);
+```php
+$package = Package::load("tests/fixtures/multi_data_datapackage.json");
+$package->resources();  // array of resource name => Resource object (see below for Resource class reference)
+$package->resoure("resource-name");  // Resource object
+$package->deleteResource("resource-name");
+$package->resource("resource-name", ["path" => [
+    "tests/fixtures/foo.txt", 
+    "tests/fixtures/baz.txt"
+]]);  // adds or replace resource
+```
 
+### Additional functionality
+
+```php
 // register custom datapackage or resource classes which can override / extend core classes
 // these custom classes run a test against the schema to decide whether to handle a given descriptor or not
 Factory::registerDatapackageClass("my\\custom\\DatapackageClass");
@@ -93,6 +93,11 @@ $datapackage->revalidate();
 
 // save the datapackage descriptor to a file
 $datapackage->saveDescriptor("datapackage.json");
+
+
+// get and manipulate resources
+$resource->name() == "resource-name"
+$resource //  BaseResource based object (e.g. DefaultResource / TabularResource)
 ```
 
 
