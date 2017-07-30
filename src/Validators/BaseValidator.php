@@ -1,4 +1,5 @@
 <?php
+
 namespace frictionlessdata\datapackage\Validators;
 
 use frictionlessdata\datapackage\Registry;
@@ -8,21 +9,24 @@ use frictionlessdata\tableschema\SchemaValidationError;
 
 abstract class BaseValidator extends SchemaValidator
 {
-    public function __construct($descriptor, $basePath=null)
+    public function __construct($descriptor, $basePath = null)
     {
         $this->basePath = $basePath;
         parent::__construct($descriptor);
     }
 
     /**
-     * validate a descriptor
+     * validate a descriptor.
+     *
      * @param object $descriptor
      * @param string $basePath
+     *
      * @return \frictionlessdata\tableschema\SchemaValidationError[]
      */
-    public static function validate($descriptor, $basePath=null)
+    public static function validate($descriptor, $basePath = null)
     {
         $validator = new static($descriptor, $basePath);
+
         return $validator->getValidationErrors();
     }
 
@@ -31,7 +35,8 @@ abstract class BaseValidator extends SchemaValidator
     /**
      * should be implemented properly by extending classes
      * should return the profile used for validation
-     * if using the default getValidationSchemaUrl function - this value should correspond to a file in schemas/ directory
+     * if using the default getValidationSchemaUrl function - this value should correspond to a file in schemas/ directory.
+     *
      * @return string
      */
     protected function getValidationProfile()
@@ -43,7 +48,7 @@ abstract class BaseValidator extends SchemaValidator
     {
         $filename = realpath($filename);
         if (file_exists($filename)) {
-            return "file://".$filename;
+            return 'file://'.$filename;
         } else {
             throw new \Exception("failed to find schema file: '{$filename}' for descriptor ".json_encode($this->descriptor));
         }
@@ -55,7 +60,8 @@ abstract class BaseValidator extends SchemaValidator
     }
 
     /**
-     * get the url which the schema for validation can be fetched from
+     * get the url which the schema for validation can be fetched from.
+     *
      * @return string
      */
     protected function getValidationSchemaUrl()
@@ -77,16 +83,18 @@ abstract class BaseValidator extends SchemaValidator
     }
 
     /**
-     * Allows to specify different error classes for different validators
+     * Allows to specify different error classes for different validators.
+     *
      * @return string
      */
     protected function getSchemaValidationErrorClass()
     {
-        return "frictionlessdata\\tableschema\\SchemaValidationError";
+        return 'frictionlessdata\\tableschema\\SchemaValidationError';
     }
 
     /**
-     * allows extending classes to modify the descriptor before passing to the validator
+     * allows extending classes to modify the descriptor before passing to the validator.
+     *
      * @return object
      */
     protected function getDescriptorForValidation()
@@ -95,17 +103,19 @@ abstract class BaseValidator extends SchemaValidator
     }
 
     /**
-     * conver the validation error message received from JsonSchema to human readable string
+     * conver the validation error message received from JsonSchema to human readable string.
+     *
      * @param array $error
+     *
      * @return string
      */
     protected function getValidationErrorMessage($error)
     {
-        return sprintf("[%s] %s", $error['property'], $error['message']);
+        return sprintf('[%s] %s', $error['property'], $error['message']);
     }
 
     /**
-     * does the validation, adds errors to the validator object using _addError method
+     * does the validation, adds errors to the validator object using _addError method.
      */
     protected function validateSchema()
     {
@@ -116,7 +126,7 @@ abstract class BaseValidator extends SchemaValidator
     {
         $validator = new \JsonSchema\Validator();
         $descriptor = $this->getDescriptorForValidation();
-        $validator->validate($descriptor, (object)["\$ref" => $url]);
+        $validator->validate($descriptor, (object) ['$ref' => $url]);
         if (!$validator->isValid()) {
             foreach ($validator->getErrors() as $error) {
                 $this->addError(
@@ -128,11 +138,12 @@ abstract class BaseValidator extends SchemaValidator
     }
 
     /**
-     * Add an error to the validator object - errors are aggregated and returned by validate function
-     * @param integer $code
+     * Add an error to the validator object - errors are aggregated and returned by validate function.
+     *
+     * @param int        $code
      * @param null|mixed $extraDetails
      */
-    protected function addError($code, $extraDetails=null)
+    protected function addError($code, $extraDetails = null)
     {
         // modified from parent function to support changing the error class
         $errorClass = $this->getSchemaValidationErrorClass();

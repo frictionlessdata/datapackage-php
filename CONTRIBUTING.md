@@ -45,6 +45,11 @@ It does static code analysis and ensure confirmation to the coding stnadards.
 
 At the moment, the integration with frictionlessdata repo is not working, you can setup a Scrutinizer-ci account for your fork and run against that.
 
+## php-cs-fixer - code style check & autofix
+
+[php-cs-fixer](https://github.com/FriendsOfPHP/PHP-CS-Fixer) can be used to check and fix code style
+
+you need to manually install it, then you can run : `composer style-check` or `composer style-fix`
 
 ## Publishing a release and updating Packagist
 

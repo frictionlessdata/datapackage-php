@@ -3,7 +3,7 @@
   "resources": [
     {
       "name": "default-resource-invalid-data",
-      "data": ["foo.txt", "--invalid--"]
+      "path": ["foo.txt", "--invalid--"]
     }
   ]
 }

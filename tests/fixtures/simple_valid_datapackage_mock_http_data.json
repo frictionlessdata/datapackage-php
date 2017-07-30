@@ -1,6 +1,6 @@
 {
   "name": "datapackage-name",
   "resources": [
-    { "name": "resource-name", "data": ["mock-http://foo.txt", "mock-http://foo.txt"] }
+    { "name": "resource-name", "path": ["mock-http://foo.txt", "mock-http://foo.txt"] }
   ]
 }

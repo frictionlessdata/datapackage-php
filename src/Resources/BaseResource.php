@@ -1,4 +1,5 @@
 <?php
+
 namespace frictionlessdata\datapackage\Resources;
 
 use frictionlessdata\datapackage\DataStreams\BaseDataStream;
@@ -12,14 +13,16 @@ abstract class BaseResource implements \Iterator
 {
     /**
      * BaseResource constructor.
-     * @param object $descriptor
+     *
+     * @param object      $descriptor
      * @param null|string $basePath
+     *
      * @throws ResourceValidationFailedException
      */
-    public function __construct($descriptor, $basePath, $skipValidations=false)
+    public function __construct($descriptor, $basePath, $skipValidations = false)
     {
         $this->basePath = $basePath;
-        $this->descriptor = $descriptor;
+        $this->descriptor = Utils::objectify($descriptor);
         $this->skipValidations = $skipValidations;
         if (!$this->skipValidations) {
             $validationErrors = $this->validateResource();
@@ -32,6 +35,32 @@ abstract class BaseResource implements \Iterator
     public static function handlesDescriptor($descriptor)
     {
         return static::handlesProfile(Registry::getResourceValidationProfile($descriptor));
+    }
+
+    public function read($options = null)
+    {
+        $rows = [];
+        foreach ($this as $row) {
+            $rows[] = $row;
+        }
+
+        return $rows;
+    }
+
+    public function dataStreams()
+    {
+        if (is_null($this->dataStreams)) {
+            $this->dataStreams = [];
+            foreach ($this->path() as $path) {
+                $this->dataStreams[] = $this->getDataStream($path);
+            }
+            $data = $this->data();
+            if ($data) {
+                $this->dataStreams[] = $this->getInlineDataStream($data);
+            }
+        }
+
+        return $this->dataStreams;
     }
 
     /**
@@ -50,14 +79,69 @@ abstract class BaseResource implements \Iterator
         return $this->descriptor()->name;
     }
 
-    // standard iterator functions - to iterate over the data sources
-    public function rewind() { $this->currentDataPosition = 0; }
-    public function current() { return $this->getDataStream($this->descriptor()->data[$this->currentDataPosition]); }
-    public function key() { return $this->currentDataPosition; }
-    public function next() { $this->currentDataPosition++; }
-    public function valid() { return isset($this->descriptor()->data[$this->currentDataPosition]); }
+    public function path()
+    {
+        if (isset($this->descriptor()->path)) {
+            $path = $this->descriptor()->path;
+            if (!is_array($path)) {
+                $path = [$path];
+            }
 
-    public static function validateDataSource($dataSource, $basePath=null)
+            return $path;
+        } else {
+            return [];
+        }
+    }
+
+    public function data()
+    {
+        return isset($this->descriptor()->data) ? $this->descriptor()->data : null;
+    }
+
+    // standard iterator functions - to iterate over the data sources
+    public function rewind()
+    {
+        $this->dataStreams = null;
+        $this->currentDataStream = 0;
+        foreach ($this->dataStreams() as $dataStream) {
+            $dataStream->rewind();
+        }
+    }
+
+    public function current()
+    {
+        return $this->dataStreams()[$this->currentDataStream]->current();
+    }
+
+    public function key()
+    {
+        return $this->dataStreams()[$this->currentDataStream]->key();
+    }
+
+    public function next()
+    {
+        return $this->dataStreams()[$this->currentDataStream]->next();
+    }
+
+    public function valid()
+    {
+        $dataStreams = $this->dataStreams();
+        if ($dataStreams[$this->currentDataStream]->valid()) {
+            // current data stream is still valid
+            return true;
+        } else {
+            ++$this->currentDataStream;
+            if (isset($dataStreams[$this->currentDataStream])) {
+                // current data stream is done, but we have another data stream
+                return true;
+            } else {
+                // no more data and no more data streams
+                return false;
+            }
+        }
+    }
+
+    public static function validateDataSource($dataSource, $basePath = null)
     {
         $errors = [];
         $dataSource = static::normalizeDataSource($dataSource, $basePath);
@@ -67,25 +151,20 @@ abstract class BaseResource implements \Iterator
                 "data source file does not exist or is not readable: {$dataSource}"
             );
         }
-        return $errors;
-    }
 
-    public static function create($name, $basePath=null)
-    {
-        return new static((object)[
-            "name" => $name,
-            "data" => []
-        ], $basePath, true);
+        return $errors;
     }
 
     /**
      * allows extending classes to add custom sources
-     * used by unit tests to add a mock http source
+     * used by unit tests to add a mock http source.
+     *
      * @param string $dataSource
      * @param string $basePath
+     *
      * @return string
      */
-    public static function normalizeDataSource($dataSource, $basePath=null)
+    public static function normalizeDataSource($dataSource, $basePath = null)
     {
         if (!empty($basePath) && !Utils::isHttpSource($dataSource)) {
             // TODO: support JSON pointers
@@ -94,6 +173,7 @@ abstract class BaseResource implements \Iterator
                 $dataSource = $absPath;
             }
         }
+
         return $dataSource;
     }
 
@@ -101,6 +181,8 @@ abstract class BaseResource implements \Iterator
     protected $basePath;
     protected $skipValidations = false;
     protected $currentDataPosition = 0;
+    protected $currentDataStream = 0;
+    protected $dataStreams = null;
 
     protected function validateResource()
     {
@@ -109,9 +191,12 @@ abstract class BaseResource implements \Iterator
 
     /**
      * @param string $dataSource
+     *
      * @return BaseDataStream
      */
     abstract protected function getDataStream($dataSource);
+
+    abstract protected function getInlineDataStream($data);
 
     protected static function handlesProfile($profile)
     {
