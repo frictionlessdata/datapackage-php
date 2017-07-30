@@ -19,7 +19,7 @@ class DatapackageValidationError extends BaseValidationError
             case static::DATA_STREAM_FAILURE:
                 return "resource {$this->extraDetails['resource']}"
                     //."data stream {$this->extraDetails['dataStream']}"
-                    .($this->extraDetails['line']?", line number {$this->extraDetails['line']}":"")
+                    .($this->extraDetails['line'] ? ", line number {$this->extraDetails['line']}" : '')
                     .': '.$this->extraDetails['error'];
             default:
                 return parent::getMessage();

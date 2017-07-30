@@ -4,7 +4,6 @@ namespace frictionlessdata\datapackage;
 
 class Package
 {
-
     public static function load($source, $basePath = null)
     {
         return Factory::datapackage($source, $basePath);
@@ -18,9 +17,11 @@ class Package
     public static function create($descriptor = null, $basePath = null)
     {
         $descriptor = Utils::objectify($descriptor);
-        if ($descriptor && !isset($descriptor->resources)) $descriptor->resources = [];
+        if ($descriptor && !isset($descriptor->resources)) {
+            $descriptor->resources = [];
+        }
         $packageClass = Factory::getDatapackageClass($descriptor);
+
         return new $packageClass($descriptor, $basePath, true);
     }
-
 }

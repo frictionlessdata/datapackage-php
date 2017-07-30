@@ -13,7 +13,7 @@ class TabularInlineDataStream extends TabularDataStream
         if (is_array($data)) {
             $numFields = count($this->schema->fields());
             $objRows = [];
-            if (array_sum(array_keys($data[0])) == array_sum(range(0, $numFields-1))) {
+            if (array_sum(array_keys($data[0])) == array_sum(range(0, $numFields - 1))) {
                 // Row Arrays - convert to Row Objects
                 $header = array_shift($data);
                 foreach ($data as $row) {
@@ -27,6 +27,7 @@ class TabularInlineDataStream extends TabularDataStream
                 // Row Objects - no processing needed
                 $objRows = $data;
             }
+
             return new NativeDataSource($objRows);
         } else {
             throw new DataStreamOpenException('inline tabular data must be an array');

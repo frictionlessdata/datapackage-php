@@ -37,12 +37,13 @@ abstract class BaseResource implements \Iterator
         return static::handlesProfile(Registry::getResourceValidationProfile($descriptor));
     }
 
-    public function read($options=null)
+    public function read($options = null)
     {
         $rows = [];
         foreach ($this as $row) {
             $rows[] = $row;
         }
+
         return $rows;
     }
 
@@ -52,12 +53,13 @@ abstract class BaseResource implements \Iterator
             $this->dataStreams = [];
             foreach ($this->path() as $path) {
                 $this->dataStreams[] = $this->getDataStream($path);
-            };
+            }
             $data = $this->data();
             if ($data) {
                 $this->dataStreams[] = $this->getInlineDataStream($data);
             }
         }
+
         return $this->dataStreams;
     }
 
@@ -84,6 +86,7 @@ abstract class BaseResource implements \Iterator
             if (!is_array($path)) {
                 $path = [$path];
             }
+
             return $path;
         } else {
             return [];
@@ -127,7 +130,7 @@ abstract class BaseResource implements \Iterator
             // current data stream is still valid
             return true;
         } else {
-            $this->currentDataStream++;
+            ++$this->currentDataStream;
             if (isset($dataStreams[$this->currentDataStream])) {
                 // current data stream is done, but we have another data stream
                 return true;

@@ -11,8 +11,6 @@ use frictionlessdata\datapackage\Resource;
 use frictionlessdata\tableschema\InferSchema;
 use frictionlessdata\tableschema\Table;
 use frictionlessdata\tableschema\DataSources\CsvDataSource;
-use frictionlessdata\datapackage\Resources\DefaultResource;
-use frictionlessdata\datapackage\Resources\TabularResource;
 
 class DatapackageTest extends TestCase
 {
@@ -271,7 +269,7 @@ class DatapackageTest extends TestCase
 
         // add a resource
         $this->assertCount(1, $datapackage->resources());
-        $datapackage->resource("new-resource", [
+        $datapackage->resource('new-resource', [
             'path' => ['tests/fixtures/foo.txt', 'tests/fixtures/baz.txt'],
         ]);
         $this->assertCount(2, $datapackage->resources());
@@ -329,11 +327,11 @@ class DatapackageTest extends TestCase
         // create static method allows to create a new datapackage or resource without validation
         // with shortcut arguments for common use-cases
         $package = Package::create([
-            "name" => 'my-datapackage-name',
-            "resources" => [
-                ["name" => "my-default-resource"],
-                ["name" => "my-tabular-resource", "profile" => "tabular-data-resource"]
-            ]
+            'name' => 'my-datapackage-name',
+            'resources' => [
+                ['name' => 'my-default-resource'],
+                ['name' => 'my-tabular-resource', 'profile' => 'tabular-data-resource'],
+            ],
         ]);
         // the tabular resource is missing schema, but it doesn't fail
         // when creating a datapackage or resource with the create method it doesn't validate
@@ -345,17 +343,17 @@ class DatapackageTest extends TestCase
                 ],
                 (object) [
                     'name' => 'my-tabular-resource',
-                    "profile" => "tabular-data-resource"
+                    'profile' => 'tabular-data-resource',
                 ],
             ],
         ], $package->descriptor());
         // you can now modify the descriptor further by editing the descriptor directly
-        $package->descriptor()->resources[1]->name = "my-renamed-tabular-resource";
+        $package->descriptor()->resources[1]->name = 'my-renamed-tabular-resource';
         $package->descriptor()->resources[1]->schema = [
-            "fields" => [
-                ["name" => "id", "type" => "integer"],
-                ["name" => "name", "type" => "string"]
-            ]
+            'fields' => [
+                ['name' => 'id', 'type' => 'integer'],
+                ['name' => 'name', 'type' => 'string'],
+            ],
         ];
         // when you are done you can revalidate
         try {
@@ -380,7 +378,7 @@ class DatapackageTest extends TestCase
 
         $defaultSecondPath = tempnam(sys_get_temp_dir(), 'datapackage-php-tests-').'.csv';
         $package->resource('my-default-resource')->descriptor()->path[] = $defaultSecondPath;
-        file_put_contents($defaultSecondPath, "BAHHH");
+        file_put_contents($defaultSecondPath, 'BAHHH');
 
         $tabularDataFilename = tempnam(sys_get_temp_dir(), 'datapackage-php-tests-').'.csv';
         $package->resource('my-renamed-tabular-resource')->descriptor()->path[] = $tabularDataFilename;
@@ -401,7 +399,7 @@ class DatapackageTest extends TestCase
                     $this->assertContains('Failed to open tabular data source', $e->getMessage());
                 }
             }
-        };
+        }
 
         // write data to the new simple data source
         // you have to do this yourself, we don't support writing data stream at the moment
@@ -412,7 +410,7 @@ class DatapackageTest extends TestCase
         $i = 0;
         foreach ($package->resource('my-default-resource') as $row) {
             if ($i == 0) {
-                $this->assertEquals("foo", $row);
+                $this->assertEquals('foo', $row);
             } elseif ($i == 1) {
                 $this->assertEquals("testing 改善\n", $row);
             } elseif ($i == 2) {
@@ -437,78 +435,78 @@ class DatapackageTest extends TestCase
                     'name' => 'my-renamed-tabular-resource',
                     'path' => [$tabularDataFilename],
                     'profile' => 'tabular-data-resource',
-                    'schema' => (object)[
-                        "fields" => [
-                            (object)["name" => "id", "type" => "integer"],
-                            (object)["name" => "name", "type" => "string"]
-                        ]
-                    ]
+                    'schema' => (object) [
+                        'fields' => [
+                            (object) ['name' => 'id', 'type' => 'integer'],
+                            (object) ['name' => 'name', 'type' => 'string'],
+                        ],
+                    ],
                 ],
             ],
         ], json_decode(file_get_contents($filename)));
 
         file_put_contents($tabularDataFilename, "id,name\n1,\"one\"\n2,\"two\"\n3,\"three\"");
         $this->assertEquals([
-            ["id" => 1, "name" => "one"],
-            ["id" => 2, "name" => "two"],
-            ["id" => 3, "name" => "three"]
-        ], $package->resource("my-renamed-tabular-resource")->read());
+            ['id' => 1, 'name' => 'one'],
+            ['id' => 2, 'name' => 'two'],
+            ['id' => 3, 'name' => 'three'],
+        ], $package->resource('my-renamed-tabular-resource')->read());
     }
 
     public function testStringPath()
     {
-        $package = Package::create(["resources" => [
-            ["name" => "_", "path" => dirname(__FILE__).'/fixtures/foo.txt']
+        $package = Package::create(['resources' => [
+            ['name' => '_', 'path' => dirname(__FILE__).'/fixtures/foo.txt'],
         ]]);
-        $this->assertEquals(["foo"], $package->resource("_")->read());
+        $this->assertEquals(['foo'], $package->resource('_')->read());
     }
 
     public function testInlineDataRowArrays()
     {
         $resource = Resource::create([
-            "name" => "_",
-            "profile" => "tabular-data-resource",
-            "schema" => [
-                "fields" => [
-                    ["name" => "id", "type" => "integer"],
-                    ["name" => "name", "type" => "string"]
-                ]
+            'name' => '_',
+            'profile' => 'tabular-data-resource',
+            'schema' => [
+                'fields' => [
+                    ['name' => 'id', 'type' => 'integer'],
+                    ['name' => 'name', 'type' => 'string'],
+                ],
             ],
-            "data" => [
-                ["id", "name"],
-                [1, "one"],
-                [2, "two"],
-                [3, "three"]
-            ]
+            'data' => [
+                ['id', 'name'],
+                [1, 'one'],
+                [2, 'two'],
+                [3, 'three'],
+            ],
         ]);
         $this->assertEquals([
-            ["id" => 1, "name" => "one"],
-            ["id" => 2, "name" => "two"],
-            ["id" => 3, "name" => "three"]
+            ['id' => 1, 'name' => 'one'],
+            ['id' => 2, 'name' => 'two'],
+            ['id' => 3, 'name' => 'three'],
         ], $resource->read());
     }
 
     public function testInlineDataRowObjects()
     {
         $resource = Resource::create([
-            "name" => "_",
-            "profile" => "tabular-data-resource",
-            "schema" => [
-                "fields" => [
-                    ["name" => "id", "type" => "integer"],
-                    ["name" => "name", "type" => "string"]
-                ]
+            'name' => '_',
+            'profile' => 'tabular-data-resource',
+            'schema' => [
+                'fields' => [
+                    ['name' => 'id', 'type' => 'integer'],
+                    ['name' => 'name', 'type' => 'string'],
+                ],
             ],
-            "data" => [
-                ["id" => 1, "name" => "one"],
-                ["id" => 2, "name" => "two"],
-                ["id" => 3, "name" => "three"]
-            ]
+            'data' => [
+                ['id' => 1, 'name' => 'one'],
+                ['id' => 2, 'name' => 'two'],
+                ['id' => 3, 'name' => 'three'],
+            ],
         ]);
         $this->assertEquals([
-            ["id" => 1, "name" => "one"],
-            ["id" => 2, "name" => "two"],
-            ["id" => 3, "name" => "three"]
+            ['id' => 1, 'name' => 'one'],
+            ['id' => 2, 'name' => 'two'],
+            ['id' => 3, 'name' => 'three'],
         ], $resource->read());
     }
 
