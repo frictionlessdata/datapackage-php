@@ -9,6 +9,7 @@
 
 A utility library for working with [Data Package](https://specs.frictionlessdata.io/data-package/) in PHP.
 
+
 ## Features summary and Usage guide
 
 ### Installation
@@ -26,78 +27,102 @@ use frictionlessdata\datapackage\Package;
 $package = Package::load("tests/fixtures/multi_data_datapackage.json");
 ```
 
-Iterate over the resources and the data.
+Iterate over the resources and the data
 
 ```php
-foreach ($datapackage as $resource) {
-    $resource->name(); // "first-resource"
-    foreach ($resource as $dataStream) {
-        foreach ($dataStream as $line) {
-            $line;  // ["key"=>"value", .. ]
-        }
+foreach ($package as $resource) {
+    echo $resource->name();
+    foreach ($resource as $row) {
+        echo $row;
     }
+}
+```
+
+Get all the data as an array (loads all the data into memory, not recommended for large data sets)
+
+```php
+foreach ($package as $resource) {
+    var_dump($resource->read());
 }
 ```
 
 All data and schemas are validated and throws exceptions in case of any problems.
 
-You can also validate the data explicitly and get a list of errors
+Validate the data explicitly and get a list of errors
 
 ```php
 Package::validate("tests/fixtures/simple_invalid_datapackage.json");  // array of validation errors
 ```
 
-The datapackage object has some useful methods to access and manipulate the resources
+The package object has some useful methods to access and manipulate the resources
 
 ```php
 $package = Package::load("tests/fixtures/multi_data_datapackage.json");
 $package->resources();  // array of resource name => Resource object (see below for Resource class reference)
-$package->resoure("resource-name");  // Resource object
-$package->deleteResource("resource-name");
-$package->resource("resource-name", ["path" => [
-    "tests/fixtures/foo.txt", 
-    "tests/fixtures/baz.txt"
-]]);  // adds or replace resource
+$package->resource("first-resource");  // Resource object matching the given name
+$package->deleteResource("first-resource");
+// add a tabular resource
+$package->resource("tabular-resource-name", [
+    "profile" => "tabular-data-resource",
+    "schema" => [
+        "fields" => [
+            ["name" => "id", "type" => "integer"],
+            ["name" => "name", "type" => "string"]
+        ]
+    ],
+    "path" => [
+        "tests/fixtures/simple_tabular_data.csv",
+    ]
+]);
 ```
 
-### Additional functionality
+Create a new package from scratch
 
 ```php
-// register custom datapackage or resource classes which can override / extend core classes
-// these custom classes run a test against the schema to decide whether to handle a given descriptor or not
-Factory::registerDatapackageClass("my\\custom\\DatapackageClass");
-Factory::registerResourceClass("my\\custom\\ResourceClass");
-
-// register custom profiles and related schemas for validation
-Registry::registerSchema("my-custom-profile-id", "path/to/my-custom-profile.schema.json");
-
-// create a new datapackage from scratch
-$datapackage = TabularDatapackage::create("my-tabular-datapackage", [
-    TabularResource::create("my-tabular-resource")
+$package = Package::create([
+    "name" => "datapackage-name",
+    "profile" => "tabular-data-package"
 ]);
+// add a resource
+$package->resource("resource-name", [
+    "profile" => "tabular-data-resource", 
+    "schema" => [
+        "fields" => [
+            ["name" => "id", "type" => "integer"],
+            ["name" => "name", "type" => "string"]
+        ]
+    ],
+    "path" => "tests/fixtures/simple_tabular_data.csv"
+]);
+// save the package descriptor to a file
+$package->saveDescriptor("datapackage.json");
+```
 
-// set the tabular data schema
-$datapackage->resource("my-tabular-resource")->descriptor()->schema = (object)[
-    "fields" => [
-        (object)["name" => "id", "type" => "integer"],
-        (object)["name" => "data", "type" => "string"],
-    ]
-];
+### Resource
 
-// add data files
-$datapackage->resource("my-tabular-resource")->descriptor()->path[] = "/path/to/file-1.csv";
-$datapackage->resource("my-tabular-resource")->descriptor()->path[] = "/path/to/file-2.csv";
+Resource objects can be accessed from a Package as described above
 
-// re-validate the new descriptor
-$datapackage->revalidate();
+```php
+$resource = $package->resource("resource-name")
+```
 
-// save the datapackage descriptor to a file
-$datapackage->saveDescriptor("datapackage.json");
+or instantiated directly
 
+```php
+use frictionlessdata\datapackage\Resource;
+$resource = Resource::create([
+    "name" => "my-resource",
+    "profile" => "tabular-data-resource",
+    "path" => "tests/fixtures/simple_tabular_data.csv",
+    "schema" => ["fields" => [["name" => "id", "type" => "integer"], ["name" => "name", "type" => "string"]]]
+]);
+```
 
-// get and manipulate resources
-$resource->name() == "resource-name"
-$resource //  BaseResource based object (e.g. DefaultResource / TabularResource)
+Iterating or reading over the resource produces combined rows from all the path or data elements
+
+```php
+foreach ($resource as $row) {};  // iterating
+$resource->read();  // get all the data as an array
 ```
 
 

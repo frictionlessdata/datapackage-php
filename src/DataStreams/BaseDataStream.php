@@ -10,13 +10,20 @@ namespace frictionlessdata\datapackage\DataStreams;
  */
 abstract class BaseDataStream implements \Iterator
 {
+    public $dataSource;
+    public $dataSourceOptions;
+
     /**
      * @param string $dataSource
      * @param mixed  $dataSourceOptions
      *
      * @throws \frictionlessdata\datapackage\Exceptions\DataStreamOpenException
      */
-    abstract public function __construct($dataSource, $dataSourceOptions = null);
+    public function __construct($dataSource, $dataSourceOptions = null)
+    {
+        $this->dataSource = $dataSource;
+        $this->dataSourceOptions = $dataSourceOptions;
+    }
 
     /**
      * @return mixed

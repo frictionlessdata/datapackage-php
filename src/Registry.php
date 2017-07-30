@@ -12,6 +12,7 @@ class Registry
      */
     public static function getResourceValidationProfile($descriptor)
     {
+        $descriptor = Utils::objectify($descriptor);
         if (isset($descriptor->profile) && $descriptor->profile != 'default') {
             return $descriptor->profile;
         } else {

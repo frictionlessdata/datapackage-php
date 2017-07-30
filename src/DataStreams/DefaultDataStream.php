@@ -9,6 +9,8 @@ use frictionlessdata\datapackage\Exceptions\DataStreamOpenException;
  */
 class DefaultDataStream extends BaseDataStream
 {
+    public $fopenResource;
+
     /**
      * @param string $dataSource
      *
@@ -16,10 +18,11 @@ class DefaultDataStream extends BaseDataStream
      */
     public function __construct($dataSource, $dataSourceOptions = null)
     {
+        parent::__construct($dataSource, $dataSourceOptions);
         try {
-            $this->fopenResource = fopen($dataSource, 'r');
+            $this->fopenResource = fopen($this->dataSource, 'r');
         } catch (\Exception $e) {
-            throw new DataStreamOpenException('Failed to open data source '.json_encode($dataSource).': '.json_encode($e->getMessage()));
+            throw new DataStreamOpenException('Failed to open data source '.json_encode($this->dataSource).': '.json_encode($e->getMessage()));
         }
     }
 
@@ -59,5 +62,4 @@ class DefaultDataStream extends BaseDataStream
     }
 
     protected $currentLineNumber = 0;
-    protected $fopenResource;
 }

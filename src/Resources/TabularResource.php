@@ -3,6 +3,7 @@
 namespace frictionlessdata\datapackage\Resources;
 
 use frictionlessdata\datapackage\DataStreams\TabularDataStream;
+use frictionlessdata\datapackage\DataStreams\TabularInlineDataStream;
 
 class TabularResource extends DefaultResource
 {
@@ -20,6 +21,11 @@ class TabularResource extends DefaultResource
     protected function getDataStream($dataSource, $dataSourceOptions = null)
     {
         return new TabularDataStream($this->normalizeDataSource($dataSource, $this->basePath), $this->schema());
+    }
+
+    protected function getInlineDataStream($data)
+    {
+        return new TabularInlineDataStream($data, $this->schema());
     }
 
     protected static function handlesProfile($profile)

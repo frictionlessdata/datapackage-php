@@ -4,6 +4,7 @@ namespace frictionlessdata\datapackage\Datapackages;
 
 use frictionlessdata\datapackage\Factory;
 use frictionlessdata\datapackage\Registry;
+use frictionlessdata\datapackage\Utils;
 use frictionlessdata\datapackage\Validators\DatapackageValidator;
 use frictionlessdata\datapackage\Exceptions\DatapackageValidationFailedException;
 
@@ -74,14 +75,40 @@ abstract class BaseDatapackage implements \Iterator
         return $resources;
     }
 
-    public function resource($name)
+    public function resource($name, $resource = null)
     {
-        foreach ($this->descriptor->resources as $resourceDescriptor) {
-            if ($resourceDescriptor->name == $name) {
-                return $this->initResource($resourceDescriptor);
+        if ($resource) {
+            if (is_a($resource, 'frictionlessdata\\datapackage\\Resources\\BaseResource')) {
+                $resource = $resource->descriptor();
+            } else {
+                $resource = Utils::objectify($resource);
             }
+            $resource->name = $name;
+            $resourceDescriptors = [];
+            $gotMatch = false;
+            foreach ($this->descriptor->resources as $resourceDescriptor) {
+                if ($resourceDescriptor->name == $resource->name) {
+                    $resourceDescriptors[] = $resource;
+                    $gotMatch = true;
+                } else {
+                    $resourceDescriptors[] = $resourceDescriptor;
+                }
+            }
+            if (!$gotMatch) {
+                $resourceDescriptors[] = $resource;
+            }
+            $this->descriptor->resources = $resourceDescriptors;
+            if (!$this->skipValidations) {
+                $this->revalidate();
+            }
+        } else {
+            foreach ($this->descriptor->resources as $resourceDescriptor) {
+                if ($resourceDescriptor->name == $name) {
+                    return $this->initResource($resourceDescriptor);
+                }
+            }
+            throw new \Exception("couldn't find matching resource with name =  '{$name}'");
         }
-        throw new \Exception("couldn't find matching resource with name =  '{$name}'");
     }
 
     public function deleteResource($name)
@@ -92,19 +119,6 @@ abstract class BaseDatapackage implements \Iterator
                 $resourceDescriptors[] = $resourceDescriptor;
             }
         }
-        $this->descriptor->resources = $resourceDescriptors;
-        if (!$this->skipValidations) {
-            $this->revalidate();
-        }
-    }
-
-    public function addResource($resource)
-    {
-        $resourceDescriptors = [];
-        foreach ($this->descriptor->resources as $resourceDescriptor) {
-            $resourceDescriptors[] = $resourceDescriptor;
-        }
-        $resourceDescriptors[] = $resource->descriptor();
         $this->descriptor->resources = $resourceDescriptors;
         if (!$this->skipValidations) {
             $this->revalidate();

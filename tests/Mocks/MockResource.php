@@ -1,21 +1,23 @@
 <?php
 
-namespace frictionlessdata\datapackage;
+namespace frictionlessdata\datapackage\tests\Mocks;
 
-class Resource
+use frictionlessdata\datapackage\Utils;
+
+class MockResource
 {
 
     public static function load($descriptor, $basePath = null)
     {
         $descriptor = Utils::objectify($descriptor);
-        return Factory::resource($descriptor, $basePath);
+        return MockFactory::resource($descriptor, $basePath);
     }
 
     public static function create($descriptor, $basePath = null)
     {
         $descriptor = Utils::objectify($descriptor);
         $skipValidations = true;
-        return Factory::resource($descriptor, $basePath, $skipValidations);
+        return MockFactory::resource($descriptor, $basePath, $skipValidations);
     }
 
 }

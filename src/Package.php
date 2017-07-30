@@ -15,4 +15,12 @@ class Package
         return Factory::validate($source, $basePath);
     }
 
+    public static function create($descriptor = null, $basePath = null)
+    {
+        $descriptor = Utils::objectify($descriptor);
+        if ($descriptor && !isset($descriptor->resources)) $descriptor->resources = [];
+        $packageClass = Factory::getDatapackageClass($descriptor);
+        return new $packageClass($descriptor, $basePath, true);
+    }
+
 }

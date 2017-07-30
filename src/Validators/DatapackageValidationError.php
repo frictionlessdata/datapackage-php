@@ -17,9 +17,9 @@ class DatapackageValidationError extends BaseValidationError
                 return "resource {$this->extraDetails['resource']} failed validation: "
                     .ResourceValidationError::getErrorMessages($this->extraDetails['validationErrors']);
             case static::DATA_STREAM_FAILURE:
-                return "resource {$this->extraDetails['resource']}, "
-                    ."data stream {$this->extraDetails['dataStream']}"
-                    //.($this->extraDetails['line']?", line number {$this->extraDetails['line']}":"")
+                return "resource {$this->extraDetails['resource']}"
+                    //."data stream {$this->extraDetails['dataStream']}"
+                    .($this->extraDetails['line']?", line number {$this->extraDetails['line']}":"")
                     .': '.$this->extraDetails['error'];
             default:
                 return parent::getMessage();

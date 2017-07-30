@@ -35,7 +35,7 @@ class DatapackageTest extends TestCase
                 (object) ['name' => 'resource-name', 'path' => ['foo.txt']],
             ],
         ];
-        $this->simpleDescriptorExpectedData = ['resource-name' => [['foo']]];
+        $this->simpleDescriptorExpectedData = ['resource-name' => ['foo']];
         $this->fixturesPath = dirname(__FILE__).'/fixtures';
     }
 
@@ -122,7 +122,7 @@ class DatapackageTest extends TestCase
                         'path' => ['mock-http://foo.txt', 'mock-http://foo.txt'],
                     ],
                 ],
-            ], ['resource-name' => [['foo'], ['foo']]],
+            ], ['resource-name' => ['foo', 'foo']],
             Mocks\MockFactory::datapackage('mock-http://simple_valid_datapackage_mock_http_data.json')
         );
     }
@@ -133,37 +133,27 @@ class DatapackageTest extends TestCase
         $datapackage = Package::load('tests/fixtures/multi_data_datapackage.json');
         foreach ($datapackage as $resource) {
             $out[] = '-- '.$resource->name().' --';
-            $i = 0;
-            foreach ($resource as $dataStream) {
-                $out[] = '-dataStream '.++$i;
-                foreach ($dataStream as $line) {
-                    $out[] = $line;
-                }
+            foreach ($resource as $line) {
+                $out[] = $line;
             }
         }
         $this->assertEquals([
             '-- first-resource --',
-            '-dataStream 1',
             'foo',
-            '-dataStream 2',
             "BAR!\n",
             "bar\n",
             "בר\n",
             '',
-            '-dataStream 3',
             "בזבזבז\n",
             'זבזבזב',
             '-- second-resource --',
-            '-dataStream 1',
             "BAR!\n",
             "bar\n",
             "בר\n",
             '',
-            '-dataStream 2',
             "בזבזבז\n",
             'זבזבזב',
             '-- third-resource --',
-            '-dataStream 1',
             "בזבזבז\n",
             'זבזבזב',
         ], $out);
@@ -212,7 +202,7 @@ class DatapackageTest extends TestCase
     public function testTabularResourceInvalidData()
     {
         $this->assertDatapackageValidation(
-            'resource 1, data stream 2: email: value is not a valid email ("bad.email")',
+            'resource 1, line number 4: email: value is not a valid email ("bad.email")',
             'tests/fixtures/tabular_resource_invalid_data.json'
         );
     }
@@ -281,9 +271,9 @@ class DatapackageTest extends TestCase
 
         // add a resource
         $this->assertCount(1, $datapackage->resources());
-        $datapackage->addResource(Resource::load((object) [
-            'name' => 'new-resource', 'path' => ['tests/fixtures/foo.txt', 'tests/fixtures/baz.txt'],
-        ]));
+        $datapackage->resource("new-resource", [
+            'path' => ['tests/fixtures/foo.txt', 'tests/fixtures/baz.txt'],
+        ]);
         $this->assertCount(2, $datapackage->resources());
         $this->assertEquals((object) [
             'name' => 'datapackage-name',
@@ -302,10 +292,8 @@ class DatapackageTest extends TestCase
         $rows = [];
         foreach ($datapackage as $resource) {
             if ($resource->name() == 'new-resource') {
-                foreach ($resource as $dataStream) {
-                    foreach ($dataStream as $row) {
-                        $rows[] = $row;
-                    }
+                foreach ($resource as $row) {
+                    $rows[] = $row;
                 }
             }
         }
@@ -318,10 +306,8 @@ class DatapackageTest extends TestCase
         $resources_data = [];
         foreach ($dp as $resource) {
             $resources_data[$resource->name()] = [];
-            foreach ($resource as $dataStream) {
-                foreach ($dataStream as $row) {
-                    $resources_data[$resource->name()][] = trim($row);
-                }
+            foreach ($resource as $row) {
+                $resources_data[$resource->name()][] = trim($row);
             }
         }
         $this->assertEquals(array(
@@ -342,42 +328,45 @@ class DatapackageTest extends TestCase
     {
         // create static method allows to create a new datapackage or resource without validation
         // with shortcut arguments for common use-cases
-        $datapackage = DefaultDatapackage::create('my-datapackage-name', [
-            DefaultResource::create('my-default-resource'),
-            TabularResource::create('my-tabular-resource'),
+        $package = Package::create([
+            "name" => 'my-datapackage-name',
+            "resources" => [
+                ["name" => "my-default-resource"],
+                ["name" => "my-tabular-resource", "profile" => "tabular-data-resource"]
+            ]
         ]);
-
+        // the tabular resource is missing schema, but it doesn't fail
         // when creating a datapackage or resource with the create method it doesn't validate
         $this->assertEquals((object) [
             'name' => 'my-datapackage-name',
             'resources' => [
                 (object) [
                     'name' => 'my-default-resource',
-                    'path' => [],
-                    'data' => [],
                 ],
                 (object) [
                     'name' => 'my-tabular-resource',
-                    'path' => [],
-                    'data' => [],
+                    "profile" => "tabular-data-resource"
                 ],
             ],
-        ], $datapackage->descriptor());
-
-        // you can now modify the descriptor further
-        $datapackage->descriptor()->resources[1]->name = 'my-renamed-tabular-resource';
-
+        ], $package->descriptor());
+        // you can now modify the descriptor further by editing the descriptor directly
+        $package->descriptor()->resources[1]->name = "my-renamed-tabular-resource";
+        $package->descriptor()->resources[1]->schema = [
+            "fields" => [
+                ["name" => "id", "type" => "integer"],
+                ["name" => "name", "type" => "string"]
+            ]
+        ];
         // when you are done you can revalidate
         try {
-            $datapackage->revalidate();
+            $package->revalidate();
             $this->fail();
         } catch (\Exception $e) {
             $this->assertTrue(true);
         }
-
         // you can expect errors if you use the datapackage before it validates
         try {
-            foreach ($datapackage as $resource) {
+            foreach ($package as $resource) {
             }
         } catch (\Exception $e) {
             $this->assertEquals(
@@ -386,78 +375,141 @@ class DatapackageTest extends TestCase
             );
         }
 
-        // you can add data items to the descriptor
-        // for both existing and non-existing files which will be written to
+        $fooFilename = dirname(__FILE__).'/fixtures/foo.txt';
+        $package->resource('my-default-resource')->descriptor()->path[] = $fooFilename;
 
-        // an existing data item
-        $datapackage->resource('my-default-resource')->descriptor()->path[] = dirname(__FILE__).'/fixtures/foo.txt';
+        $defaultSecondPath = tempnam(sys_get_temp_dir(), 'datapackage-php-tests-').'.csv';
+        $package->resource('my-default-resource')->descriptor()->path[] = $defaultSecondPath;
+        file_put_contents($defaultSecondPath, "BAHHH");
 
-        // non-existing data items
-        $datapackage->resource('my-default-resource')->descriptor()->path[] = tempnam(sys_get_temp_dir(), 'datapackage-php-tests-').'.csv';
-        $datapackage->resource('my-renamed-tabular-resource')->descriptor()->path[] = tempnam(sys_get_temp_dir(), 'datapackage-php-tests-').'.csv';
+        $tabularDataFilename = tempnam(sys_get_temp_dir(), 'datapackage-php-tests-').'.csv';
+        $package->resource('my-renamed-tabular-resource')->descriptor()->path[] = $tabularDataFilename;
 
-        // iterate over the data - will yield for first resource but raise exception for 2nd
-        foreach ($datapackage as $resource) {
+        foreach ($package as $resource) {
             if ($resource->name() == 'my-default-resource') {
-                foreach ($resource as $dataStream) {
-                    foreach ($dataStream as $row) {
-                        $this->assertEquals('foo', $row);
-                    }
+                $this->assertEquals([$fooFilename, $defaultSecondPath], $resource->path());
+                foreach ($resource as $row) {
+                    $this->assertEquals('foo', $row);
                     break;
                 }
             } else {
                 // but the non-existant resources raise an exception
                 try {
-                    foreach ($resource as $dataStream) {
+                    foreach ($resource as $row) {
                     }
                 } catch (Exceptions\DataStreamOpenException $e) {
-                    $this->assertContains('Failed to open data source', $e->getMessage());
+                    $this->assertContains('Failed to open tabular data source', $e->getMessage());
                 }
             }
-        }
+        };
 
         // write data to the new simple data source
         // you have to do this yourself, we don't support writing data stream at the moment
-        $filename = $datapackage->resource('my-default-resource')->descriptor()->path[1];
-        file_put_contents($filename, "testing 改善\n");
+        $dataFilename = $package->resource('my-default-resource')->descriptor()->path[1];
+        file_put_contents($dataFilename, "testing 改善\n");
 
         // now you can access the data normally
         $i = 0;
-        foreach ($datapackage->resource('my-default-resource') as $data) {
-            if ($i == 1) {
-                $j = 0;
-                foreach ($data as $row) {
-                    if ($j == 0) {
-                        $this->assertEquals("testing 改善\n", $row);
-                    } elseif ($j == 1) {
-                        $this->assertFalse($row);
-                    } else {
-                        $this->fail();
-                    }
-                    ++$j;
-                }
+        foreach ($package->resource('my-default-resource') as $row) {
+            if ($i == 0) {
+                $this->assertEquals("foo", $row);
+            } elseif ($i == 1) {
+                $this->assertEquals("testing 改善\n", $row);
+            } elseif ($i == 2) {
+                $this->assertFalse($row);
+            } else {
+                $this->fail("{$i} - {$row}");
             }
             ++$i;
         }
 
         // save the descriptor to json file
         $filename = tempnam(sys_get_temp_dir(), 'datapackage-php-tests-');
-        $datapackage->saveDescriptor($filename);
+        $package->saveDescriptor($filename);
         $this->assertEquals((object) [
             'name' => 'my-datapackage-name',
             'resources' => [
                 (object) [
                     'name' => 'my-default-resource',
-                    'path' => $datapackage->resource('my-default-resource')->descriptor()->path,
-                    'data' => [],
+                    'path' => [$fooFilename, $dataFilename],
                 ],
                 (object) [
                     'name' => 'my-renamed-tabular-resource',
-                    'path' => $datapackage->resource('my-renamed-tabular-resource')->descriptor()->path,
-                    'data' => [],
+                    'path' => [$tabularDataFilename],
+                    'profile' => 'tabular-data-resource',
+                    'schema' => (object)[
+                        "fields" => [
+                            (object)["name" => "id", "type" => "integer"],
+                            (object)["name" => "name", "type" => "string"]
+                        ]
+                    ]
                 ],
             ],
         ], json_decode(file_get_contents($filename)));
+
+        file_put_contents($tabularDataFilename, "id,name\n1,\"one\"\n2,\"two\"\n3,\"three\"");
+        $this->assertEquals([
+            ["id" => 1, "name" => "one"],
+            ["id" => 2, "name" => "two"],
+            ["id" => 3, "name" => "three"]
+        ], $package->resource("my-renamed-tabular-resource")->read());
+    }
+
+    public function testStringPath()
+    {
+        $package = Package::create(["resources" => [
+            ["name" => "_", "path" => dirname(__FILE__).'/fixtures/foo.txt']
+        ]]);
+        $this->assertEquals(["foo"], $package->resource("_")->read());
+    }
+
+    public function testInlineDataRowArrays()
+    {
+        $resource = Resource::create([
+            "name" => "_",
+            "profile" => "tabular-data-resource",
+            "schema" => [
+                "fields" => [
+                    ["name" => "id", "type" => "integer"],
+                    ["name" => "name", "type" => "string"]
+                ]
+            ],
+            "data" => [
+                ["id", "name"],
+                [1, "one"],
+                [2, "two"],
+                [3, "three"]
+            ]
+        ]);
+        $this->assertEquals([
+            ["id" => 1, "name" => "one"],
+            ["id" => 2, "name" => "two"],
+            ["id" => 3, "name" => "three"]
+        ], $resource->read());
+    }
+
+    public function testInlineDataRowObjects()
+    {
+        $resource = Resource::create([
+            "name" => "_",
+            "profile" => "tabular-data-resource",
+            "schema" => [
+                "fields" => [
+                    ["name" => "id", "type" => "integer"],
+                    ["name" => "name", "type" => "string"]
+                ]
+            ],
+            "data" => [
+                ["id" => 1, "name" => "one"],
+                ["id" => 2, "name" => "two"],
+                ["id" => 3, "name" => "three"]
+            ]
+        ]);
+        $this->assertEquals([
+            ["id" => 1, "name" => "one"],
+            ["id" => 2, "name" => "two"],
+            ["id" => 3, "name" => "three"]
+        ], $resource->read());
     }
 
     protected function assertDatapackageValidation($expectedMessages, $source, $basePath = null)
@@ -486,14 +538,7 @@ class DatapackageTest extends TestCase
     {
         $allResourcesData = [];
         foreach ($datapackage as $resource) {
-            $resourceData = [];
-            foreach ($resource as $dataStream) {
-                $data = [];
-                foreach ($dataStream as $line) {
-                    $data[] = $line;
-                }
-                $resourceData[] = $data;
-            }
+            $resourceData = $resource->read();
             $allResourcesData[$resource->name()] = $resourceData;
         }
         $this->assertEquals($expectedData, $allResourcesData);

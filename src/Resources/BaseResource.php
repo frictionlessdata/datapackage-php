@@ -22,7 +22,7 @@ abstract class BaseResource implements \Iterator
     public function __construct($descriptor, $basePath, $skipValidations = false)
     {
         $this->basePath = $basePath;
-        $this->descriptor = $descriptor;
+        $this->descriptor = Utils::objectify($descriptor);
         $this->skipValidations = $skipValidations;
         if (!$this->skipValidations) {
             $validationErrors = $this->validateResource();
@@ -35,6 +35,30 @@ abstract class BaseResource implements \Iterator
     public static function handlesDescriptor($descriptor)
     {
         return static::handlesProfile(Registry::getResourceValidationProfile($descriptor));
+    }
+
+    public function read($options=null)
+    {
+        $rows = [];
+        foreach ($this as $row) {
+            $rows[] = $row;
+        }
+        return $rows;
+    }
+
+    public function dataStreams()
+    {
+        if (is_null($this->dataStreams)) {
+            $this->dataStreams = [];
+            foreach ($this->path() as $path) {
+                $this->dataStreams[] = $this->getDataStream($path);
+            };
+            $data = $this->data();
+            if ($data) {
+                $this->dataStreams[] = $this->getInlineDataStream($data);
+            }
+        }
+        return $this->dataStreams;
     }
 
     /**
@@ -53,30 +77,65 @@ abstract class BaseResource implements \Iterator
         return $this->descriptor()->name;
     }
 
+    public function path()
+    {
+        if (isset($this->descriptor()->path)) {
+            $path = $this->descriptor()->path;
+            if (!is_array($path)) {
+                $path = [$path];
+            }
+            return $path;
+        } else {
+            return [];
+        }
+    }
+
+    public function data()
+    {
+        return isset($this->descriptor()->data) ? $this->descriptor()->data : null;
+    }
+
     // standard iterator functions - to iterate over the data sources
     public function rewind()
     {
-        $this->currentDataPosition = 0;
+        $this->dataStreams = null;
+        $this->currentDataStream = 0;
+        foreach ($this->dataStreams() as $dataStream) {
+            $dataStream->rewind();
+        }
     }
 
     public function current()
     {
-        return $this->getDataStream($this->descriptor()->path[$this->currentDataPosition]);
+        return $this->dataStreams()[$this->currentDataStream]->current();
     }
 
     public function key()
     {
-        return $this->currentDataPosition;
+        return $this->dataStreams()[$this->currentDataStream]->key();
     }
 
     public function next()
     {
-        ++$this->currentDataPosition;
+        return $this->dataStreams()[$this->currentDataStream]->next();
     }
 
     public function valid()
     {
-        return isset($this->descriptor()->path[$this->currentDataPosition]);
+        $dataStreams = $this->dataStreams();
+        if ($dataStreams[$this->currentDataStream]->valid()) {
+            // current data stream is still valid
+            return true;
+        } else {
+            $this->currentDataStream++;
+            if (isset($dataStreams[$this->currentDataStream])) {
+                // current data stream is done, but we have another data stream
+                return true;
+            } else {
+                // no more data and no more data streams
+                return false;
+            }
+        }
     }
 
     public static function validateDataSource($dataSource, $basePath = null)
@@ -91,15 +150,6 @@ abstract class BaseResource implements \Iterator
         }
 
         return $errors;
-    }
-
-    public static function create($name, $basePath = null)
-    {
-        return new static((object) [
-            'name' => $name,
-            'path' => [],
-            'data' => [],
-        ], $basePath, true);
     }
 
     /**
@@ -128,6 +178,8 @@ abstract class BaseResource implements \Iterator
     protected $basePath;
     protected $skipValidations = false;
     protected $currentDataPosition = 0;
+    protected $currentDataStream = 0;
+    protected $dataStreams = null;
 
     protected function validateResource()
     {
@@ -140,6 +192,8 @@ abstract class BaseResource implements \Iterator
      * @return BaseDataStream
      */
     abstract protected function getDataStream($dataSource);
+
+    abstract protected function getInlineDataStream($data);
 
     protected static function handlesProfile($profile)
     {

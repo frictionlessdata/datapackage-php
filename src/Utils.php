@@ -23,4 +23,9 @@ class Utils
             )
         ;
     }
+
+    public static function objectify($val)
+    {
+        return is_object($val) ? $val : json_decode(json_encode($val));
+    }
 }

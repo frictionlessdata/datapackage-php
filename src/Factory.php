@@ -74,21 +74,16 @@ class Factory
     public static function validate($source, $basePath = null)
     {
         $curResource = 1;
-        $curData = null;
         $curLine = null;
         try {
             $datapackage = static::datapackage($source, $basePath);
             foreach ($datapackage as $resource) {
-                $curData = 1;
-                foreach ($resource as $dataStream) {
-                    $curLine = 1;
-                    foreach ($dataStream as $line) {
-                        if ($curLine == self::VALIDATE_PEEK_LINES) {
-                            break;
-                        }
-                        ++$curLine;
+                $curLine = 1;
+                foreach ($resource as $line) {
+                    if ($curLine == self::VALIDATE_PEEK_LINES) {
+                        break;
                     }
-                    ++$curData;
+                    ++$curLine;
                 }
                 ++$curResource;
             }
@@ -123,7 +118,6 @@ class Factory
                     Validators\DatapackageValidationError::DATA_STREAM_FAILURE,
                     [
                         'resource' => $curResource,
-                        'dataStream' => $curData,
                         'line' => 0,
                         'error' => $e->getMessage(),
                     ]
@@ -136,7 +130,6 @@ class Factory
                     Validators\DatapackageValidationError::DATA_STREAM_FAILURE,
                     [
                         'resource' => $curResource,
-                        'dataStream' => $curData,
                         'line' => $curLine,
                         'error' => $e->getMessage(),
                     ]
@@ -203,6 +196,7 @@ class Factory
      */
     public static function getResourceClass($descriptor)
     {
+        $descriptor = Utils::objectify($descriptor);
         $resourceClasses = array_merge(
             // custom classes
             static::$registeredResourceClasses,
