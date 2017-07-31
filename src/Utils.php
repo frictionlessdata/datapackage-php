@@ -28,4 +28,13 @@ class Utils
     {
         return is_object($val) ? $val : json_decode(json_encode($val));
     }
+
+    public static function removeDir($path)
+    {
+        $files = glob($path . '/*');
+        foreach ($files as $file) {
+            is_dir($file) ? Utils::removeDir($file) : unlink($file);
+        }
+        rmdir($path);
+    }
 }

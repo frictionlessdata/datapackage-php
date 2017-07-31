@@ -1,7 +1,6 @@
 /vendor/
 /.idea/
 /coverage-clover.xml
-/composer.lock
 /.php_cs
 /.php_cs.cache
 /php-cs-fixer

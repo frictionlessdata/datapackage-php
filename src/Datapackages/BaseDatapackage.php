@@ -7,6 +7,7 @@ use frictionlessdata\datapackage\Registry;
 use frictionlessdata\datapackage\Utils;
 use frictionlessdata\datapackage\Validators\DatapackageValidator;
 use frictionlessdata\datapackage\Exceptions\DatapackageValidationFailedException;
+use Alchemy\Zippy\Zippy;
 
 abstract class BaseDatapackage implements \Iterator
 {
@@ -154,6 +155,29 @@ abstract class BaseDatapackage implements \Iterator
     public function valid()
     {
         return isset($this->descriptor()->resources[$this->currentResourcePosition]);
+    }
+
+    public function save($zip_filename)
+    {
+        $zippy = Zippy::load();
+        $base = tempnam(sys_get_temp_dir(), 'datapackage-zip-');
+        $files = [
+            "datapackage.json" => $base."datapackage.json"
+        ];
+        $ri = 0;
+        foreach ($this as $resource) {
+            $fileNames = $resource->save($base."resource-".$ri);
+            foreach ($fileNames as $fileName) {
+                $relname = str_replace($base."resource-".$ri, "", $fileName);
+                $files["resource-".$ri.$relname] = $fileName;
+            }
+            $ri++;
+        }
+        $this->saveDescriptor($files["datapackage.json"]);
+        $zippy->create($zip_filename, $files);
+        foreach (array_values($files) as $file) {
+            unlink($file);
+        }
     }
 
     protected $descriptor;

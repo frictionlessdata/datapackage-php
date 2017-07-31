@@ -2,6 +2,8 @@
 
 namespace frictionlessdata\datapackage\tests;
 
+use Alchemy\Zippy\Zippy;
+use frictionlessdata\datapackage\Utils;
 use frictionlessdata\datapackage\Validators\DatapackageValidationError;
 use PHPUnit\Framework\TestCase;
 use frictionlessdata\datapackage\Datapackages\DefaultDatapackage;
@@ -423,8 +425,7 @@ class DatapackageTest extends TestCase
 
         // save the descriptor to json file
         $filename = tempnam(sys_get_temp_dir(), 'datapackage-php-tests-');
-        $package->saveDescriptor($filename);
-        $this->assertEquals((object) [
+        $expectedDatapackageDescriptor = (object) [
             'name' => 'my-datapackage-name',
             'resources' => [
                 (object) [
@@ -443,7 +444,9 @@ class DatapackageTest extends TestCase
                     ],
                 ],
             ],
-        ], json_decode(file_get_contents($filename)));
+        ];
+        $package->saveDescriptor($filename);
+        $this->assertEquals($expectedDatapackageDescriptor, json_decode(file_get_contents($filename)));
 
         file_put_contents($tabularDataFilename, "id,name\n1,\"one\"\n2,\"two\"\n3,\"three\"");
         $this->assertEquals([
@@ -451,6 +454,21 @@ class DatapackageTest extends TestCase
             ['id' => 2, 'name' => 'two'],
             ['id' => 3, 'name' => 'three'],
         ], $package->resource('my-renamed-tabular-resource')->read());
+
+        $filename = tempnam(sys_get_temp_dir(), 'datapackage-php-tests-').".zip";
+        $package->save($filename);
+        $zippy = Zippy::load();
+        $tempdir = sys_get_temp_dir().DIRECTORY_SEPARATOR.'datapackage-php-tests-zipdir';
+        if (file_exists($tempdir)) Utils::removeDir($tempdir);
+        mkdir($tempdir);
+        $archive = $zippy->open($filename);
+        $archive->extract($tempdir);
+        unlink($filename);
+        $tempdir = $tempdir.DIRECTORY_SEPARATOR;
+        $this->assertEquals($expectedDatapackageDescriptor, json_decode(file_get_contents($tempdir."datapackage.json")));
+        $this->assertEquals("foo", file_get_contents($tempdir."resource-0-data-0"));
+        $this->assertEquals("testing 改善\n", file_get_contents($tempdir."resource-0-data-1"));
+        $this->assertEquals("id,name\n1,one\n2,two\n3,three\n", file_get_contents($tempdir."resource-1.csv"));
     }
 
     public function testStringPath()

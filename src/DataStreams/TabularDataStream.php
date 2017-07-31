@@ -41,6 +41,11 @@ class TabularDataStream extends BaseDataStream
         $this->table->rewind();
     }
 
+    public function save($filename)
+    {
+        $this->table->save($filename);
+    }
+
     /**
      * @return array
      *

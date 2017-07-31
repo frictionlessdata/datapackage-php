@@ -15,8 +15,10 @@ A utility library for working with [Data Package](https://specs.frictionlessdata
 ### Installation
 
 ```bash
-$ composer require frictionlessdata/datapackage
+composer require frictionlessdata/datapackage
 ```
+
+Optionally, to create zip files you will need the PHP zip extension. On ubuntu it can be enabled with `sudo apt-get install php-zip`
 
 ### Package
 
@@ -97,6 +99,13 @@ $package->resource("resource-name", [
 // save the package descriptor to a file
 $package->saveDescriptor("datapackage.json");
 ```
+
+Save the entire datapackage including any local data to a zip file
+
+```php
+$package->save("datapackage.zip");
+```
+
 
 ### Resource
 

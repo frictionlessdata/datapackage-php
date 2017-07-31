@@ -25,6 +25,8 @@ abstract class BaseDataStream implements \Iterator
         $this->dataSourceOptions = $dataSourceOptions;
     }
 
+    abstract public function save($filename);
+
     /**
      * @return mixed
      *

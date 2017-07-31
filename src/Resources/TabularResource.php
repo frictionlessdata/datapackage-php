@@ -13,6 +13,11 @@ class TabularResource extends DefaultResource
         return $this->descriptor()->schema;
     }
 
+    public function getFileExtension()
+    {
+        return ".csv";
+    }
+
     /**
      * @param string $dataSource
      *

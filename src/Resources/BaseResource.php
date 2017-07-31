@@ -141,6 +141,30 @@ abstract class BaseResource implements \Iterator
         }
     }
 
+    public function getFileExtension()
+    {
+        return "";
+    }
+
+    public function save($baseFilename)
+    {
+        $dataStreams = $this->dataStreams();
+        $numDataStreams = count($dataStreams);
+        $fileNames = [];
+        $i = 0;
+        foreach ($dataStreams as $dataStream) {
+            if ($numDataStreams == 1) {
+                $filename = $baseFilename.$this->getFileExtension();
+            } else {
+                $filename = $baseFilename."-data-".$i.$this->getFileExtension();
+            }
+            $fileNames[] = $filename;
+            $dataStream->save($filename);
+            $i++;
+        }
+        return $fileNames;
+    }
+
     public static function validateDataSource($dataSource, $basePath = null)
     {
         $errors = [];

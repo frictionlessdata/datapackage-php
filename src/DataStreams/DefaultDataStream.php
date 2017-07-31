@@ -41,6 +41,13 @@ class DefaultDataStream extends BaseDataStream
         }
     }
 
+    public function save($filename)
+    {
+        $target = fopen($filename, 'w');
+        stream_copy_to_stream($this->fopenResource, $target);
+        fclose($target);
+    }
+
     public function current()
     {
         return fgets($this->fopenResource);
