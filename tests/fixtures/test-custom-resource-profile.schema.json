@@ -54,7 +54,7 @@
         "title": "URI",
         "description": "A URI (with some restrictions), being a fully qualified HTTP address, a relative POSIX path, or a JSON Pointer.",
         "type": "string",
-        "format": "uri",
+
         "context": "Implementations need to negotiate the type of URI provided, and dereference the data accordingly. There are restrictions imposed on URIs that are POSIX paths: see [the notes on descriptors](#descriptor) for more information."
       },
       "context": "The dereferenced value of each referenced data source in the `data` `array` `MUST` be commensurate with a native, dereferenced representation of the data the resource describes. For example, in a *Tabular* Data Resource, this means that the dereferenced value of `data` `MUST` be an array.",
@@ -109,7 +109,7 @@
           "title": "URI",
           "description": "A URI (with some restrictions), being a fully qualified HTTP address, a relative POSIX path, or a JSON Pointer.",
           "type": "string",
-          "format": "uri",
+
           "examples": [
             "{\n  \"uri\": \"file.csv\"\n}\n",
             "{\n  \"uri\": \"#/data/my-data\"\n}\n",
@@ -161,7 +161,7 @@
             "title": "URI",
             "description": "A URI (with some restrictions), being a fully qualified HTTP address, a relative POSIX path, or a JSON Pointer.",
             "type": "string",
-            "format": "uri",
+
             "examples": [
               "{\n  \"uri\": \"file.csv\"\n}\n",
               "{\n  \"uri\": \"#/data/my-data\"\n}\n",
@@ -215,7 +215,7 @@
             "title": "URI",
             "description": "A URI (with some restrictions), being a fully qualified HTTP address, a relative POSIX path, or a JSON Pointer.",
             "type": "string",
-            "format": "uri",
+
             "examples": [
               "{\n  \"uri\": \"file.csv\"\n}\n",
               "{\n  \"uri\": \"#/data/my-data\"\n}\n",

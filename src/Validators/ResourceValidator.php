@@ -23,16 +23,7 @@ class ResourceValidator extends BaseValidator
 
     protected function getDescriptorForValidation()
     {
-        // add base path to uri fields
-        // need to ensure all attributes exist because we are before schema validation
-        // TODO: find a more elegant way to do it with support for registring custom url fields
         $descriptor = clone $this->descriptor;
-        if (isset($descriptor->path) && is_array($descriptor->path)) {
-            foreach ($descriptor->path as &$url) {
-                $url = 'file://'.$url;
-            }
-        }
-
         return $descriptor;
     }
 
