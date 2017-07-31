@@ -15,7 +15,7 @@ class TabularResource extends DefaultResource
 
     public function getFileExtension()
     {
-        return ".csv";
+        return '.csv';
     }
 
     /**

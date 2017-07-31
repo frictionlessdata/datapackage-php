@@ -31,9 +31,9 @@ class Utils
 
     public static function removeDir($path)
     {
-        $files = glob($path . '/*');
+        $files = glob($path.'/*');
         foreach ($files as $file) {
-            is_dir($file) ? Utils::removeDir($file) : unlink($file);
+            is_dir($file) ? self::removeDir($file) : unlink($file);
         }
         rmdir($path);
     }

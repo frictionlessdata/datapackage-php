@@ -24,6 +24,7 @@ class ResourceValidator extends BaseValidator
     protected function getDescriptorForValidation()
     {
         $descriptor = clone $this->descriptor;
+
         return $descriptor;
     }
 

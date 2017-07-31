@@ -162,18 +162,18 @@ abstract class BaseDatapackage implements \Iterator
         $zippy = Zippy::load();
         $base = tempnam(sys_get_temp_dir(), 'datapackage-zip-');
         $files = [
-            "datapackage.json" => $base."datapackage.json"
+            'datapackage.json' => $base.'datapackage.json',
         ];
         $ri = 0;
         foreach ($this as $resource) {
-            $fileNames = $resource->save($base."resource-".$ri);
+            $fileNames = $resource->save($base.'resource-'.$ri);
             foreach ($fileNames as $fileName) {
-                $relname = str_replace($base."resource-".$ri, "", $fileName);
-                $files["resource-".$ri.$relname] = $fileName;
+                $relname = str_replace($base.'resource-'.$ri, '', $fileName);
+                $files['resource-'.$ri.$relname] = $fileName;
             }
-            $ri++;
+            ++$ri;
         }
-        $this->saveDescriptor($files["datapackage.json"]);
+        $this->saveDescriptor($files['datapackage.json']);
         $zippy->create($zip_filename, $files);
         foreach (array_values($files) as $file) {
             unlink($file);

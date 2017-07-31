@@ -143,7 +143,7 @@ abstract class BaseResource implements \Iterator
 
     public function getFileExtension()
     {
-        return "";
+        return '';
     }
 
     public function save($baseFilename)
@@ -156,12 +156,13 @@ abstract class BaseResource implements \Iterator
             if ($numDataStreams == 1) {
                 $filename = $baseFilename.$this->getFileExtension();
             } else {
-                $filename = $baseFilename."-data-".$i.$this->getFileExtension();
+                $filename = $baseFilename.'-data-'.$i.$this->getFileExtension();
             }
             $fileNames[] = $filename;
             $dataStream->save($filename);
-            $i++;
+            ++$i;
         }
+
         return $fileNames;
     }
 
