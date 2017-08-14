@@ -29,11 +29,15 @@ class DatapackageValidator extends BaseValidator
             foreach ($descriptor->resources as &$resource) {
                 if (is_object($resource)) {
                     $resource = clone $resource;
-                    if (isset($resource->path) && is_array($resource->path)) {
-                        foreach ($resource->path as &$url) {
-                            if (is_string($url)) {
-                                $url = 'file://'.$url;
+                    if (isset($resource->path)) {
+                        if (is_array($resource->path)) {
+                            foreach ($resource->path as &$url) {
+                                if (is_string($url)) {
+                                    $url = 'file://'.$url;
+                                }
                             }
+                        } else if (is_string($resource->path)) {
+                            $resource->path .= 'file://' . $resource->path;
                         }
                     }
                 }

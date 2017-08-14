@@ -44,7 +44,9 @@ class ResourceValidator extends BaseValidator
     protected function validateKeys()
     {
         $resourceClass = $this->getResourceClass();
-        foreach ($this->descriptor->path as $dataSource) {
+        // DS: path can be a string or an array
+        $sources = is_array($this->descriptor->path) ? $this->descriptor->path : array($this->descriptor->path);
+        foreach ($sources as $dataSource) {
             foreach ($resourceClass::validateDataSource($dataSource, $this->basePath) as $error) {
                 $this->errors[] = $error;
             }
