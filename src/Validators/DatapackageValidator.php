@@ -36,8 +36,8 @@ class DatapackageValidator extends BaseValidator
                                     $url = 'file://'.$url;
                                 }
                             }
-                        } else if (is_string($resource->path)) {
-                            $resource->path .= 'file://' . $resource->path;
+                        } elseif (is_string($resource->path)) {
+                            $resource->path .= 'file://'.$resource->path;
                         }
                     }
                 }
