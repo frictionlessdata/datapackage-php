@@ -4,9 +4,9 @@ namespace frictionlessdata\datapackage;
 
 class Package
 {
-    public static function load($source, $basePath = null)
+    public static function load($source, $basePath = null, $options = null)
     {
-        return Factory::datapackage($source, $basePath);
+        return Factory::datapackage($source, $basePath, $options);
     }
 
     public static function validate($source, $basePath = null)

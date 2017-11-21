@@ -1,12 +1,12 @@
 {
   "name": "my-openspending-datapackage",
   "title": "My OpenSpending Data Package",
-  "profile": "fiscal-data-package",
+  "profile": "tabular-data-package",
   "resources": [
     {
       "name": "budget",
       "title": "Budget",
-      "profile": "data-resource",
+      "profile": "tabular-data-resource",
       "path": ["budget.csv"],
       "schema": {
         "fields": [
@@ -43,7 +43,7 @@
     {
       "name": "entities",
       "title": "Entities",
-      "profile": "data-resource",
+      "profile": "tabular-data-resource",
       "path": ["entities.csv"],
       "schema": {
         "fields": [

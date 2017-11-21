@@ -67,3 +67,18 @@ you need to manually install it, then you can run : `composer style-check` or `c
 The json schemas for the frictionlessdata specs are stored locally as part of the package.
 
 They might change from time to time, to donwnload the latest specs run `composer update_registry`
+
+## Testing with a local copy of tableschema-php
+
+Add the following to `composer.json`
+
+```
+"repositories": [
+    {
+        "type": "path",
+        "url": "../tableschema-php"
+    }
+]
+```
+
+Run `composer update`

@@ -307,21 +307,15 @@ class DatapackageTest extends TestCase
         foreach ($dp as $resource) {
             $resources_data[$resource->name()] = [];
             foreach ($resource as $row) {
-                $resources_data[$resource->name()][] = trim($row);
+                $resources_data[$resource->name()][] = $row;
             }
         }
-        $this->assertEquals(array(
-                'budget' => [
-                    'pk,budget,budget_date,payee',
-                    '1,10000,01/01/2015,1',
-                    '2,20000,01/02/2015,1',
-                ],
-                'entities' => [
-                    'id,name,description',
-                    '1,Acme 1,They are the first acme company',
-                    '2,Acme 2,They are the sceond acme company',
-                ],
-        ), $resources_data);
+        $this->assertEquals([
+            'id' => null, 'amount' => null, 'date' => null, 'payee' => 1,
+        ], $resources_data['budget'][1]);
+        $this->assertEquals([
+            'id' => '1', 'title' => null, 'description' => 'They are the first acme company',
+        ], $resources_data['entities'][0]);
     }
 
     public function testCreateEditDatapackageDescriptor()
@@ -528,6 +522,40 @@ class DatapackageTest extends TestCase
             ['id' => 2, 'name' => 'two'],
             ['id' => 3, 'name' => 'three'],
         ], $resource->read());
+    }
+
+    public function testDataHubCountryList()
+    {
+        // $package = Package::load("https://datahub.io/core/country-list/datapackage.json");
+        $package = Package::load(dirname(__FILE__).'/fixtures/datahub-country-list/datapackage.json');
+        $this->assertEquals('data-package', $package->descriptor()->profile);
+        $resources = [];
+        foreach ($package as $resource) {
+            $resources[$resource->name()] = [];
+            foreach ($resource as $row) {
+                // note that this is not a tabular data resource, so we return the rows as strings
+                $this->assertEquals('data-resource', $resource->descriptor()->profile);
+                $resources[$resource->name()][] = $row;
+            }
+        }
+        $this->assertEquals(['data_csv', 'data_json', 'datapackage_zip', 'data'], array_keys($resources));
+        $this->assertEquals('Name,Code', trim($resources['data_csv'][0]));
+
+        // now, let's try to load it but get it as tabular data
+        $descriptor = json_decode(file_get_contents(dirname(__FILE__).'/fixtures/datahub-country-list/datapackage.json'));
+        foreach ($descriptor->resources as $resource) {
+            if ($resource->name != 'datapackage_zip') {
+                $resource->profile = 'tabular-data-resource';
+            }
+        }
+        $package = Package::load($descriptor, dirname(__FILE__).'/fixtures/datahub-country-list');
+        $resources = [];
+        foreach ($package as $resource) {
+            $resources[$resource->name()] = [];
+            foreach ($resource as $row) {
+                $resources[$resource->name()][] = $row;
+            }
+        }
     }
 
     protected function assertDatapackageValidation($expectedMessages, $source, $basePath = null)

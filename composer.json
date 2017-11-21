@@ -5,7 +5,7 @@
     "require": {
         "php": ">=5.4",
         "justinrainbow/json-schema": "^5.2",
-        "frictionlessdata/tableschema": "^0.1.6",
+        "frictionlessdata/tableschema": "^0.1.7",
         "alchemy/zippy": "=0.3.5"
     },
     "require-dev": {

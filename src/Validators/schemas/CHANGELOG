@@ -6,3 +6,17 @@
 * changed role enum
 * data attribute changed to path which can be either a single string or array of strings
 * changes to table-schema (not affecting datapackage directly)
+
+2017-11-21T20:55:19+02:00
+
+* added schemas from registry: data-resource, tabular-data-resource
+* default profile changed from 'default' to 'data-package'
+* homepage type changed from 'object' to 'string' with format 'uri'
+* changed contributor 'name' attribute to 'title'
+* added default contributor role - 'contributor'
+* added image attribute - an image to represent the data package (string)
+* license name - must be an Open Definition license identifier - "^([-a-zA-Z0-9._])+$"
+* resource must have either one of "data" or "path" attribute (but not both)
+* default resource profile changed from 'default' to 'data-resource'
+* added 'data' - Inline data for this resource
+* changed source 'name' attribute to 'title'
