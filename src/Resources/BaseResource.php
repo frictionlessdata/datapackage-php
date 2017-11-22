@@ -37,7 +37,7 @@ abstract class BaseResource implements \Iterator
         return static::handlesProfile(Registry::getResourceValidationProfile($descriptor));
     }
 
-    public function read($options = null)
+    public function read()
     {
         $rows = [];
         foreach ($this as $row) {
