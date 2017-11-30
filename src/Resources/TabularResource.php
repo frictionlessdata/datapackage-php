@@ -4,6 +4,7 @@ namespace frictionlessdata\datapackage\Resources;
 
 use frictionlessdata\datapackage\DataStreams\TabularDataStream;
 use frictionlessdata\datapackage\DataStreams\TabularInlineDataStream;
+use frictionlessdata\datapackage\Registry;
 
 class TabularResource extends DefaultResource
 {
@@ -41,8 +42,11 @@ class TabularResource extends DefaultResource
         ]);
     }
 
-    protected static function handlesProfile($profile)
+    public static function handlesDescriptor($descriptor)
     {
-        return $profile == 'tabular-data-resource';
+        return (
+            Registry::getResourceValidationProfile($descriptor) == 'tabular-data-resource'
+            || (isset($descriptor->format) && in_array($descriptor->format, ['csv', 'tsv']))
+        );
     }
 }

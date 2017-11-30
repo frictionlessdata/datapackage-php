@@ -468,6 +468,23 @@ class DatapackageTest extends TestCase
         $this->assertEquals("id,name\n1,one\n2,two\n3,three\n", file_get_contents($tempdir.'resource-1.csv'));
     }
 
+    public function testLoadDatapackageZip()
+    {
+        $package = Package::load(dirname(__FILE__).'/fixtures/datapackage_zip.zip');
+        // $package = Package::load('http://datahub.io/opendatafortaxjustice/eucountrydatawb/r/datapackage_zip.zip');
+        $this->assertEquals([[
+            'jurisdiction' => 'Austria',
+            'population in millions' => 8.7474000000000007,
+            'GDP in $Billions' => 386.42779999999999,
+            'GDP per cap' => 44176.519999999997
+        ], [
+            'jurisdiction' => 'Belgium',
+            'population in millions' => 11.3482,
+            'GDP in $Billions' => 466.3657,
+            'GDP per cap' => 41096.160000000003
+        ]], $package->resource('eucountrydatawb_csv')->read(["limit" => 2]));
+    }
+
     public function testStringPath()
     {
         $package = Package::create(['resources' => [
@@ -540,7 +557,7 @@ class DatapackageTest extends TestCase
             }
         }
         $this->assertEquals(['data_csv', 'data_json', 'datapackage_zip', 'data'], array_keys($resources));
-        $this->assertEquals('Name,Code', trim($resources['data_csv'][0]));
+        $this->assertEquals(["Name" => "Afghanistan", "Code" => "AF"], $resources['data_csv'][0]);
 
         // now, let's try to load it but get it as tabular data
         $descriptor = json_decode(file_get_contents(dirname(__FILE__).'/fixtures/datahub-country-list/datapackage.json'));
@@ -569,7 +586,7 @@ class DatapackageTest extends TestCase
             foreach ($resource as $row) {
                 ++$rowNum;
             }
-            $this->assertEquals(706, $rowNum);
+            $this->assertEquals(702, $rowNum);
             ++$resourceNum;
         }
     }

@@ -4,6 +4,7 @@ namespace frictionlessdata\datapackage;
 
 use frictionlessdata\datapackage\Datapackages\BaseDatapackage;
 use frictionlessdata\datapackage\Resources\BaseResource;
+use Alchemy\Zippy\Zippy;
 
 /**
  * datapackage and resource have different classes depending on the corresponding profile
@@ -23,6 +24,7 @@ class Factory
      *  - JSON encoded object
      *  - URL (must be in either 'http' or 'https' schemes)
      *  - local filesystem (POSIX) path.
+     *  - local or remote zip file
      *
      * @param mixed       $source
      * @param null|string $basePath optional, required only if you want to use relative paths
@@ -269,37 +271,45 @@ class Factory
                     );
                 }
             } elseif (static::isHttpSource($source)) {
-                try {
-                    $descriptor = json_decode(file_get_contents(static::normalizeHttpSource($source)));
-                } catch (\Exception $e) {
-                    throw new Exceptions\DatapackageInvalidSourceException(
-                        'Failed to load source: '.json_encode($source).': '.$e->getMessage()
-                    );
+                if (static::isHttpZipSource($source)) {
+                    return static::loadHttpZipSource($source);
+                } else {
+                    try {
+                        $descriptor = json_decode(file_get_contents(static::normalizeHttpSource($source)));
+                    } catch (\Exception $e) {
+                        throw new Exceptions\DatapackageInvalidSourceException(
+                            'Failed to load source: '.json_encode($source).': '.$e->getMessage()
+                        );
+                    }
+                    // http sources don't allow relative paths, hence basePath should remain null
+                    $basePath = null;
                 }
-                // http sources don't allow relative paths, hence basePath should remain null
-                $basePath = null;
             } else {
                 // not a json string and not a url - assume it's a file path
-                if (empty($basePath)) {
-                    // no basePath
-                    // - assume source is the absolute path of the file
-                    // - set it's directory as the basePath
-                    $basePath = dirname($source);
+                if (static::isFileZipSource($source)) {
+                    return static::loadFileZipSource($source);
                 } else {
-                    // got a basePath
-                    // - try to prepend it to the source and see if such a file exists
-                    // - if not - assume it's an absolute path
-                    $absPath = $basePath.DIRECTORY_SEPARATOR.$source;
-                    if (file_exists($absPath)) {
-                        $source = $absPath;
+                    if (empty($basePath)) {
+                        // no basePath
+                        // - assume source is the absolute path of the file
+                        // - set it's directory as the basePath
+                        $basePath = dirname($source);
+                    } else {
+                        // got a basePath
+                        // - try to prepend it to the source and see if such a file exists
+                        // - if not - assume it's an absolute path
+                        $absPath = $basePath.DIRECTORY_SEPARATOR.$source;
+                        if (file_exists($absPath)) {
+                            $source = $absPath;
+                        }
                     }
-                }
-                try {
-                    $descriptor = json_decode(file_get_contents($source));
-                } catch (\Exception $e) {
-                    throw new Exceptions\DatapackageInvalidSourceException(
-                        'Failed to load source: '.json_encode($source).': '.$e->getMessage()
-                    );
+                    try {
+                        $descriptor = json_decode(file_get_contents($source));
+                    } catch (\Exception $e) {
+                        throw new Exceptions\DatapackageInvalidSourceException(
+                            'Failed to load source: '.json_encode($source).': '.$e->getMessage()
+                        );
+                    }
                 }
             }
         } else {
@@ -309,5 +319,39 @@ class Factory
         }
 
         return (object) ['descriptor' => $descriptor, 'basePath' => $basePath];
+    }
+
+    protected static function isHttpZipSource($source)
+    {
+        return (strtolower(substr($source, -4)) == '.zip');
+    }
+
+    protected static function isFileZipSource($source)
+    {
+        return (strtolower(substr($source, -4)) == '.zip');
+    }
+
+    protected static function loadHttpZipSource($source)
+    {
+        $tempfile = tempnam(sys_get_temp_dir(), 'datapackage-php');
+        unlink($tempfile);
+        $tempfile.='.zip';
+        stream_copy_to_stream(fopen($source, 'r'), fopen($tempfile, 'w'));
+        register_shutdown_function(function() use ($tempfile) {unlink($tempfile);});
+        return self::loadFileZipSource($tempfile);
+    }
+
+    protected static function loadFileZipSource($source)
+    {
+        $zippy = Zippy::load();
+        $tempdir = tempnam(sys_get_temp_dir(), 'datapackage-php');
+        unlink($tempdir);
+        mkdir($tempdir);
+        register_shutdown_function(function() use ($tempdir) {Utils::removeDir($tempdir);});
+        $zippy->open($source)->extract($tempdir);
+        if (!file_exists($tempdir."/datapackage.json")) {
+            throw new Exceptions\DatapackageInvalidSourceException("zip file must contain a datappackage.json file");
+        }
+        return static::loadSource($tempdir."/datapackage.json", $tempdir);
     }
 }

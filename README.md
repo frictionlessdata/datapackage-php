@@ -56,6 +56,21 @@ Validate the data explicitly and get a list of errors
 Package::validate("tests/fixtures/simple_invalid_datapackage.json");  // array of validation errors
 ```
 
+Load a zip file
+
+```php
+$package = Package::load('http://datahub.io/opendatafortaxjustice/eucountrydatawb/r/datapackage_zip.zip');
+```
+
+Provide read options which are passed through to [tableschema-php](https://github.com/frictionlessdata/tableschema-php) Table::read method
+
+```php
+$package = Package::load('http://datahub.io/opendatafortaxjustice/eucountrydatawb/r/datapackage_zip.zip');
+foreach ($package as $resource) {
+    $resource->read(["cast" => false]);
+}
+```
+
 The package object has some useful methods to access and manipulate the resources
 
 ```php
@@ -105,7 +120,6 @@ Save the entire datapackage including any local data to a zip file
 ```php
 $package->save("datapackage.zip");
 ```
-
 
 ### Resource
 
