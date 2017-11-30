@@ -251,7 +251,7 @@ class DatapackageTest extends TestCase
         ));
         // delete resource
         $this->assertCount(2, $datapackage->resources());
-        $datapackage->deleteResource('resource-name');
+        $datapackage->removeResource('resource-name');
         $this->assertCount(1, $datapackage->resources());
         $i = 0;
         foreach ($datapackage as $resource) {
@@ -272,7 +272,7 @@ class DatapackageTest extends TestCase
 
         // add a resource
         $this->assertCount(1, $datapackage->resources());
-        $datapackage->resource('new-resource', [
+        $datapackage->addResource('new-resource', [
             'path' => ['tests/fixtures/foo.txt', 'tests/fixtures/baz.txt'],
         ]);
         $this->assertCount(2, $datapackage->resources());
@@ -378,7 +378,7 @@ class DatapackageTest extends TestCase
         file_put_contents($defaultSecondPath, 'BAHHH');
 
         $tabularDataFilename = tempnam(sys_get_temp_dir(), 'datapackage-php-tests-').'.csv';
-        $package->resource('my-renamed-tabular-resource')->descriptor()->path[] = $tabularDataFilename;
+        $package->getResource('my-renamed-tabular-resource')->descriptor()->path[] = $tabularDataFilename;
 
         foreach ($package as $resource) {
             if ($resource->name() == 'my-default-resource') {
@@ -405,7 +405,7 @@ class DatapackageTest extends TestCase
 
         // now you can access the data normally
         $i = 0;
-        foreach ($package->resource('my-default-resource') as $row) {
+        foreach ($package->getResource('my-default-resource') as $row) {
             if ($i == 0) {
                 $this->assertEquals('foo', $row);
             } elseif ($i == 1) {

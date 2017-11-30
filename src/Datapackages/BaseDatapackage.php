@@ -76,43 +76,54 @@ abstract class BaseDatapackage implements \Iterator
         return $resources;
     }
 
-    public function resource($name, $resource = null)
+    public function getResource($name)
     {
-        if ($resource) {
-            if (is_a($resource, 'frictionlessdata\\datapackage\\Resources\\BaseResource')) {
-                $resource = $resource->descriptor();
-            } else {
-                $resource = Utils::objectify($resource);
+        foreach ($this->descriptor->resources as $resourceDescriptor) {
+            if ($resourceDescriptor->name == $name) {
+                return $this->initResource($resourceDescriptor);
             }
-            $resource->name = $name;
-            $resourceDescriptors = [];
-            $gotMatch = false;
-            foreach ($this->descriptor->resources as $resourceDescriptor) {
-                if ($resourceDescriptor->name == $resource->name) {
-                    $resourceDescriptors[] = $resource;
-                    $gotMatch = true;
-                } else {
-                    $resourceDescriptors[] = $resourceDescriptor;
-                }
-            }
-            if (!$gotMatch) {
-                $resourceDescriptors[] = $resource;
-            }
-            $this->descriptor->resources = $resourceDescriptors;
-            if (!$this->skipValidations) {
-                $this->revalidate();
-            }
+        }
+        throw new \Exception("couldn't find matching resource with name =  '{$name}'");
+    }
+
+    public function addResource($name, $resource)
+    {
+        if (is_a($resource, 'frictionlessdata\\datapackage\\Resources\\BaseResource')) {
+            $resource = $resource->descriptor();
         } else {
-            foreach ($this->descriptor->resources as $resourceDescriptor) {
-                if ($resourceDescriptor->name == $name) {
-                    return $this->initResource($resourceDescriptor);
-                }
+            $resource = Utils::objectify($resource);
+        }
+        $resource->name = $name;
+        $resourceDescriptors = [];
+        $gotMatch = false;
+        foreach ($this->descriptor->resources as $resourceDescriptor) {
+            if ($resourceDescriptor->name == $resource->name) {
+                $resourceDescriptors[] = $resource;
+                $gotMatch = true;
+            } else {
+                $resourceDescriptors[] = $resourceDescriptor;
             }
-            throw new \Exception("couldn't find matching resource with name =  '{$name}'");
+        }
+        if (!$gotMatch) {
+            $resourceDescriptors[] = $resource;
+        }
+        $this->descriptor->resources = $resourceDescriptors;
+        if (!$this->skipValidations) {
+            $this->revalidate();
         }
     }
 
-    public function deleteResource($name)
+    // TODO: remove this function and use the getResource / addResource directly (will need to modify a lot of tests code)
+    public function resource($name, $resource = null)
+    {
+        if ($resource) {
+            $this->addResource($name, $resource);
+        } else {
+            return $this->getResource($name);
+        }
+    }
+
+    public function removeResource($name)
     {
         $resourceDescriptors = [];
         foreach ($this->descriptor->resources as $resourceDescriptor) {

@@ -76,10 +76,10 @@ The package object has some useful methods to access and manipulate the resource
 ```php
 $package = Package::load("tests/fixtures/multi_data_datapackage.json");
 $package->resources();  // array of resource name => Resource object (see below for Resource class reference)
-$package->resource("first-resource");  // Resource object matching the given name
-$package->deleteResource("first-resource");
+$package->getResource("first-resource");  // Resource object matching the given name
+$package->removeResource("first-resource");
 // add a tabular resource
-$package->resource("tabular-resource-name", [
+$package->addResource("tabular-resource-name", [
     "profile" => "tabular-data-resource",
     "schema" => [
         "fields" => [
@@ -101,7 +101,7 @@ $package = Package::create([
     "profile" => "tabular-data-package"
 ]);
 // add a resource
-$package->resource("resource-name", [
+$package->addResource("resource-name", [
     "profile" => "tabular-data-resource", 
     "schema" => [
         "fields" => [
@@ -126,7 +126,7 @@ $package->save("datapackage.zip");
 Resource objects can be accessed from a Package as described above
 
 ```php
-$resource = $package->resource("resource-name")
+$resource = $package->getResource("resource-name")
 ```
 
 or instantiated directly
