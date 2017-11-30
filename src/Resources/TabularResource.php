@@ -44,9 +44,9 @@ class TabularResource extends DefaultResource
 
     public static function handlesDescriptor($descriptor)
     {
-        return (
+        return
             Registry::getResourceValidationProfile($descriptor) == 'tabular-data-resource'
             || (isset($descriptor->format) && in_array($descriptor->format, ['csv', 'tsv']))
-        );
+        ;
     }
 }

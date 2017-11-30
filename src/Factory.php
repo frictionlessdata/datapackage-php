@@ -24,7 +24,7 @@ class Factory
      *  - JSON encoded object
      *  - URL (must be in either 'http' or 'https' schemes)
      *  - local filesystem (POSIX) path.
-     *  - local or remote zip file
+     *  - local or remote zip file.
      *
      * @param mixed       $source
      * @param null|string $basePath optional, required only if you want to use relative paths
@@ -323,21 +323,22 @@ class Factory
 
     protected static function isHttpZipSource($source)
     {
-        return (strtolower(substr($source, -4)) == '.zip');
+        return strtolower(substr($source, -4)) == '.zip';
     }
 
     protected static function isFileZipSource($source)
     {
-        return (strtolower(substr($source, -4)) == '.zip');
+        return strtolower(substr($source, -4)) == '.zip';
     }
 
     protected static function loadHttpZipSource($source)
     {
         $tempfile = tempnam(sys_get_temp_dir(), 'datapackage-php');
         unlink($tempfile);
-        $tempfile.='.zip';
+        $tempfile .= '.zip';
         stream_copy_to_stream(fopen($source, 'r'), fopen($tempfile, 'w'));
-        register_shutdown_function(function() use ($tempfile) {unlink($tempfile);});
+        register_shutdown_function(function () use ($tempfile) {unlink($tempfile); });
+
         return self::loadFileZipSource($tempfile);
     }
 
@@ -347,11 +348,12 @@ class Factory
         $tempdir = tempnam(sys_get_temp_dir(), 'datapackage-php');
         unlink($tempdir);
         mkdir($tempdir);
-        register_shutdown_function(function() use ($tempdir) {Utils::removeDir($tempdir);});
+        register_shutdown_function(function () use ($tempdir) {Utils::removeDir($tempdir); });
         $zippy->open($source)->extract($tempdir);
-        if (!file_exists($tempdir."/datapackage.json")) {
-            throw new Exceptions\DatapackageInvalidSourceException("zip file must contain a datappackage.json file");
+        if (!file_exists($tempdir.'/datapackage.json')) {
+            throw new Exceptions\DatapackageInvalidSourceException('zip file must contain a datappackage.json file');
         }
-        return static::loadSource($tempdir."/datapackage.json", $tempdir);
+
+        return static::loadSource($tempdir.'/datapackage.json', $tempdir);
     }
 }

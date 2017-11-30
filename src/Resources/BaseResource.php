@@ -37,31 +37,38 @@ abstract class BaseResource implements \Iterator
         return static::handlesProfile(Registry::getResourceValidationProfile($descriptor));
     }
 
-    public function read($readOptions=null)
+    public function read($readOptions = null)
     {
-        $limit = ($readOptions && isset($readOptions["limit"])) ? $readOptions["limit"] : null;
+        $limit = ($readOptions && isset($readOptions['limit'])) ? $readOptions['limit'] : null;
         $rows = [];
         foreach ($this->dataStreams() as $dataStream) {
             if (isset($dataStream->table)) {
-                $readOptions["limit"] = $limit;
+                $readOptions['limit'] = $limit;
                 foreach ($dataStream->table->read($readOptions) as $row) {
                     $rows[] = $row;
                     if ($limit !== null) {
-                        $limit--;
-                        if ($limit < 0) break;
+                        --$limit;
+                        if ($limit < 0) {
+                            break;
+                        }
                     }
-                };
+                }
             } else {
                 foreach ($dataStream as $row) {
                     $rows[] = $row;
                     if ($limit !== null) {
-                        $limit--;
-                        if ($limit < 0) break;
+                        --$limit;
+                        if ($limit < 0) {
+                            break;
+                        }
                     }
                 }
             }
-            if ($limit !== null && $limit < 0) break;
+            if ($limit !== null && $limit < 0) {
+                break;
+            }
         }
+
         return $rows;
     }
 
