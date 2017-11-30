@@ -18,13 +18,15 @@ class TabularDataStream extends BaseDataStream
     public function __construct($dataSource, $dataSourceOptions = null)
     {
         parent::__construct($dataSource, $dataSourceOptions);
-        $schema = $this->dataSourceOptions;
+        $this->dataSourceOptions = (object) $this->dataSourceOptions;
+        $schema = $this->dataSourceOptions->schema;
+        $dialect = $this->dataSourceOptions->dialect;
         if (empty($schema)) {
             throw new \Exception('schema is required for tabular data stream');
         } else {
             try {
                 $this->schema = new Schema($schema);
-                $this->table = new Table($this->getDataSourceObject(), $this->schema);
+                $this->table = new Table($this->getDataSourceObject(), $this->schema, $dialect);
             } catch (\Exception $e) {
                 throw new DataStreamOpenException('Failed to open tabular data source '.json_encode($dataSource).': '.json_encode($e->getMessage()));
             }

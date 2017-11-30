@@ -1,0 +1,116 @@
+{
+  "bytes": 216380647,
+  "count_of_rows": 2941876,
+  "description": "Knesset committees and committee meetings data from Knesset dataservice API",
+  "hash": "5e3087c6129d7b7da03f0e7ec93d1c48",
+  "name": "knesset_data_committees",
+  "resources": [
+    {
+      "bytes": 160722,
+      "count_of_rows": 702,
+      "dialect": {
+        "delimiter": ",",
+        "doubleQuote": true,
+        "lineTerminator": "\r\n",
+        "quoteChar": "\"",
+        "skipInitialSpace": false
+      },
+      "dpp:streaming": true,
+      "encoding": "utf-8",
+      "format": "csv",
+      "hash": "23974f6e86b9996d4930753f073a67f1",
+      "name": "kns_committee",
+      "path": "kns_committee.csv",
+      "schema": {
+        "fields": [
+          {
+            "description": "\u05e7\u05d5\u05d3 \u05d4\u05d5\u05d5\u05e2\u05d3\u05d4",
+            "name": "CommitteeID",
+            "type": "integer"
+          },
+          {
+            "description": "\u05e9\u05dd \u05d4\u05d5\u05d5\u05e2\u05d3\u05d4",
+            "name": "Name",
+            "type": "string"
+          },
+          {
+            "description": "\u05e7\u05d5\u05d3 \u05d4\u05e7\u05d8\u05d2\u05d5\u05e8\u05d9\u05d4 \u05e9\u05dc \u05d4\u05d5\u05d5\u05e2\u05d3\u05d4",
+            "name": "CategoryID",
+            "type": "integer"
+          },
+          {
+            "description": "\u05ea\u05d9\u05d0\u05d5\u05e8 \u05d4\u05e7\u05d8\u05d2\u05d5\u05e8\u05d9\u05d4 \u05e9\u05dc \u05d4\u05d5\u05d5\u05e2\u05d3\u05d4 \u05d1\u05db\u05dc \u05db\u05e0\u05e1\u05ea, \u05db\u05dc \u05d4\u05d5\u05d5\u05e2\u05d3\u05d5\u05ea \u05de\u05d5\u05e7\u05de\u05d5\u05ea \u05de\u05d7\u05d3\u05e9. \u05d4\u05e9\u05d3\u05d4 \u05e7\u05d8\u05d2\u05d5\u05e8\u05d9\u05d4 \u05db\u05d5\u05dc\u05dc \u05d0\u05ea \u05e8\u05e9\u05d9\u05de\u05ea \u05d4\u05e7\u05d8\u05d2\u05d5\u05e8\u05d9\u05d5\u05ea \u05d4\u05e0\u05d5\u05e9\u05d0\u05d9\u05d5\u05ea \u05e9\u05d0\u05dc\u05d9\u05d4\u05df \u05de\u05e9\u05d5\u05d9\u05db\u05d5\u05ea \u05d4\u05d5\u05d5\u05e2\u05d3\u05d5\u05ea. \u05dc\u05de\u05e9\u05dc \u05d4\u05e7\u05d8\u05d2\u05d5\u05e8\u05d9\u05d4 \u05e9\u05dc \u05d5\u05e2\u05d3\u05ea \u05d4\u05e4\u05e0\u05d9\u05dd \u05d5\u05d4\u05d2\u05e0\u05ea \u05d4\u05e1\u05d1\u05d9\u05d1\u05d4 \u05d4\u05d9\u05d0 \"\u05e4\u05e0\u05d9\u05dd\" \u05d5\u05db\u05da \u05d4\u05d9\u05d4 \u05d2\u05dd \u05db\u05d0\u05e9\u05e8 \u05e9\u05dd \u05d4\u05d5\u05d5\u05e2\u05d3\u05d4 \u05d4\u05d9\u05d4 \u05d5\u05e2\u05d3\u05ea \u05d4\u05e4\u05e0\u05d9\u05dd \u05d5\u05d0\u05d9\u05db\u05d5\u05ea \u05d4\u05e1\u05d1\u05d9\u05d1\u05d4. \u05d2\u05dd \u05d5\u05e2\u05d3\u05d5\u05ea \u05d4\u05de\u05e9\u05e0\u05d4 \u05e9\u05dc \u05db\u05dc \u05d5\u05e2\u05d3\u05d4 \u05de\u05e9\u05d5\u05d9\u05db\u05d5\u05ea \u05dc\u05e7\u05d8\u05d2\u05d5\u05e8\u05d9\u05d4 \u05e9\u05dc\u05d4. \u05de\u05d3\u05d5\u05d1\u05e8 \u05d1\u05e9\u05d9\u05d5\u05da \u05e0\u05d5\u05e9\u05d0\u05d9 \u05e9\u05dc \u05d4\u05d5\u05d5\u05e2\u05d3\u05d5\u05ea.\n",
+            "name": "CategoryDesc",
+            "type": "string"
+          },
+          {
+            "description": "\u05de\u05e1\u05e4\u05e8 \u05d4\u05db\u05e0\u05e1\u05ea",
+            "name": "KnessetNum",
+            "type": "integer"
+          },
+          {
+            "description": "\u05e7\u05d5\u05d3 \u05e1\u05d5\u05d2 \u05d4\u05d5\u05d5\u05e2\u05d3\u05d4",
+            "name": "CommitteeTypeID",
+            "type": "integer"
+          },
+          {
+            "description": "\u05ea\u05d9\u05d0\u05d5\u05e8 \u05e1\u05d5\u05d2 \u05d4\u05d5\u05d5\u05e2\u05d3\u05d4 (\u05e8\u05d0\u05e9\u05d9\u05ea, \u05de\u05d9\u05d5\u05d7\u05d3\u05ea, \u05de\u05e9\u05e0\u05d4, \u05de\u05e9\u05d5\u05ea\u05e4\u05ea, \u05d4\u05db\u05e0\u05e1\u05ea)\n",
+            "name": "CommitteeTypeDesc",
+            "type": "string"
+          },
+          {
+            "description": "\u05db\u05ea\u05d5\u05d1\u05ea \u05d4\u05d3\u05d5\u05d0\"\u05dc \u05e9\u05dc \u05d4\u05d5\u05d5\u05e2\u05d3\u05d4",
+            "name": "Email",
+            "type": "string"
+          },
+          {
+            "description": "\u05ea\u05d0\u05e8\u05d9\u05da \u05d4\u05ea\u05d7\u05dc\u05d4",
+            "format": "%Y-%m-%d %H:%M:%S",
+            "name": "StartDate",
+            "type": "datetime"
+          },
+          {
+            "description": "\u05ea\u05d0\u05e8\u05d9\u05da \u05e1\u05d9\u05d5\u05dd",
+            "format": "%Y-%m-%d %H:%M:%S",
+            "name": "FinishDate",
+            "type": "datetime"
+          },
+          {
+            "description": "\u05e7\u05d5\u05d3 \u05e1\u05d5\u05d2 \u05de\u05e9\u05e0\u05d4 \u05e9\u05dc \u05d4\u05d5\u05d5\u05e2\u05d3\u05d4",
+            "name": "AdditionalTypeID",
+            "type": "integer"
+          },
+          {
+            "description": "\u05ea\u05d9\u05d0\u05d5\u05e8 \u05e1\u05d5\u05d2 \u05de\u05e9\u05e0\u05d4 \u05e9\u05dc \u05d4\u05d5\u05d5\u05e2\u05d3\u05d4 (\u05e7\u05d1\u05d5\u05e2\u05d4, \u05de\u05d9\u05d5\u05d7\u05d3\u05ea, \u05d7\u05e7\u05d9\u05e8\u05d4)",
+            "name": "AdditionalTypeDesc",
+            "type": "string"
+          },
+          {
+            "description": "\u05e7\u05d5\u05d3 \u05d5\u05e2\u05d3\u05ea \u05d4\u05d0\u05dd (\u05e8\u05dc\u05d5\u05d5\u05e0\u05d8\u05d9 \u05e8\u05e7 \u05dc\u05d5\u05d5\u05e2\u05d3\u05ea \u05de\u05e9\u05e0\u05d4)",
+            "name": "ParentCommitteeID",
+            "type": "integer"
+          },
+          {
+            "description": "\u05ea\u05d9\u05d0\u05d5\u05e8 \u05d5\u05e2\u05d3\u05ea \u05d4\u05d0\u05dd",
+            "name": "CommitteeParentName",
+            "type": "string"
+          },
+          {
+            "description": "\u05d4\u05d0\u05dd \u05d4\u05d5\u05d5\u05e2\u05d3\u05d4 \u05e4\u05e2\u05d9\u05dc\u05d4?",
+            "name": "IsCurrent",
+            "type": "boolean"
+          },
+          {
+            "description": "\u05ea\u05d0\u05e8\u05d9\u05da \u05e2\u05d3\u05db\u05d5\u05df \u05d0\u05d7\u05e8\u05d5\u05df",
+            "format": "%Y-%m-%d %H:%M:%S",
+            "name": "LastUpdatedDate",
+            "type": "datetime"
+          }
+        ],
+        "primaryKey": [
+          "CommitteeID"
+        ]
+      }
+    }
+  ]
+}

@@ -81,4 +81,5 @@ Add the following to `composer.json`
 ]
 ```
 
-Run `composer update`
+Run `composer require "frictionlessdata/tableschema @dev"`
+

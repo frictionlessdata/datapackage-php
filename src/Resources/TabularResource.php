@@ -25,12 +25,20 @@ class TabularResource extends DefaultResource
      */
     protected function getDataStream($dataSource, $dataSourceOptions = null)
     {
-        return new TabularDataStream($this->normalizeDataSource($dataSource, $this->basePath), $this->schema());
+        $dataSourceOptions = array_merge([
+            'schema' => $this->schema(),
+            'dialect' => isset($this->descriptor()->dialect) ? $this->descriptor()->dialect : null,
+        ], (array) $dataSourceOptions);
+
+        return new TabularDataStream($this->normalizeDataSource($dataSource, $this->basePath), $dataSourceOptions);
     }
 
     protected function getInlineDataStream($data)
     {
-        return new TabularInlineDataStream($data, $this->schema());
+        return new TabularInlineDataStream($data, [
+            'schema' => $this->schema(),
+            'dialect' => isset($this->descriptor()->dialect) ? $this->descriptor()->dialect : null,
+        ]);
     }
 
     protected static function handlesProfile($profile)

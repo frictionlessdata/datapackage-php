@@ -13,6 +13,7 @@ use frictionlessdata\datapackage\Resource;
 use frictionlessdata\tableschema\InferSchema;
 use frictionlessdata\tableschema\Table;
 use frictionlessdata\tableschema\DataSources\CsvDataSource;
+use Carbon\Carbon;
 
 class DatapackageTest extends TestCase
 {
@@ -544,7 +545,7 @@ class DatapackageTest extends TestCase
         // now, let's try to load it but get it as tabular data
         $descriptor = json_decode(file_get_contents(dirname(__FILE__).'/fixtures/datahub-country-list/datapackage.json'));
         foreach ($descriptor->resources as $resource) {
-            if ($resource->name != 'datapackage_zip') {
+            if (!in_array($resource->name, ['datapackage_zip', 'data_json'])) {
                 $resource->profile = 'tabular-data-resource';
             }
         }
@@ -555,6 +556,64 @@ class DatapackageTest extends TestCase
             foreach ($resource as $row) {
                 $resources[$resource->name()][] = $row;
             }
+        }
+    }
+
+    public function testCommitteesPackage()
+    {
+        $package = Package::load(dirname(__FILE__).'/fixtures/committees/datapackage.json');
+        $resourceNum = 0;
+        foreach ($package as $resource) {
+            $this->assertEquals(0, $resourceNum);
+            $rowNum = 0;
+            foreach ($resource as $row) {
+                ++$rowNum;
+            }
+            $this->assertEquals(706, $rowNum);
+            ++$resourceNum;
+        }
+    }
+
+    public function testCsvDialect()
+    {
+        $package = Package::load(dirname(__FILE__).'/fixtures/committees/datapackage-lolsv.json');
+        $resourceNum = 0;
+        foreach ($package as $resource) {
+            $this->assertEquals(0, $resourceNum);
+            $rowNum = 0;
+            foreach ($resource as $row) {
+                if ($rowNum == 0) {
+                    $this->assertEquals(array(
+                        'CommitteeID' => 97,
+                        'Name' => '"ה""ח המדיניות הכלכלית לשנת הכספים 2004"',
+                        'CategoryID' => null,
+                        'CategoryDesc' => null,
+                        'KnessetNum' => 16,
+                        'CommitteeTypeID' => 73,
+                        'CommitteeTypeDesc' => 'ועדה  משותפת',
+                        'Email' => null,
+                        'StartDate' => Carbon::__set_state(array(
+                                'date' => '2004-08-12 00:00:00.000000',
+                                'timezone_type' => 3,
+                                'timezone' => 'UTC',
+                            )),
+                        'FinishDate' => null,
+                        'AdditionalTypeID' => null,
+                        'AdditionalTypeDesc' => null,
+                        'ParentCommitteeID' => null,
+                        'CommitteeParentName' => null,
+                        'IsCurrent' => true,
+                        'LastUpdatedDate' => Carbon::__set_state(array(
+                                'date' => '2015-03-20 12:02:57.000000',
+                                'timezone_type' => 3,
+                                'timezone' => 'UTC',
+                            )),
+                    ), $row);
+                }
+                ++$rowNum;
+            }
+            $this->assertEquals(2, $rowNum);
+            ++$resourceNum;
         }
     }
 
