@@ -312,10 +312,10 @@ class Factory
                     }
                 }
             }
-            if(json_last_error()){
-				throw new Exceptions\DatapackageInvalidSourceException(
-					json_last_error_msg().' when loading source: '.json_encode($source)
-				);
+            if (json_last_error()) {
+                throw new Exceptions\DatapackageInvalidSourceException(
+                    json_last_error_msg().' when loading source: '.json_encode($source)
+                );
             }
         } else {
             throw new Exceptions\DatapackageInvalidSourceException(

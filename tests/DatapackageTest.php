@@ -95,7 +95,7 @@ class DatapackageTest extends TestCase
             function () { Package::load('-invalid-'); }
         );
     }
-    
+
     public function testJsonInvalidSyntaxShouldFail()
     {
         // http://php.net/manual/en/function.json-decode.php
