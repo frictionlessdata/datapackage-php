@@ -96,6 +96,19 @@ class DatapackageTest extends TestCase
         );
     }
 
+    public function testJsonInvalidSyntaxShouldFail()
+    {
+        // http://php.net/manual/en/function.json-decode.php
+        // trailing commas are not allowed
+        $bad_json = '{ "bar": "baz", }';
+        json_decode($bad_json); // null
+        $this->assertDatapackageException(
+            'frictionlessdata\\datapackage\\Exceptions\\DatapackageInvalidSourceException',
+            json_last_error_msg().' when loading source: '.json_encode($bad_json),
+            function () use ($bad_json) { Package::load($bad_json); }
+        );
+    }
+
     public function testJsonFileRelativeToBasePath()
     {
         $this->assertDatapackage(
