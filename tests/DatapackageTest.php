@@ -2,7 +2,7 @@
 
 namespace frictionlessdata\datapackage\tests;
 
-use Alchemy\Zippy\Zippy;
+use Chumper\Zipper\Zipper;
 use frictionlessdata\datapackage\Utils;
 use frictionlessdata\datapackage\Validators\DatapackageValidationError;
 use PHPUnit\Framework\TestCase;
@@ -465,14 +465,14 @@ class DatapackageTest extends TestCase
 
         $filename = tempnam(sys_get_temp_dir(), 'datapackage-php-tests-').'.zip';
         $package->save($filename);
-        $zippy = Zippy::load();
+        $zipper = new Zipper();
         $tempdir = sys_get_temp_dir().DIRECTORY_SEPARATOR.'datapackage-php-tests-zipdir';
         if (file_exists($tempdir)) {
             Utils::removeDir($tempdir);
         }
         mkdir($tempdir);
-        $archive = $zippy->open($filename);
-        $archive->extract($tempdir);
+        $zipper->make($filename)->extractTo($tempdir);
+        $zipper->close();
         unlink($filename);
         $tempdir = $tempdir.DIRECTORY_SEPARATOR;
         $this->assertEquals($expectedDatapackageDescriptor, json_decode(file_get_contents($tempdir.'datapackage.json')));

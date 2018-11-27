@@ -4,7 +4,7 @@ namespace frictionlessdata\datapackage;
 
 use frictionlessdata\datapackage\Datapackages\BaseDatapackage;
 use frictionlessdata\datapackage\Resources\BaseResource;
-use Alchemy\Zippy\Zippy;
+use Chumper\Zipper\Zipper;
 
 /**
  * datapackage and resource have different classes depending on the corresponding profile
@@ -349,14 +349,20 @@ class Factory
 
     protected static function loadFileZipSource($source)
     {
-        $zippy = Zippy::load();
+        $zipper = new Zipper();
         $tempdir = tempnam(sys_get_temp_dir(), 'datapackage-php');
         unlink($tempdir);
         mkdir($tempdir);
         register_shutdown_function(function () use ($tempdir) {Utils::removeDir($tempdir); });
-        $zippy->open($source)->extract($tempdir);
+        try {
+            $zipper->make($source)->extractTo($tempdir);
+        } catch (\Exception $e) {
+            throw new \RuntimeException("failed to extract \"{$source}\" to \"{$tempdir}\"");
+        } finally {
+            $zipper->close();
+        }
         if (!file_exists($tempdir.'/datapackage.json')) {
-            throw new Exceptions\DatapackageInvalidSourceException('zip file must contain a datappackage.json file');
+            throw new Exceptions\DatapackageInvalidSourceException('zip file must contain a datapackage.json file');
         }
 
         return static::loadSource($tempdir.'/datapackage.json', $tempdir);
