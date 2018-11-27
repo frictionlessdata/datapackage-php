@@ -185,7 +185,7 @@ abstract class BaseDatapackage implements \Iterator
             ++$ri;
         }
         $this->saveDescriptor($files['datapackage.json']);
-        /** @noinspection PhpUnhandledExceptionInspection Never occurs with our args */
+        /* @noinspection PhpUnhandledExceptionInspection Never occurs with our args */
         $zipper->make($zip_filename)->add($files)->close();
         foreach (array_values($files) as $file) {
             unlink($file);
