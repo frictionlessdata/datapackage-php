@@ -354,13 +354,9 @@ class Factory
         unlink($tempdir);
         mkdir($tempdir);
         register_shutdown_function(function () use ($tempdir) {Utils::removeDir($tempdir); });
-        try {
-            $zipper->make($source)->extractTo($tempdir);
-        } catch (\Exception $e) {
-            throw new \RuntimeException("failed to extract \"{$source}\" to \"{$tempdir}\"");
-        } finally {
-            $zipper->close();
-        }
+        /* @noinspection PhpUnhandledExceptionInspection File existence is checked afterwards anyway */
+        $zipper->make($source)->extractTo($tempdir);
+        $zipper->close();
         if (!file_exists($tempdir.'/datapackage.json')) {
             throw new Exceptions\DatapackageInvalidSourceException('zip file must contain a datapackage.json file');
         }
