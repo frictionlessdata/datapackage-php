@@ -475,10 +475,65 @@ class DatapackageTest extends TestCase
         $zipper->close();
         unlink($filename);
         $tempdir = $tempdir.DIRECTORY_SEPARATOR;
+
+        //after saving to disk, the paths are updated
+        $expectedDatapackageDescriptor = (object) [
+            'name' => 'my-datapackage-name',
+            'resources' => [
+                (object) [
+                    'name' => 'my-default-resource',
+                    'path' => ["resource-0-data-0", "resource-0-data-1"],
+                ],
+                (object) [
+                    'name' => 'my-renamed-tabular-resource',
+                    'path' => "resource-1.csv",
+                    'profile' => 'tabular-data-resource',
+                    'schema' => (object) [
+                        'fields' => [
+                            (object) ['name' => 'id', 'type' => 'integer'],
+                            (object) ['name' => 'name', 'type' => 'string'],
+                        ],
+                    ],
+                ],
+            ],
+        ];
         $this->assertEquals($expectedDatapackageDescriptor, json_decode(file_get_contents($tempdir.'datapackage.json')));
         $this->assertEquals('foo', file_get_contents($tempdir.'resource-0-data-0'));
         $this->assertEquals("testing 改善\n", file_get_contents($tempdir.'resource-0-data-1'));
         $this->assertEquals("id,name\n1,one\n2,two\n3,three\n", file_get_contents($tempdir.'resource-1.csv'));
+    }
+
+    public function testSaveAndLoadZip()
+    {
+        //create example csv
+        file_put_contents('/tmp/example.csv', "name,email\nJohn Doe,john@example.com");
+
+        //create a new datapackage object
+        $package = Package::create(['name' => 'csv-example','profile' => 'tabular-data-package']);
+
+        //add a csv file
+        $package->addResource('example.csv', [
+            "profile" => "tabular-data-resource",
+            "schema" => ["fields" => [["name" => "name", "type" => "string"],["name" => "email", "type" => "string"]]],
+            "path" => '/tmp/example.csv'
+        ]);
+
+        //save the datapackage
+        if (is_file('datapackage.zip')) {
+            unlink('datapackage.zip');
+        }
+        $package->save("datapackage.zip");
+
+        //delete example csv
+        unlink('/tmp/example.csv');
+
+        //load the new package
+        $package2 = Package::load('datapackage.zip');
+
+        //assert you get expected content back out
+        $this->assertEquals([['name' => 'John Doe', 'email' => 'john@example.com']], $package2->resource('example.csv')->read());
+
+        unlink('datapackage.zip');
     }
 
     public function testLoadDatapackageZip()
@@ -623,10 +678,10 @@ class DatapackageTest extends TestCase
                         'CommitteeTypeDesc' => 'ועדה  משותפת',
                         'Email' => null,
                         'StartDate' => Carbon::__set_state(array(
-                                'date' => '2004-08-12 00:00:00.000000',
-                                'timezone_type' => 3,
-                                'timezone' => 'UTC',
-                            )),
+                            'date' => '2004-08-12 00:00:00.000000',
+                            'timezone_type' => 3,
+                            'timezone' => 'UTC',
+                        )),
                         'FinishDate' => null,
                         'AdditionalTypeID' => null,
                         'AdditionalTypeDesc' => null,
@@ -634,10 +689,10 @@ class DatapackageTest extends TestCase
                         'CommitteeParentName' => null,
                         'IsCurrent' => true,
                         'LastUpdatedDate' => Carbon::__set_state(array(
-                                'date' => '2015-03-20 12:02:57.000000',
-                                'timezone_type' => 3,
-                                'timezone' => 'UTC',
-                            )),
+                            'date' => '2015-03-20 12:02:57.000000',
+                            'timezone_type' => 3,
+                            'timezone' => 'UTC',
+                        )),
                     ), $row);
                 }
                 ++$rowNum;

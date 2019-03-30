@@ -171,25 +171,39 @@ abstract class BaseDatapackage implements \Iterator
     public function save($zip_filename)
     {
         $zipper = new Zipper();
+
+        $packageCopy = $this->clone();
+
         $base = tempnam(sys_get_temp_dir(), 'datapackage-zip-');
         $files = [
             'datapackage.json' => $base.'datapackage.json',
         ];
         $ri = 0;
-        foreach ($this as $resource) {
+
+        foreach ($packageCopy->resources() as $resource) {
+            $resourceFiles = [];
             $fileNames = $resource->save($base.'resource-'.$ri);
             foreach ($fileNames as $fileName) {
                 $relname = str_replace($base.'resource-'.$ri, '', $fileName);
                 $files['resource-'.$ri.$relname] = $fileName;
+                $resourceFiles []= 'resource-'.$ri.$relname;
             }
+            $resource->descriptor()->path = count($resourceFiles) == 1 ? $resourceFiles[0] : $resourceFiles;
             ++$ri;
         }
-        $this->saveDescriptor($files['datapackage.json']);
+
+        $packageCopy->saveDescriptor($files['datapackage.json']);
+
         /* @noinspection PhpUnhandledExceptionInspection Never occurs with our args */
         $zipper->make($zip_filename)->add($files)->close();
         foreach (array_values($files) as $file) {
             unlink($file);
         }
+    }
+
+    public function clone()
+    {
+        return new static($this->descriptor, $this->basePath, true);
     }
 
     protected $descriptor;
