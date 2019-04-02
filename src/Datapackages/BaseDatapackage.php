@@ -186,7 +186,7 @@ abstract class BaseDatapackage implements \Iterator
             foreach ($fileNames as $fileName) {
                 $relname = str_replace($base.'resource-'.$ri, '', $fileName);
                 $files['resource-'.$ri.$relname] = $fileName;
-                $resourceFiles []= 'resource-'.$ri.$relname;
+                $resourceFiles[] = 'resource-'.$ri.$relname;
             }
             $resource->descriptor()->path = count($resourceFiles) == 1 ? $resourceFiles[0] : $resourceFiles;
             ++$ri;
@@ -201,7 +201,7 @@ abstract class BaseDatapackage implements \Iterator
         }
     }
 
-    public function copy()
+    protected function copy()
     {
         return new static($this->descriptor, $this->basePath, true);
     }

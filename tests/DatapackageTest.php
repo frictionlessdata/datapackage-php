@@ -46,7 +46,9 @@ class DatapackageTest extends TestCase
         $this->assertDatapackageException(
             'frictionlessdata\\datapackage\\Exceptions\\DatapackageInvalidSourceException',
             'Invalid source: {"name":"datapackage-name","resources":[{"name":"resource-name","path":["foo.txt"]}]}',
-            function () use ($descriptorArray) { Package::load($descriptorArray); }
+            function () use ($descriptorArray) {
+                Package::load($descriptorArray);
+            }
         );
     }
 
@@ -56,14 +58,17 @@ class DatapackageTest extends TestCase
         $this->assertDatapackageException(
             'frictionlessdata\\datapackage\\Exceptions\\DatapackageValidationFailedException',
             'Datapackage validation failed: data source file does not exist or is not readable: foo.txt',
-            function () use ($descriptor) { Package::load($descriptor); }
+            function () use ($descriptor) {
+                Package::load($descriptor);
+            }
         );
     }
 
     public function testNativePHPObject()
     {
         $this->assertDatapackage(
-            $this->simpleDescriptor, $this->simpleDescriptorExpectedData,
+            $this->simpleDescriptor,
+            $this->simpleDescriptorExpectedData,
             Package::load($this->simpleDescriptor, $this->fixturesPath)
         );
     }
@@ -74,7 +79,9 @@ class DatapackageTest extends TestCase
         $this->assertDatapackageException(
             'frictionlessdata\\datapackage\\Exceptions\\DatapackageValidationFailedException',
             'Datapackage validation failed: data source file does not exist or is not readable: foo.txt',
-            function () use ($source) { Package::load($source); }
+            function () use ($source) {
+                Package::load($source);
+            }
         );
     }
 
@@ -82,7 +89,8 @@ class DatapackageTest extends TestCase
     {
         $source = json_encode($this->simpleDescriptor);
         $this->assertDatapackage(
-            $this->simpleDescriptor, $this->simpleDescriptorExpectedData,
+            $this->simpleDescriptor,
+            $this->simpleDescriptorExpectedData,
             Package::load($source, $this->fixturesPath)
         );
     }
@@ -92,7 +100,9 @@ class DatapackageTest extends TestCase
         $this->assertDatapackageException(
             'frictionlessdata\\datapackage\\Exceptions\\DatapackageInvalidSourceException',
             'Failed to load source: "-invalid-": '.$this->getFileGetContentsErrorMessage('-invalid-'),
-            function () { Package::load('-invalid-'); }
+            function () {
+                Package::load('-invalid-');
+            }
         );
     }
 
@@ -105,14 +115,17 @@ class DatapackageTest extends TestCase
         $this->assertDatapackageException(
             'frictionlessdata\\datapackage\\Exceptions\\DatapackageInvalidSourceException',
             json_last_error_msg().' when loading source: '.json_encode($bad_json),
-            function () use ($bad_json) { Package::load($bad_json); }
+            function () use ($bad_json) {
+                Package::load($bad_json);
+            }
         );
     }
 
     public function testJsonFileRelativeToBasePath()
     {
         $this->assertDatapackage(
-            $this->simpleDescriptor, $this->simpleDescriptorExpectedData,
+            $this->simpleDescriptor,
+            $this->simpleDescriptorExpectedData,
             Package::load('simple_valid_datapackage.json', $this->fixturesPath)
         );
     }
@@ -120,7 +133,8 @@ class DatapackageTest extends TestCase
     public function testJsonFileRelativeToCurrentDirectory()
     {
         $this->assertDatapackage(
-            $this->simpleDescriptor, $this->simpleDescriptorExpectedData,
+            $this->simpleDescriptor,
+            $this->simpleDescriptorExpectedData,
             Package::load('tests/fixtures/simple_valid_datapackage.json')
         );
     }
@@ -136,7 +150,8 @@ class DatapackageTest extends TestCase
                         'path' => ['mock-http://foo.txt', 'mock-http://foo.txt'],
                     ],
                 ],
-            ], ['resource-name' => ['foo', 'foo']],
+            ],
+            ['resource-name' => ['foo', 'foo']],
             Mocks\MockFactory::datapackage('mock-http://simple_valid_datapackage_mock_http_data.json')
         );
     }
@@ -482,11 +497,11 @@ class DatapackageTest extends TestCase
             'resources' => [
                 (object) [
                     'name' => 'my-default-resource',
-                    'path' => ["resource-0-data-0", "resource-0-data-1"],
+                    'path' => ['resource-0-data-0', 'resource-0-data-1'],
                 ],
                 (object) [
                     'name' => 'my-renamed-tabular-resource',
-                    'path' => "resource-1.csv",
+                    'path' => 'resource-1.csv',
                     'profile' => 'tabular-data-resource',
                     'schema' => (object) [
                         'fields' => [
@@ -509,20 +524,20 @@ class DatapackageTest extends TestCase
         file_put_contents('/tmp/example.csv', "name,email\nJohn Doe,john@example.com");
 
         //create a new datapackage object
-        $package = Package::create(['name' => 'csv-example','profile' => 'tabular-data-package']);
+        $package = Package::create(['name' => 'csv-example', 'profile' => 'tabular-data-package']);
 
         //add a csv file
         $package->addResource('example.csv', [
-            "profile" => "tabular-data-resource",
-            "schema" => ["fields" => [["name" => "name", "type" => "string"],["name" => "email", "type" => "string"]]],
-            "path" => '/tmp/example.csv'
+            'profile' => 'tabular-data-resource',
+            'schema' => ['fields' => [['name' => 'name', 'type' => 'string'], ['name' => 'email', 'type' => 'string']]],
+            'path' => '/tmp/example.csv',
         ]);
 
         //save the datapackage
         if (is_file('datapackage.zip')) {
             unlink('datapackage.zip');
         }
-        $package->save("datapackage.zip");
+        $package->save('datapackage.zip');
 
         //delete example csv
         unlink('/tmp/example.csv');
