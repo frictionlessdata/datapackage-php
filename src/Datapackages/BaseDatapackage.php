@@ -172,7 +172,7 @@ abstract class BaseDatapackage implements \Iterator
     {
         $zipper = new Zipper();
 
-        $packageCopy = $this->clone();
+        $packageCopy = $this->copy();
 
         $base = tempnam(sys_get_temp_dir(), 'datapackage-zip-');
         $files = [
@@ -201,7 +201,7 @@ abstract class BaseDatapackage implements \Iterator
         }
     }
 
-    public function clone()
+    public function copy()
     {
         return new static($this->descriptor, $this->basePath, true);
     }
