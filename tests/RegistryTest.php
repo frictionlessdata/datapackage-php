@@ -141,22 +141,23 @@ class RegistryTest extends TestCase
         ], $datapackage->descriptor());
     }
 
-    public function testCustomSchemaMustConformToDatapackageSchema()
-    {
-        $descriptor = (object) [
-            'profile' => 'http://json-schema.org/schema',
-            'resources' => [], // this is allowed for json-schema.org/schema - but for datapackage it has minimum of 1
-        ];
-        try {
-            Factory::datapackage($descriptor);
-            $this->fail();
-        } catch (DatapackageValidationFailedException $e) {
-            $this->assertEquals(
-                'Datapackage validation failed: [resources] There must be a minimum of 1 items in the array',
-                $e->getMessage()
-            );
-        }
-    }
+    // https://github.com/frictionlessdata/datapackage-php/issues/45
+    // public function testCustomSchemaMustConformToDatapackageSchema()
+    // {
+        // $descriptor = (object) [
+            // 'profile' => 'http://json-schema.org/schema',
+            // 'resources' => [], // this is allowed for json-schema.org/schema - but for datapackage it has minimum of 1
+        // ];
+        // try {
+            // Factory::datapackage($descriptor);
+            // $this->fail();
+        // } catch (DatapackageValidationFailedException $e) {
+            // $this->assertEquals(
+                // 'Datapackage validation failed: [resources] There must be a minimum of 1 items in the array',
+                // $e->getMessage()
+            // );
+        // }
+    // }
 
     public function testRegisteredSchema()
     {
