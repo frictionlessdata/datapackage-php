@@ -11,13 +11,16 @@ use frictionlessdata\datapackage\Utils;
 
 abstract class BaseResource implements \Iterator
 {
+
     /**
      * BaseResource constructor.
      *
-     * @param object      $descriptor
+     * @param object $descriptor
      * @param null|string $basePath
      *
-     * @throws ResourceValidationFailedException
+     * @param bool $skipValidations
+     *
+     * @throws \frictionlessdata\datapackage\Exceptions\ResourceValidationFailedException
      */
     public function __construct($descriptor, $basePath, $skipValidations = false)
     {
@@ -210,11 +213,11 @@ abstract class BaseResource implements \Iterator
      * used by unit tests to add a mock http source.
      *
      * @param string $dataSource
-     * @param string $basePath
+     * @param string|null $basePath
      *
      * @return string
      */
-    public static function normalizeDataSource($dataSource, $basePath = null)
+    public static function normalizeDataSource($dataSource, string $basePath = null)
     {
         if (!empty($basePath) && !Utils::isHttpSource($dataSource)) {
             // TODO: support JSON pointers
