@@ -22,7 +22,10 @@ class TabularResource extends DefaultResource
     /**
      * @param string $dataSource
      *
+     * @param null $dataSourceOptions
+     *
      * @return TabularDataStream
+     * @throws \frictionlessdata\datapackage\Exceptions\DataStreamOpenException
      */
     protected function getDataStream($dataSource, $dataSourceOptions = null)
     {
@@ -47,6 +50,6 @@ class TabularResource extends DefaultResource
         return
             Registry::getResourceValidationProfile($descriptor) == 'tabular-data-resource'
             || (isset($descriptor->format) && in_array($descriptor->format, ['csv', 'tsv']))
-        ;
+            ;
     }
 }
