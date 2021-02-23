@@ -156,7 +156,7 @@ class Factory
     public static function getDatapackageClass($descriptor)
     {
         $datapackageClasses = array_merge(
-            // custom classes
+        // custom classes
             static::$registeredDatapackageClasses,
             // core classes
             [
@@ -198,7 +198,7 @@ class Factory
     {
         $descriptor = Utils::objectify($descriptor);
         $resourceClasses = array_merge(
-            // custom classes
+        // custom classes
             static::$registeredResourceClasses,
             // core classes
             [
@@ -224,25 +224,25 @@ class Factory
     protected static $registeredDatapackageClasses = [];
     protected static $registeredResourceClasses = [];
 
-  /**
-   * allows extending classes to add custom sources
-   * used by unit tests to add a mock http source.
-   *
-   * @param $source
-   *
-   * @return mixed
-   */
+    /**
+     * allows extending classes to add custom sources
+     * used by unit tests to add a mock http source.
+     *
+     * @param $source
+     *
+     * @return mixed
+     */
     protected static function normalizeHttpSource($source)
     {
         return $source;
     }
 
-  /**
-   * allows extending classes to add custom sources
-   * used by unit tests to add a mock http source.
-   * @param $source
-   * @return bool
-*/
+    /**
+     * allows extending classes to add custom sources
+     * used by unit tests to add a mock http source.
+     * @param $source
+     * @return bool
+     */
     protected static function isHttpSource($source)
     {
         return Utils::isHttpSource($source);
@@ -361,10 +361,10 @@ class Factory
         register_shutdown_function(function () use ($tempdir) {Utils::removeDir($tempdir); });
         /* @noinspection PhpUnhandledExceptionInspection File existence is checked afterwards anyway */
         if (($zip->open($source) === TRUE) && ($zip->extractTo($tempdir) === TRUE)) {
-          $zip->close();
+            $zip->close();
         }
         else {
-          throw new Exceptions\DatapackageInvalidSourceException('zip file could not be opened from source.');
+            throw new Exceptions\DatapackageInvalidSourceException('zip file could not be opened from source.');
         }
 
         if (!file_exists($tempdir.'/datapackage.json')) {
