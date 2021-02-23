@@ -11,14 +11,14 @@ class DefaultDataStream extends BaseDataStream
 {
     public $fopenResource;
 
-  /**
-   * @param string $dataSource
-   *
-   * @param null $dataSourceOptions
-   *
-   * @throws \frictionlessdata\datapackage\Exceptions\DataStreamOpenException
-   */
-    public function __construct(string $dataSource, $dataSourceOptions = null)
+    /**
+     * @param $dataSource
+     *
+     * @param null $dataSourceOptions
+     *
+     * @throws \frictionlessdata\datapackage\Exceptions\DataStreamOpenException
+     */
+    public function __construct($dataSource, $dataSourceOptions = null)
     {
         parent::__construct($dataSource, $dataSourceOptions);
         try {
