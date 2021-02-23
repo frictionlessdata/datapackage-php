@@ -13,13 +13,11 @@ abstract class BaseDataStream implements \Iterator
     public $dataSource;
     public $dataSourceOptions;
 
-    /**
-     * @param string $dataSource
-     * @param mixed  $dataSourceOptions
-     *
-     * @throws \frictionlessdata\datapackage\Exceptions\DataStreamOpenException
-     */
-    public function __construct($dataSource, $dataSourceOptions = null)
+  /**
+   * @param string $dataSource
+   * @param mixed $dataSourceOptions
+   */
+    public function __construct(string $dataSource, $dataSourceOptions = null)
     {
         $this->dataSource = $dataSource;
         $this->dataSourceOptions = $dataSourceOptions;
