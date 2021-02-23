@@ -9,6 +9,10 @@ class Registry
 {
     /**
      * get the profile which should be used for validation from the given resource descriptor.
+     *
+     * @param $descriptor
+     *
+     * @return string
      */
     public static function getResourceValidationProfile($descriptor)
     {
@@ -21,8 +25,13 @@ class Registry
     }
 
     /**
-     * get the profile which should be used for validation from the given datapackage descriptor
-     * corresponds to the id from the registry.
+     * Get the profile which should be used for validation from the given datapackage descriptor
+     *
+     * Corresponds to the id from the registry.
+     *
+     * @param $descriptor
+     *
+     * @return string
      */
     public static function getDatapackageValidationProfile($descriptor)
     {
@@ -34,9 +43,13 @@ class Registry
     }
 
     /**
-     * given a normalized profile - get the corresponding schema file for known schema in the registry
-     * returns false in case of unknown schema
+     * Given a normalized profile - get the corresponding schema file for known schema in the registry.
+     *
+     * Returns false in case of unknown schema
      * works the same for both datapackage schema and resource schemas.
+     *
+     * @param $profile
+     * @return false|string
      */
     public static function getJsonSchemaFile($profile)
     {
@@ -64,7 +77,7 @@ class Registry
     }
 
     /**
-     * returns array of all known schemas in the registry.
+     * Returns array of all known schemas in the registry.
      */
     public static function getAllSchemas()
     {
