@@ -13,10 +13,10 @@ abstract class BaseDataStream implements \Iterator
     public $dataSource;
     public $dataSourceOptions;
 
-  /**
-   * @param $dataSource
-   * @param mixed $dataSourceOptions
-   */
+    /**
+     * @param $dataSource
+     * @param mixed $dataSourceOptions
+     */
     public function __construct($dataSource, $dataSourceOptions = null)
     {
         $this->dataSource = $dataSource;
