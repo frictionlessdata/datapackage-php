@@ -35,6 +35,7 @@ class Utils
         foreach ($files as $file) {
             is_dir($file) ? self::removeDir($file) : unlink($file);
         }
-        rmdir($path);
+        is_dir($path) ? rmdir($path) : unlink($path);
     }
+
 }
