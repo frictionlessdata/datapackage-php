@@ -4,7 +4,7 @@ namespace frictionlessdata\datapackage;
 
 use frictionlessdata\datapackage\Datapackages\BaseDatapackage;
 use frictionlessdata\datapackage\Resources\BaseResource;
-use Chumper\Zipper\Zipper;
+use ZipArchive;
 
 /**
  * datapackage and resource have different classes depending on the corresponding profile
@@ -32,7 +32,6 @@ class Factory
      * @return Datapackages\BaseDatapackage
      *
      * @throws Exceptions\DatapackageInvalidSourceException
-     * @throws Exceptions\DatapackageValidationFailedException
      */
     public static function datapackage($source, $basePath = null)
     {
@@ -54,7 +53,6 @@ class Factory
      *
      * @return Resources\BaseResource
      *
-     * @throws Exceptions\ResourceValidationFailedException
      */
     public static function resource($descriptor, $basePath = null, $skipValidations = false)
     {
@@ -226,19 +224,25 @@ class Factory
     protected static $registeredDatapackageClasses = [];
     protected static $registeredResourceClasses = [];
 
-    /**
-     * allows extending classes to add custom sources
-     * used by unit tests to add a mock http source.
-     */
+  /**
+   * allows extending classes to add custom sources
+   * used by unit tests to add a mock http source.
+   *
+   * @param $source
+   *
+   * @return mixed
+   */
     protected static function normalizeHttpSource($source)
     {
         return $source;
     }
 
-    /**
-     * allows extending classes to add custom sources
-     * used by unit tests to add a mock http source.
-     */
+  /**
+   * allows extending classes to add custom sources
+   * used by unit tests to add a mock http source.
+   * @param $source
+   * @return bool
+*/
     protected static function isHttpSource($source)
     {
         return Utils::isHttpSource($source);
@@ -338,6 +342,7 @@ class Factory
 
     protected static function loadHttpZipSource($source)
     {
+        print_r('calling loadHttpZipSource');
         $tempfile = tempnam(sys_get_temp_dir(), 'datapackage-php');
         unlink($tempfile);
         $tempfile .= '.zip';
@@ -349,18 +354,22 @@ class Factory
 
     protected static function loadFileZipSource($source)
     {
-        $zipper = new Zipper();
+        $zip = new ZipArchive();
         $tempdir = tempnam(sys_get_temp_dir(), 'datapackage-php');
         unlink($tempdir);
         mkdir($tempdir);
         register_shutdown_function(function () use ($tempdir) {Utils::removeDir($tempdir); });
         /* @noinspection PhpUnhandledExceptionInspection File existence is checked afterwards anyway */
-        $zipper->make($source)->extractTo($tempdir);
-        $zipper->close();
+        if (($zip->open($source) === TRUE) && ($zip->extractTo($tempdir) === TRUE)) {
+          $zip->close();
+        }
+        else {
+          throw new Exceptions\DatapackageInvalidSourceException('zip file could not be opened from source.');
+        }
+
         if (!file_exists($tempdir.'/datapackage.json')) {
             throw new Exceptions\DatapackageInvalidSourceException('zip file must contain a datapackage.json file');
         }
-
-        return static::loadSource($tempdir.'/datapackage.json', $tempdir);
+        return static::loadSource('datapackage.json', $tempdir);
     }
 }

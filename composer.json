@@ -4,6 +4,7 @@
     "license": "MIT",
     "require": {
         "php": ">=7.1",
+        "ext-zip": "*",
         "justinrainbow/json-schema": "^5.2",
         "frictionlessdata/tableschema": "^v0.2.0"
     },

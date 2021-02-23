@@ -7,18 +7,22 @@ use frictionlessdata\datapackage\Registry;
 use frictionlessdata\datapackage\Utils;
 use frictionlessdata\datapackage\Validators\DatapackageValidator;
 use frictionlessdata\datapackage\Exceptions\DatapackageValidationFailedException;
-use Chumper\Zipper\Zipper;
+use frictionlessdata\datapackage\Exceptions\DatapackageInvalidSourceException;
+use ZipArchive;
 
 abstract class BaseDatapackage implements \Iterator
 {
-    /**
-     * BaseDatapackage constructor.
-     *
-     * @param object      $descriptor
-     * @param null|string $basePath
-     *
-     * @throws DatapackageValidationFailedException
-     */
+
+  /**
+   * BaseDatapackage constructor.
+   *
+   * @param object $descriptor
+   * @param null|string $basePath
+   *
+   * @param bool $skipValidations
+   *
+   * @throws \frictionlessdata\datapackage\Exceptions\DatapackageValidationFailedException
+   */
     public function __construct($descriptor, $basePath = null, $skipValidations = false)
     {
         $this->descriptor = $descriptor;
@@ -170,7 +174,7 @@ abstract class BaseDatapackage implements \Iterator
 
     public function save($zip_filename)
     {
-        $zipper = new Zipper();
+        $zip = new ZipArchive();
         $base = tempnam(sys_get_temp_dir(), 'datapackage-zip-');
         $files = [
             'datapackage.json' => $base.'datapackage.json',
@@ -185,10 +189,15 @@ abstract class BaseDatapackage implements \Iterator
             ++$ri;
         }
         $this->saveDescriptor($files['datapackage.json']);
-        /* @noinspection PhpUnhandledExceptionInspection Never occurs with our args */
-        $zipper->make($zip_filename)->add($files)->close();
-        foreach (array_values($files) as $file) {
-            unlink($file);
+        register_shutdown_function(function () use ($base) {Utils::removeDir($base); });
+        if ($zip->open($zip_filename, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
+          foreach ($files as $filename => $resource) {
+            $zip->addFile($resource, $filename);
+          }
+          $zip->close();
+        }
+        else {
+          throw new DatapackageInvalidSourceException('zip file could not be saved.');
         }
     }
 
@@ -197,13 +206,14 @@ abstract class BaseDatapackage implements \Iterator
     protected $basePath;
     protected $skipValidations = false;
 
-    /**
-     * called by the resources iterator for each iteration.
-     *
-     * @param object $descriptor
-     *
-     * @return \frictionlessdata\datapackage\Resources\BaseResource
-     */
+  /**
+   * called by the resources iterator for each iteration.
+   *
+   * @param object $descriptor
+   *
+   * @return \frictionlessdata\datapackage\Resources\BaseResource
+   * @throws \frictionlessdata\datapackage\Exceptions\ResourceValidationFailedException
+   */
     protected function initResource($descriptor)
     {
         return Factory::resource($descriptor, $this->basePath, $this->skipValidations);
