@@ -17,7 +17,7 @@ class MockDefaultResource extends DefaultResource
      *
      * @return string
      */
-    public static function normalizeDataSource(string $dataSource, $basePath = null)
+    public static function normalizeDataSource($dataSource, string $basePath = null)
     {
         if (strpos($dataSource, 'mock-http://') === 0) {
             $dataSource = str_replace('mock-http://', '', $dataSource);
