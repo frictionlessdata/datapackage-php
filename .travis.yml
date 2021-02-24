@@ -11,4 +11,4 @@ script:
   - 'composer style-check'
 after_success:
   - 'vendor/bin/coveralls'
-dist: trusty
+dist: xenial
