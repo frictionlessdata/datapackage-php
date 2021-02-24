@@ -16,7 +16,7 @@ class Package
    * @throws \Exception
    * @throws \frictionlessdata\datapackage\Exceptions\DatapackageInvalidSourceException
    */
-  public static function load($source, $basePath = null)
+    public static function load($source, $basePath = null)
     {
         static::isZipPresent();
         return Factory::datapackage($source, $basePath);
@@ -29,7 +29,7 @@ class Package
    * @return \frictionlessdata\datapackage\Validators\DatapackageValidationError[]
    * @throws \Exception
    */
-  public static function validate($source, $basePath = null)
+    public static function validate($source, $basePath = null)
     {
         static::isZipPresent();
         return Factory::validate($source, $basePath);
@@ -42,7 +42,7 @@ class Package
    * @return mixed
    * @throws \Exception
    */
-  public static function create($descriptor = null, $basePath = null)
+    public static function create($descriptor = null, $basePath = null)
     {
         static::isZipPresent();
         $descriptor = Utils::objectify($descriptor);
@@ -57,10 +57,11 @@ class Package
   /**
    * @throws \Exception
    */
-  private static function isZipPresent() {
+    private static function isZipPresent()
+    {
         //If ZipArchive is not available throw Exception.
         if (!class_exists('ZipArchive')) {
-          throw new Exception('Error: Your PHP version is not compiled with zip support');
+            throw new Exception('Error: Your PHP version is not compiled with zip support');
         }
     }
 }

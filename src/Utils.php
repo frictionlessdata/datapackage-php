@@ -37,5 +37,4 @@ class Utils
         }
         is_dir($path) ? rmdir($path) : unlink($path);
     }
-
 }

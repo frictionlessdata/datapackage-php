@@ -189,15 +189,16 @@ abstract class BaseDatapackage implements \Iterator
             ++$ri;
         }
         $this->saveDescriptor($files['datapackage.json']);
-        register_shutdown_function(function () use ($base) {Utils::removeDir($base); });
-        if ($zip->open($zip_filename, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
-          foreach ($files as $filename => $resource) {
-            $zip->addFile($resource, $filename);
-          }
-          $zip->close();
-        }
-        else {
-          throw new DatapackageInvalidSourceException('zip file could not be saved.');
+        register_shutdown_function(function () use ($base) {
+            Utils::removeDir($base);
+        });
+        if ($zip->open($zip_filename, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
+            foreach ($files as $filename => $resource) {
+                $zip->addFile($resource, $filename);
+            }
+            $zip->close();
+        } else {
+            throw new DatapackageInvalidSourceException('zip file could not be saved.');
         }
     }
 

@@ -94,7 +94,8 @@ class Factory
             // return a list containing a single LOAD_FAILED validation error
             return [
                 new Validators\DatapackageValidationError(
-                    Validators\DatapackageValidationError::LOAD_FAILED, $e->getMessage()
+                    Validators\DatapackageValidationError::LOAD_FAILED,
+                    $e->getMessage()
                 ),
             ];
         } catch (Exceptions\DatapackageValidationFailedException $e) {
@@ -347,7 +348,9 @@ class Factory
         unlink($tempfile);
         $tempfile .= '.zip';
         stream_copy_to_stream(fopen($source, 'r'), fopen($tempfile, 'w'));
-        register_shutdown_function(function () use ($tempfile) {unlink($tempfile); });
+        register_shutdown_function(function () use ($tempfile) {
+            unlink($tempfile);
+        });
 
         return self::loadFileZipSource($tempfile);
     }
@@ -358,12 +361,13 @@ class Factory
         $tempdir = tempnam(sys_get_temp_dir(), 'datapackage-php');
         unlink($tempdir);
         mkdir($tempdir);
-        register_shutdown_function(function () use ($tempdir) {Utils::removeDir($tempdir); });
+        register_shutdown_function(function () use ($tempdir) {
+            Utils::removeDir($tempdir);
+        });
         /* @noinspection PhpUnhandledExceptionInspection File existence is checked afterwards anyway */
-        if (($zip->open($source) === TRUE) && ($zip->extractTo($tempdir) === TRUE)) {
+        if (($zip->open($source) === true) && ($zip->extractTo($tempdir) === true)) {
             $zip->close();
-        }
-        else {
+        } else {
             throw new Exceptions\DatapackageInvalidSourceException('zip file could not be opened from source.');
         }
 
