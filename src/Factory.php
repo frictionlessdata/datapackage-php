@@ -343,7 +343,6 @@ class Factory
 
     protected static function loadHttpZipSource($source)
     {
-        print_r('calling loadHttpZipSource');
         $tempfile = tempnam(sys_get_temp_dir(), 'datapackage-php');
         unlink($tempfile);
         $tempfile .= '.zip';
