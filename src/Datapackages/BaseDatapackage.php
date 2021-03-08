@@ -3,6 +3,7 @@
 namespace frictionlessdata\datapackage\Datapackages;
 
 use frictionlessdata\datapackage\Factory;
+use frictionlessdata\datapackage\Package;
 use frictionlessdata\datapackage\Registry;
 use frictionlessdata\datapackage\Utils;
 use frictionlessdata\datapackage\Validators\DatapackageValidator;
@@ -13,16 +14,16 @@ use ZipArchive;
 abstract class BaseDatapackage implements \Iterator
 {
 
-  /**
-   * BaseDatapackage constructor.
-   *
-   * @param object $descriptor
-   * @param null|string $basePath
-   *
-   * @param bool $skipValidations
-   *
-   * @throws \frictionlessdata\datapackage\Exceptions\DatapackageValidationFailedException
-   */
+    /**
+     * BaseDatapackage constructor.
+     *
+     * @param object $descriptor
+     * @param null|string $basePath
+     *
+     * @param bool $skipValidations
+     *
+     * @throws \frictionlessdata\datapackage\Exceptions\DatapackageValidationFailedException
+     */
     public function __construct($descriptor, $basePath = null, $skipValidations = false)
     {
         $this->descriptor = $descriptor;
@@ -172,8 +173,15 @@ abstract class BaseDatapackage implements \Iterator
         return isset($this->descriptor()->resources[$this->currentResourcePosition]);
     }
 
+    /**
+     * @param $zip_filename
+     *
+     * @throws \frictionlessdata\datapackage\Exceptions\DatapackageInvalidSourceException
+     * @throws \Exception
+     */
     public function save($zip_filename)
     {
+        Package::isZipPresent();
         $zip = new ZipArchive();
         $base = tempnam(sys_get_temp_dir(), 'datapackage-zip-');
         $files = [

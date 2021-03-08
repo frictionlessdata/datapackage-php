@@ -261,6 +261,7 @@ class Factory
      * @return object
      *
      * @throws Exceptions\DatapackageInvalidSourceException
+     * @throws \Exception
      */
     protected static function loadSource($source, $basePath)
     {
@@ -341,8 +342,16 @@ class Factory
         return strtolower(substr($source, -4)) == '.zip';
     }
 
+    /**
+     * @param $source
+     *
+     * @return object
+     * @throws \frictionlessdata\datapackage\Exceptions\DatapackageInvalidSourceException
+     * @throws \Exception
+     */
     protected static function loadHttpZipSource($source)
     {
+        Package::isZipPresent();
         $tempfile = tempnam(sys_get_temp_dir(), 'datapackage-php');
         unlink($tempfile);
         $tempfile .= '.zip';
@@ -354,8 +363,16 @@ class Factory
         return self::loadFileZipSource($tempfile);
     }
 
+    /**
+     * @param $source
+     *
+     * @return object
+     * @throws \frictionlessdata\datapackage\Exceptions\DatapackageInvalidSourceException
+     * @throws \Exception
+     */
     protected static function loadFileZipSource($source)
     {
+        Package::isZipPresent();
         $zip = new ZipArchive();
         $tempdir = tempnam(sys_get_temp_dir(), 'datapackage-php');
         unlink($tempdir);

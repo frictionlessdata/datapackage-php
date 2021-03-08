@@ -682,11 +682,11 @@ class DatapackageTest extends TestCase
         $this->assertEquals($expectedData, $allResourcesData);
     }
 
-  /**
-   * @param object $expectedDescriptor
-   * @param array $expectedData
-   * @param $datapackage
-   */
+    /**
+     * @param object $expectedDescriptor
+     * @param array $expectedData
+     * @param $datapackage
+     */
     protected function assertDatapackage($expectedDescriptor, $expectedData, $datapackage)
     {
         $this->assertDatapackageDescriptor($expectedDescriptor, $datapackage);
