@@ -14,10 +14,8 @@ abstract class BaseDataStream implements \Iterator
     public $dataSourceOptions;
 
     /**
-     * @param string $dataSource
-     * @param mixed  $dataSourceOptions
-     *
-     * @throws \frictionlessdata\datapackage\Exceptions\DataStreamOpenException
+     * @param $dataSource
+     * @param mixed $dataSourceOptions
      */
     public function __construct($dataSource, $dataSourceOptions = null)
     {

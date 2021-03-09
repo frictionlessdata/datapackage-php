@@ -2,7 +2,6 @@
 
 namespace frictionlessdata\datapackage\tests;
 
-use Chumper\Zipper\Zipper;
 use frictionlessdata\datapackage\Utils;
 use frictionlessdata\datapackage\Validators\DatapackageValidationError;
 use PHPUnit\Framework\TestCase;
@@ -14,6 +13,7 @@ use frictionlessdata\tableschema\InferSchema;
 use frictionlessdata\tableschema\Table;
 use frictionlessdata\tableschema\DataSources\CsvDataSource;
 use Carbon\Carbon;
+use ZipArchive;
 
 class DatapackageTest extends TestCase
 {
@@ -465,20 +465,23 @@ class DatapackageTest extends TestCase
 
         $filename = tempnam(sys_get_temp_dir(), 'datapackage-php-tests-').'.zip';
         $package->save($filename);
-        $zipper = new Zipper();
+        $zip = new ZipArchive;
         $tempdir = sys_get_temp_dir().DIRECTORY_SEPARATOR.'datapackage-php-tests-zipdir';
         if (file_exists($tempdir)) {
             Utils::removeDir($tempdir);
         }
         mkdir($tempdir);
-        $zipper->make($filename)->extractTo($tempdir);
-        $zipper->close();
+        $zip->open($filename);
+        $zip->extractTo($tempdir);
+        $zip->close();
         unlink($filename);
         $tempdir = $tempdir.DIRECTORY_SEPARATOR;
         $this->assertEquals($expectedDatapackageDescriptor, json_decode(file_get_contents($tempdir.'datapackage.json')));
         $this->assertEquals('foo', file_get_contents($tempdir.'resource-0-data-0'));
         $this->assertEquals("testing 改善\n", file_get_contents($tempdir.'resource-0-data-1'));
         $this->assertEquals("id,name\n1,one\n2,two\n3,three\n", file_get_contents($tempdir.'resource-1.csv'));
+        // Clean up
+        Utils::removeDir($tempdir);
     }
 
     public function testLoadDatapackageZip()
@@ -680,9 +683,9 @@ class DatapackageTest extends TestCase
     }
 
     /**
-     * @param string $source
      * @param object $expectedDescriptor
-     * @param array  $expectedData
+     * @param array $expectedData
+     * @param $datapackage
      */
     protected function assertDatapackage($expectedDescriptor, $expectedData, $datapackage)
     {

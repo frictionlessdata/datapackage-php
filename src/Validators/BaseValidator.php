@@ -19,7 +19,7 @@ abstract class BaseValidator extends SchemaValidator
      * validate a descriptor.
      *
      * @param object $descriptor
-     * @param string $basePath
+     * @param null $basePath
      *
      * @return \frictionlessdata\tableschema\SchemaValidationError[]
      */
@@ -60,9 +60,11 @@ abstract class BaseValidator extends SchemaValidator
     }
 
     /**
-     * get the url which the schema for validation can be fetched from.
+     * Get the url which the schema for validation can be fetched from.
      *
      * @return string
+     * @throws \Exception
+     * @throws \Exception
      */
     protected function getValidationSchemaUrl()
     {
@@ -93,7 +95,7 @@ abstract class BaseValidator extends SchemaValidator
     }
 
     /**
-     * allows extending classes to modify the descriptor before passing to the validator.
+     * Allows extending classes to modify the descriptor before passing to the validator.
      *
      * @return object
      */
@@ -103,19 +105,19 @@ abstract class BaseValidator extends SchemaValidator
     }
 
     /**
-     * conver the validation error message received from JsonSchema to human readable string.
+     * Convert the validation error message received from JsonSchema to human readable string.
      *
      * @param array $error
      *
      * @return string
      */
-    protected function getValidationErrorMessage($error)
+    protected function getValidationErrorMessage(array $error)
     {
         return sprintf('[%s] %s', $error['property'], $error['message']);
     }
 
     /**
-     * does the validation, adds errors to the validator object using _addError method.
+     * Does the validation, adds errors to the validator object using _addError method.
      */
     protected function validateSchema()
     {

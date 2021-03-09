@@ -28,7 +28,7 @@ class ResourceValidator extends BaseValidator
         return $descriptor;
     }
 
-    protected function getValidationErrorMessage($error)
+    protected function getValidationErrorMessage(array $error)
     {
         $property = $error['property'];
         // silly hack to only show properties within the resource of the fake datapackage

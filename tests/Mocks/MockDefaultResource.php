@@ -6,15 +6,18 @@ use frictionlessdata\datapackage\Resources\DefaultResource;
 
 class MockDefaultResource extends DefaultResource
 {
+
     /**
      * allows extending classes to add custom sources
      * used by unit tests to add a mock http source.
      *
      * @param string $dataSource
      *
+     * @param null $basePath
+     *
      * @return string
      */
-    public static function normalizeDataSource($dataSource, $basePath = null)
+    public static function normalizeDataSource($dataSource, string $basePath = null)
     {
         if (strpos($dataSource, 'mock-http://') === 0) {
             $dataSource = str_replace('mock-http://', '', $dataSource);
