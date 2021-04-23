@@ -183,20 +183,27 @@ abstract class BaseDatapackage implements \Iterator
     {
         Package::isZipPresent();
         $zip = new ZipArchive();
+
+        $packageCopy = $this->copy();
+
         $base = tempnam(sys_get_temp_dir(), 'datapackage-zip-');
         $files = [
             'datapackage.json' => $base.'datapackage.json',
         ];
         $ri = 0;
-        foreach ($this as $resource) {
+        foreach ($packageCopy->resources() as $resource) {
+            $resourceFiles = [];
             $fileNames = $resource->save($base.'resource-'.$ri);
             foreach ($fileNames as $fileName) {
                 $relname = str_replace($base.'resource-'.$ri, '', $fileName);
                 $files['resource-'.$ri.$relname] = $fileName;
+                $resourceFiles[] = 'resource-'.$ri.$relname;
             }
+            $resource->descriptor()->path = count($resourceFiles) == 1 ? $resourceFiles[0] : $resourceFiles;
             ++$ri;
         }
-        $this->saveDescriptor($files['datapackage.json']);
+        $packageCopy->saveDescriptor($files['datapackage.json']);
+
         register_shutdown_function(function () use ($base) {
             Utils::removeDir($base);
         });
@@ -210,19 +217,24 @@ abstract class BaseDatapackage implements \Iterator
         }
     }
 
+    protected function copy()
+    {
+        return new static($this->descriptor, $this->basePath, true);
+    }
+
     protected $descriptor;
     protected $currentResourcePosition = 0;
     protected $basePath;
     protected $skipValidations = false;
 
-  /**
-   * called by the resources iterator for each iteration.
-   *
-   * @param object $descriptor
-   *
-   * @return \frictionlessdata\datapackage\Resources\BaseResource
-   * @throws \frictionlessdata\datapackage\Exceptions\ResourceValidationFailedException
-   */
+    /**
+     * called by the resources iterator for each iteration.
+     *
+     * @param object $descriptor
+     *
+     * @return \frictionlessdata\datapackage\Resources\BaseResource
+     * @throws \frictionlessdata\datapackage\Exceptions\ResourceValidationFailedException
+     */
     protected function initResource($descriptor)
     {
         return Factory::resource($descriptor, $this->basePath, $this->skipValidations);
