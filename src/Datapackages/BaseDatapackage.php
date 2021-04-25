@@ -192,7 +192,9 @@ abstract class BaseDatapackage implements \Iterator
         ];
         $ri = 0;
         foreach ($packageCopy as $resource) {
-            if ($resource->isRemote()) continue;
+            if ($resource->isRemote()) {
+                continue;
+            }
 
             $resourceFiles = [];
             $fileNames = $resource->save($base.'resource-'.$ri);
