@@ -41,4 +41,17 @@ class MockDefaultResource extends DefaultResource
     {
         return MockResourceValidator::validate($this->descriptor(), $this->basePath);
     }
+
+
+    /**
+     * @inheritDoc
+     * @return bool
+     */
+    public function isRemote()
+    {
+        $path = $this->path();
+        $path_to_check = is_array($path) && count($path) > 0 ? $path[0] : $path;
+        return strpos($path_to_check, 'mock-http://') === 0 || parent::isRemote();
+    }
+
 }

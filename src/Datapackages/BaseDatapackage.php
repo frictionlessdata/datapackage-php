@@ -191,7 +191,9 @@ abstract class BaseDatapackage implements \Iterator
             'datapackage.json' => $base.'datapackage.json',
         ];
         $ri = 0;
-        foreach ($packageCopy->resources() as $resource) {
+        foreach ($packageCopy as $resource) {
+            if ($resource->isRemote()) continue;
+
             $resourceFiles = [];
             $fileNames = $resource->save($base.'resource-'.$ri);
             foreach ($fileNames as $fileName) {
@@ -217,6 +219,11 @@ abstract class BaseDatapackage implements \Iterator
         }
     }
 
+    /**
+     * Make a new Datapackage object that is a copy of the current Datapackage. Bypasses validation.
+     * @return $this
+     * @throws DatapackageValidationFailedException
+     */
     protected function copy()
     {
         return new static($this->descriptor, $this->basePath, true);

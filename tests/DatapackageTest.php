@@ -141,6 +141,37 @@ class DatapackageTest extends TestCase
         );
     }
 
+    public function testHttpSourceSaveAndLoad()
+    {
+        $package = Mocks\MockFactory::datapackage('mock-http://simple_valid_datapackage_mock_http_data.json');
+
+        $filename = tempnam(sys_get_temp_dir(), 'datapackage-php-tests-').'.zip';
+        //save the datapackage
+        if (is_file($filename)) {
+            unlink($filename);
+        }
+        $package->save($filename);
+
+        //load the new package
+        $package2 = Mocks\MockFactory::datapackage($filename);
+
+        $this->assertDatapackage(
+            (object) [
+                'name' => 'datapackage-name',
+                'resources' => [
+                    (object) [
+                        'name' => 'resource-name',
+                        'path' => ['mock-http://foo.txt', 'mock-http://foo.txt'],
+                    ],
+                ],
+            ],
+            ['resource-name' => ['foo', 'foo']],
+            $package2
+        );
+
+        unlink($filename);
+    }
+
     public function testMultiDataDatapackage()
     {
         $out = [];
@@ -509,8 +540,11 @@ class DatapackageTest extends TestCase
 
     public function testSaveAndLoadZip()
     {
+        //generate a csv file
+        $csv_filepath = tempnam(sys_get_temp_dir(),'example-csv');
+
         //create example csv
-        file_put_contents('/tmp/example.csv', "name,email\nJohn Doe,john@example.com");
+        file_put_contents($csv_filepath, "name,email\nJohn Doe,john@example.com");
 
         //create a new datapackage object
         $package = Package::create(['name' => 'csv-example','profile' => 'tabular-data-package']);
@@ -519,25 +553,26 @@ class DatapackageTest extends TestCase
         $package->addResource('example.csv', [
             "profile" => "tabular-data-resource",
             "schema" => ["fields" => [["name" => "name", "type" => "string"],["name" => "email", "type" => "string"]]],
-            "path" => '/tmp/example.csv'
+            "path" => $csv_filepath
         ]);
 
         //save the datapackage
-        if (is_file('datapackage.zip')) {
-            unlink('datapackage.zip');
+        $filename = tempnam(sys_get_temp_dir(), 'datapackage-php-tests-').'.zip';
+        if (is_file($filename)) {
+            unlink($filename);
         }
-        $package->save("datapackage.zip");
+        $package->save($filename);
 
         //delete example csv
-        unlink('/tmp/example.csv');
+        unlink($csv_filepath);
 
         //load the new package
-        $package2 = Package::load('datapackage.zip');
+        $package2 = Package::load($filename);
 
         //assert you get expected content back out
         $this->assertEquals([['name' => 'John Doe', 'email' => 'john@example.com']], $package2->resource('example.csv')->read());
 
-        unlink('datapackage.zip');
+        unlink($filename);
     }
 
     public function testLoadDatapackageZip()
