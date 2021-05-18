@@ -141,6 +141,37 @@ class DatapackageTest extends TestCase
         );
     }
 
+    public function testHttpSourceSaveAndLoad()
+    {
+        $package = Mocks\MockFactory::datapackage('mock-http://simple_valid_datapackage_mock_http_data.json');
+
+        $filename = tempnam(sys_get_temp_dir(), 'datapackage-php-tests-').'.zip';
+        //save the datapackage
+        if (is_file($filename)) {
+            unlink($filename);
+        }
+        $package->save($filename);
+
+        //load the new package
+        $package2 = Mocks\MockFactory::datapackage($filename);
+
+        $this->assertDatapackage(
+            (object) [
+                'name' => 'datapackage-name',
+                'resources' => [
+                    (object) [
+                        'name' => 'resource-name',
+                        'path' => ['mock-http://foo.txt', 'mock-http://foo.txt'],
+                    ],
+                ],
+            ],
+            ['resource-name' => ['foo', 'foo']],
+            $package2
+        );
+
+        unlink($filename);
+    }
+
     public function testMultiDataDatapackage()
     {
         $out = [];
@@ -476,12 +507,72 @@ class DatapackageTest extends TestCase
         $zip->close();
         unlink($filename);
         $tempdir = $tempdir.DIRECTORY_SEPARATOR;
+
+        //after saving to disk, the paths are updated
+        $expectedDatapackageDescriptor = (object) [
+            'name' => 'my-datapackage-name',
+            'resources' => [
+                (object) [
+                    'name' => 'my-default-resource',
+                    'path' => ["resource-0-data-0", "resource-0-data-1"],
+                ],
+                (object) [
+                    'name' => 'my-renamed-tabular-resource',
+                    'path' => "resource-1.csv",
+                    'profile' => 'tabular-data-resource',
+                    'schema' => (object) [
+                        'fields' => [
+                            (object) ['name' => 'id', 'type' => 'integer'],
+                            (object) ['name' => 'name', 'type' => 'string'],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
         $this->assertEquals($expectedDatapackageDescriptor, json_decode(file_get_contents($tempdir.'datapackage.json')));
         $this->assertEquals('foo', file_get_contents($tempdir.'resource-0-data-0'));
         $this->assertEquals("testing 改善\n", file_get_contents($tempdir.'resource-0-data-1'));
         $this->assertEquals("id,name\n1,one\n2,two\n3,three\n", file_get_contents($tempdir.'resource-1.csv'));
         // Clean up
         Utils::removeDir($tempdir);
+    }
+
+    public function testSaveAndLoadZip()
+    {
+        //generate a csv file
+        $csv_filepath = tempnam(sys_get_temp_dir(),'example-csv');
+
+        //create example csv
+        file_put_contents($csv_filepath, "name,email\nJohn Doe,john@example.com");
+
+        //create a new datapackage object
+        $package = Package::create(['name' => 'csv-example','profile' => 'tabular-data-package']);
+
+        //add a csv file
+        $package->addResource('example.csv', [
+            "profile" => "tabular-data-resource",
+            "schema" => ["fields" => [["name" => "name", "type" => "string"],["name" => "email", "type" => "string"]]],
+            "path" => $csv_filepath
+        ]);
+
+        //save the datapackage
+        $filename = tempnam(sys_get_temp_dir(), 'datapackage-php-tests-').'.zip';
+        if (is_file($filename)) {
+            unlink($filename);
+        }
+        $package->save($filename);
+
+        //delete example csv
+        unlink($csv_filepath);
+
+        //load the new package
+        $package2 = Package::load($filename);
+
+        //assert you get expected content back out
+        $this->assertEquals([['name' => 'John Doe', 'email' => 'john@example.com']], $package2->resource('example.csv')->read());
+
+        unlink($filename);
     }
 
     public function testLoadDatapackageZip()
@@ -626,10 +717,10 @@ class DatapackageTest extends TestCase
                         'CommitteeTypeDesc' => 'ועדה  משותפת',
                         'Email' => null,
                         'StartDate' => Carbon::__set_state(array(
-                                'date' => '2004-08-12 00:00:00.000000',
-                                'timezone_type' => 3,
-                                'timezone' => 'UTC',
-                            )),
+                            'date' => '2004-08-12 00:00:00.000000',
+                            'timezone_type' => 3,
+                            'timezone' => 'UTC',
+                        )),
                         'FinishDate' => null,
                         'AdditionalTypeID' => null,
                         'AdditionalTypeDesc' => null,
@@ -637,10 +728,10 @@ class DatapackageTest extends TestCase
                         'CommitteeParentName' => null,
                         'IsCurrent' => true,
                         'LastUpdatedDate' => Carbon::__set_state(array(
-                                'date' => '2015-03-20 12:02:57.000000',
-                                'timezone_type' => 3,
-                                'timezone' => 'UTC',
-                            )),
+                            'date' => '2015-03-20 12:02:57.000000',
+                            'timezone_type' => 3,
+                            'timezone' => 'UTC',
+                        )),
                     ), $row);
                 }
                 ++$rowNum;

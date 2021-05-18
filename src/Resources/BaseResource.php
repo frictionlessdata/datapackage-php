@@ -75,6 +75,10 @@ abstract class BaseResource implements \Iterator
         return $rows;
     }
 
+    /**
+     * Loads $this->dataStreams based on $this->path() and $this->data
+     * @return BaseDataStream[]|null
+     */
     public function dataStreams()
     {
         if (is_null($this->dataStreams)) {
@@ -119,6 +123,25 @@ abstract class BaseResource implements \Iterator
         } else {
             return [];
         }
+    }
+
+    /**
+     * If the resource's $path is local (non-http)
+     * @return bool
+     */
+    public function isLocal()
+    {
+        return !$this->isRemote();
+    }
+
+    /**
+     * If the resource's $path is remote (http)
+     * @return bool
+     */
+    public function isRemote()
+    {
+        $path = $this->path();
+        return Utils::isHttpSource(is_array($path) && count($path) > 0 ? $path[0] : $path);
     }
 
     public function data()
