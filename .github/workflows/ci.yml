@@ -1,0 +1,52 @@
+name: CI
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+     
+     - uses: actions/checkout@v2
+     
+     - name: Cache Composer dependencies
+       uses: actions/cache@v2
+       with:
+         path: /tmp/composer-cache
+         key: ${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
+    
+     - uses: php-actions/composer@v6
+       with:
+          php_version: 7.1
+          php_extensions: zip
+          version: 2
+     
+     - name: Validate composer.json & composer.lock
+       uses: php-actions/composer@v6
+       with:
+          php_version: 7.1
+          php_extensions: zip
+          version: 2
+          command: validate --strict
+          
+     - name: Run Code Style Check
+       uses: php-actions/composer@v6
+       with:
+          php_version: 7.1
+          php_extensions: zip
+          version: 2
+          dev: yes
+          command: style-check
+          
+     - name: Run Tests
+       uses: php-actions/composer@v6
+       with:
+          php_version: 7.1
+          php_extensions: zip
+          dev: yes
+          command: test
+
+      
+
