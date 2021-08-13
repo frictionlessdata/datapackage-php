@@ -1,6 +1,6 @@
 # Data Package
 
-[![Build]](https://github.com/frictionlessdata/datapackage-php/actions/workflows/ci.yml/badge.svg?branch=master)]((https://github.com/frictionlessdata/datapackage-php/actions/workflows/ci.yml)
+[![Build](https://github.com/frictionlessdata/datapackage-php/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/frictionlessdata/datapackage-php/actions/workflows/ci.yml)
 [![Coveralls](http://img.shields.io/coveralls/frictionlessdata/datapackage-php.svg?branch=master)](https://coveralls.io/r/frictionlessdata/datapackage-php?branch=master)
 [![Scrutinizer-ci](https://scrutinizer-ci.com/g/frictionlessdata/datapackage-php/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/frictionlessdata/datapackage-php/)
 [![Packagist](https://img.shields.io/packagist/dm/frictionlessdata/datapackage.svg)](https://packagist.org/packages/frictionlessdata/datapackage)
