@@ -6,10 +6,16 @@ on:
     branches: [ master ]
 jobs:
   build:
-    runs-on: ubuntu-latest
-    steps:
-     
-     - uses: actions/checkout@v2
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      matrix:
+        operating-system: [ubuntu-latest]
+        php-versions: ['7.1', '7.4']
+        
+    name: frictionlessdata/datapackage-php PHP ${{ matrix.php-versions }} test on ${{ matrix.operating-system }} 
+    
+    steps:   
+     - uses: actions/checkout@v2    
      
      - name: Cache Composer dependencies
        uses: actions/cache@v2
@@ -19,31 +25,31 @@ jobs:
     
      - uses: php-actions/composer@v6
        with:
-          php_version: 7.1
+          php_version: ${{ matrix.php-versions }}
           php_extensions: zip
           version: 2
      
-     - name: Validate composer.json & composer.lock
+     - name: Validate composer.json & composer.lock for PHP ${{ matrix.php-versions }}
        uses: php-actions/composer@v6
        with:
-          php_version: 7.1
+          php_version: ${{ matrix.php-versions }}
           php_extensions: zip
           version: 2
           command: validate --strict
           
-     - name: Run Code Style Check
+     - name: Run Code Style Check for PHP ${{ matrix.php-versions }}
        uses: php-actions/composer@v6
        with:
-          php_version: 7.1
+          php_version: ${{ matrix.php-versions }}
           php_extensions: zip
           version: 2
           dev: yes
           command: style-check
           
-     - name: Run Tests
+     - name: Run Tests for PHP ${{ matrix.php-versions }}
        uses: php-actions/composer@v6
        with:
-          php_version: 7.1
+          php_version: ${{ matrix.php-versions }}
           php_extensions: zip
           dev: yes
           command: test
