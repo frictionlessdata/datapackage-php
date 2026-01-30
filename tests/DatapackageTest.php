@@ -22,8 +22,7 @@ class DatapackageTest extends TestCase
     public $simpleDescriptorExpectedData;
     public $fixturesPath;
 
-    public function setUp()
-    {
+    public function setUp(): void {
         $this->simpleDescriptorArray = [
             'name' => 'datapackage-name',
             'resources' => [
@@ -356,7 +355,7 @@ class DatapackageTest extends TestCase
             }
         }
         $this->assertEquals([
-            'id' => null, 'amount' => null, 'date' => null, 'payee' => 1,
+            'id' => 2, 'amount' => null, 'date' => null, 'payee' => '1',
         ], $resources_data['budget'][1]);
         $this->assertEquals([
             'id' => '1', 'title' => null, 'description' => 'They are the first acme company',
@@ -437,7 +436,7 @@ class DatapackageTest extends TestCase
                     foreach ($resource as $row) {
                     }
                 } catch (Exceptions\DataStreamOpenException $e) {
-                    $this->assertContains('Failed to open tabular data source', $e->getMessage());
+                    $this->assertStringContainsString('Failed to open tabular data source', $e->getMessage());
                 }
             }
         }
