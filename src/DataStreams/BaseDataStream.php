@@ -30,5 +30,5 @@ abstract class BaseDataStream implements \Iterator
      *
      * @throws \frictionlessdata\datapackage\Exceptions\DataStreamValidationException
      */
-    abstract public function current();
+    abstract public function current():mixed;
 }

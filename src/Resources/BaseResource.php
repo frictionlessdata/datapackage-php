@@ -8,6 +8,7 @@ use frictionlessdata\datapackage\Validators\ResourceValidationError;
 use frictionlessdata\datapackage\Validators\ResourceValidator;
 use frictionlessdata\datapackage\Exceptions\ResourceValidationFailedException;
 use frictionlessdata\datapackage\Utils;
+use frictionlessdata\tableschema\SchemaValidationError;
 
 abstract class BaseResource implements \Iterator
 {
@@ -146,11 +147,11 @@ abstract class BaseResource implements \Iterator
 
     public function data()
     {
-        return isset($this->descriptor()->data) ? $this->descriptor()->data : null;
+        return $this->descriptor()->data ?? null;
     }
 
     // standard iterator functions - to iterate over the data sources
-    public function rewind()
+    public function rewind():void
     {
         $this->dataStreams = null;
         $this->currentDataStream = 0;
@@ -159,22 +160,25 @@ abstract class BaseResource implements \Iterator
         }
     }
 
-    public function current()
+  /**
+   * @throws \frictionlessdata\datapackage\Exceptions\DataStreamValidationException
+   */
+    public function current():mixed
     {
         return $this->dataStreams()[$this->currentDataStream]->current();
     }
 
-    public function key()
+    public function key():mixed
     {
         return $this->dataStreams()[$this->currentDataStream]->key();
     }
 
-    public function next()
+    public function next():void
     {
-        return $this->dataStreams()[$this->currentDataStream]->next();
+        $this->dataStreams()[$this->currentDataStream]->next();
     }
 
-    public function valid()
+    public function valid():bool
     {
         $dataStreams = $this->dataStreams();
         if ($dataStreams[$this->currentDataStream]->valid()) {
@@ -223,7 +227,7 @@ abstract class BaseResource implements \Iterator
         $dataSource = static::normalizeDataSource($dataSource, $basePath);
         if (!Utils::isHttpSource($dataSource) && !file_exists($dataSource)) {
             $errors[] = new ResourceValidationError(
-                ResourceValidationError::SCHEMA_VIOLATION,
+                SchemaValidationError::SCHEMA_VIOLATION,
                 "data source file does not exist or is not readable: {$dataSource}"
             );
         }

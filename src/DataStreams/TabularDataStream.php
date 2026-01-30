@@ -15,6 +15,10 @@ class TabularDataStream extends BaseDataStream
     public $table;
     public $schema;
 
+  /**
+   * @throws \frictionlessdata\datapackage\Exceptions\DataStreamOpenException
+   * @throws \Exception
+   */
     public function __construct($dataSource, $dataSourceOptions = null)
     {
         parent::__construct($dataSource, $dataSourceOptions);
@@ -38,7 +42,7 @@ class TabularDataStream extends BaseDataStream
         return new CsvDataSource($this->dataSource);
     }
 
-    public function rewind()
+    public function rewind():void
     {
         $this->table->rewind();
     }
@@ -53,28 +57,26 @@ class TabularDataStream extends BaseDataStream
      *
      * @throws DataStreamValidationException
      */
-    public function current()
+    public function current():mixed
     {
         try {
             return $this->table->current();
-        } catch (DataSourceException $e) {
-            throw new DataStreamValidationException($e->getMessage());
-        } catch (FieldValidationException $e) {
+        } catch (DataSourceException|FieldValidationException $e) {
             throw new DataStreamValidationException($e->getMessage());
         }
     }
 
-    public function key()
+    public function key():mixed
     {
         return $this->table->key();
     }
 
-    public function next()
+    public function next():void
     {
         $this->table->next();
     }
 
-    public function valid()
+    public function valid(): bool
     {
         return $this->table->valid();
     }
