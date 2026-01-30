@@ -20,3 +20,45 @@
 * default resource profile changed from 'default' to 'data-resource'
 * added 'data' - Inline data for this resource
 * changed source 'name' attribute to 'title'
+
+
+Changes to data-package schema
+2026-01-30T18:41:15+00:00
+* check the git diff and summarize the spec changes here
+* 
+
+
+
+Changes to tabular-data-package schema
+2026-01-30T18:41:15+00:00
+* check the git diff and summarize the spec changes here
+* 
+
+
+
+Changes to fiscal-data-package schema
+2026-01-30T18:41:15+00:00
+* check the git diff and summarize the spec changes here
+* 
+
+
+
+Changes to data-resource schema
+2026-01-30T18:41:16+00:00
+* check the git diff and summarize the spec changes here
+* 
+
+
+
+Changes to tabular-data-resource schema
+2026-01-30T18:41:16+00:00
+* check the git diff and summarize the spec changes here
+* 
+
+
+
+Changes to table-schema schema
+2026-01-30T18:41:16+00:00
+* check the git diff and summarize the spec changes here
+* 
+

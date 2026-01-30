@@ -7,13 +7,27 @@ use frictionlessdata\datapackage\Exceptions\DataStreamOpenException;
 
 class TabularInlineDataStream extends TabularDataStream
 {
+
+    /**
+     * @throws \frictionlessdata\datapackage\Exceptions\DataStreamOpenException
+     */
     protected function getDataSourceObject()
     {
         $data = json_decode(json_encode($this->dataSource), true);
         if (is_array($data)) {
             $numFields = count($this->schema->fields());
             $objRows = [];
-            if (array_sum(array_keys($data[0])) == array_sum(range(0, $numFields - 1))) {
+            if (!function_exists('array_is_list')) {
+                function array_is_list(array $arr):bool
+                {
+                    if ($arr === []) {
+                        return true;
+                    }
+                    return array_keys($arr) === range(0, count($arr) - 1);
+                }
+            }
+
+            if (array_is_list($data[0]) && (count($data[0])) == $numFields) {
                 // Row Arrays - convert to Row Objects
                 $header = array_shift($data);
                 foreach ($data as $row) {

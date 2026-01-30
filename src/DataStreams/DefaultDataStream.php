@@ -33,7 +33,10 @@ class DefaultDataStream extends BaseDataStream
         fclose($this->fopenResource);
     }
 
-    public function rewind()
+  /**
+   * @throws \Exception
+   */
+    public function rewind():void
     {
         if ($this->currentLineNumber == 0) {
             // starting iterations
@@ -50,22 +53,22 @@ class DefaultDataStream extends BaseDataStream
         fclose($target);
     }
 
-    public function current()
+    public function current():mixed
     {
         return fgets($this->fopenResource);
     }
 
-    public function key()
+    public function key():mixed
     {
         return $this->currentLineNumber;
     }
 
-    public function next()
+    public function next():void
     {
         ++$this->currentLineNumber;
     }
 
-    public function valid()
+    public function valid():bool
     {
         return !feof($this->fopenResource);
     }

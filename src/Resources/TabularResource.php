@@ -31,17 +31,20 @@ class TabularResource extends DefaultResource
     {
         $dataSourceOptions = array_merge([
             'schema' => $this->schema(),
-            'dialect' => isset($this->descriptor()->dialect) ? $this->descriptor()->dialect : null,
+            'dialect' => $this->descriptor()->dialect ?? null,
         ], (array) $dataSourceOptions);
 
         return new TabularDataStream($this->normalizeDataSource($dataSource, $this->basePath), $dataSourceOptions);
     }
 
+  /**
+   * @throws \frictionlessdata\datapackage\Exceptions\DataStreamOpenException
+   */
     protected function getInlineDataStream($data)
     {
         return new TabularInlineDataStream($data, [
             'schema' => $this->schema(),
-            'dialect' => isset($this->descriptor()->dialect) ? $this->descriptor()->dialect : null,
+            'dialect' => $this->descriptor()->dialect ?? null,
         ]);
     }
 

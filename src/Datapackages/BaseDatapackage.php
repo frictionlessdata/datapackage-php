@@ -2,6 +2,7 @@
 
 namespace frictionlessdata\datapackage\Datapackages;
 
+use Exception;
 use frictionlessdata\datapackage\Factory;
 use frictionlessdata\datapackage\Package;
 use frictionlessdata\datapackage\Registry;
@@ -9,9 +10,10 @@ use frictionlessdata\datapackage\Utils;
 use frictionlessdata\datapackage\Validators\DatapackageValidator;
 use frictionlessdata\datapackage\Exceptions\DatapackageValidationFailedException;
 use frictionlessdata\datapackage\Exceptions\DatapackageInvalidSourceException;
+use Iterator;
 use ZipArchive;
 
-abstract class BaseDatapackage implements \Iterator
+abstract class BaseDatapackage implements Iterator
 {
 
     /**
@@ -34,6 +36,9 @@ abstract class BaseDatapackage implements \Iterator
         }
     }
 
+  /**
+   * @throws \frictionlessdata\datapackage\Exceptions\DatapackageValidationFailedException
+   */
     public static function create($name, $resources, $basePath = null)
     {
         $datapackage = new static((object) [
@@ -47,6 +52,9 @@ abstract class BaseDatapackage implements \Iterator
         return $datapackage;
     }
 
+  /**
+   * @throws \frictionlessdata\datapackage\Exceptions\DatapackageValidationFailedException
+   */
     public function revalidate()
     {
         $this->rewind();
@@ -81,6 +89,10 @@ abstract class BaseDatapackage implements \Iterator
         return $resources;
     }
 
+  /**
+   * @throws \frictionlessdata\datapackage\Exceptions\ResourceValidationFailedException
+   * @throws \Exception
+   */
     public function getResource($name)
     {
         foreach ($this->descriptor->resources as $resourceDescriptor) {
@@ -88,9 +100,12 @@ abstract class BaseDatapackage implements \Iterator
                 return $this->initResource($resourceDescriptor);
             }
         }
-        throw new \Exception("couldn't find matching resource with name =  '{$name}'");
+        throw new Exception("couldn't find matching resource with name =  '{$name}'");
     }
 
+  /**
+   * @throws \frictionlessdata\datapackage\Exceptions\DatapackageValidationFailedException
+   */
     public function addResource($name, $resource)
     {
         if (is_a($resource, 'frictionlessdata\\datapackage\\Resources\\BaseResource')) {
@@ -119,6 +134,10 @@ abstract class BaseDatapackage implements \Iterator
     }
 
     // TODO: remove this function and use the getResource / addResource directly (will need to modify a lot of tests code)
+
+  /**
+   * @throws \Exception
+   */
     public function resource($name, $resource = null)
     {
         if ($resource) {
@@ -128,6 +147,9 @@ abstract class BaseDatapackage implements \Iterator
         }
     }
 
+  /**
+   * @throws \frictionlessdata\datapackage\Exceptions\DatapackageValidationFailedException
+   */
     public function removeResource($name)
     {
         $resourceDescriptors = [];
@@ -148,27 +170,30 @@ abstract class BaseDatapackage implements \Iterator
     }
 
     // standard iterator functions - to iterate over the resources
-    public function rewind()
+    public function rewind():void
     {
         $this->currentResourcePosition = 0;
     }
 
-    public function current()
+  /**
+   * @throws \frictionlessdata\datapackage\Exceptions\ResourceValidationFailedException
+   */
+    public function current():mixed
     {
         return $this->initResource($this->descriptor()->resources[$this->currentResourcePosition]);
     }
 
-    public function key()
+    public function key():mixed
     {
         return $this->currentResourcePosition;
     }
 
-    public function next()
+    public function next():void
     {
         ++$this->currentResourcePosition;
     }
 
-    public function valid()
+    public function valid():bool
     {
         return isset($this->descriptor()->resources[$this->currentResourcePosition]);
     }
@@ -242,7 +267,6 @@ abstract class BaseDatapackage implements \Iterator
      * @param object $descriptor
      *
      * @return \frictionlessdata\datapackage\Resources\BaseResource
-     * @throws \frictionlessdata\datapackage\Exceptions\ResourceValidationFailedException
      */
     protected function initResource($descriptor)
     {

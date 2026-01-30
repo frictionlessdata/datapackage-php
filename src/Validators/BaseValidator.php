@@ -44,6 +44,9 @@ abstract class BaseValidator extends SchemaValidator
         return $this->descriptor->profile;
     }
 
+  /**
+   * @throws \Exception
+   */
     protected function convertValidationSchemaFilenameToUrl($filename)
     {
         $filename = realpath($filename);
@@ -116,9 +119,12 @@ abstract class BaseValidator extends SchemaValidator
         return sprintf('[%s] %s', $error['property'], $error['message']);
     }
 
-    /**
-     * Does the validation, adds errors to the validator object using _addError method.
-     */
+  /**
+   * Does the validation, adds errors to the validator object using _addError
+   * method.
+   *
+   * @throws \Exception
+   */
     protected function validateSchema()
     {
         $this->validateSchemaUrl($this->getValidationSchemaUrl());

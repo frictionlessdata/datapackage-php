@@ -4,6 +4,7 @@ namespace frictionlessdata\datapackage;
 
 use frictionlessdata\datapackage\Datapackages\BaseDatapackage;
 use frictionlessdata\datapackage\Resources\BaseResource;
+use frictionlessdata\tableschema\SchemaValidationError;
 use ZipArchive;
 
 /**
@@ -39,9 +40,7 @@ class Factory
         $descriptor = $source->descriptor;
         $basePath = $source->basePath;
         $datapackageClass = static::getDatapackageClass($descriptor);
-        $datapackage = new $datapackageClass($descriptor, $basePath);
-
-        return $datapackage;
+        return new $datapackageClass($descriptor, $basePath);
     }
 
     /**
@@ -94,7 +93,7 @@ class Factory
             // return a list containing a single LOAD_FAILED validation error
             return [
                 new Validators\DatapackageValidationError(
-                    Validators\DatapackageValidationError::LOAD_FAILED,
+                    SchemaValidationError::LOAD_FAILED,
                     $e->getMessage()
                 ),
             ];
@@ -291,7 +290,7 @@ class Factory
                     $basePath = null;
                 }
             } else {
-                // not a json string and not a url - assume it's a file path
+                // not a json string and not an url - assume it's a file path
                 if (static::isFileZipSource($source)) {
                     return static::loadFileZipSource($source);
                 } else {
